@@ -66,18 +66,6 @@ export const diaryEntries = pgTable("diary_entries", {
   date: text("date").notNull(), // YYYY-MM-DD format
 });
 
-// Auth schemas
-export const signUpSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-export const signInSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(1, "Password is required"),
-});
-
 export const updateUserProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -90,8 +78,6 @@ export const insertDiaryEntrySchema = createInsertSchema(diaryEntries).pick({
   date: true,
 });
 
-export type SignUp = z.infer<typeof signUpSchema>;
-export type SignIn = z.infer<typeof signInSchema>;
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
 export type User = typeof users.$inferSelect;
 export type DiaryEntry = typeof diaryEntries.$inferSelect;
