@@ -31,12 +31,16 @@ export default function DiaryPage() {
   
   // Use a separate effect to handle data fetching and state updates
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchEntries = async () => {
       try {
         const response = await fetch(`/api/diary-entries?limit=${limit}&offset=${offset}`);
         if (!response.ok) throw new Error('Failed to fetch entries');
         
         const newEntries: DiaryEntry[] = await response.json();
+        
+        if (!isMounted) return;
         
         if (newEntries.length === 0) {
           setHasMore(false);
@@ -49,23 +53,35 @@ export default function DiaryPage() {
         } else {
           // Append new entries, avoiding duplicates
           setEntries(prevEntries => {
-            const combinedEntries = [...prevEntries];
+            // Create a map of existing entries by ID for quick lookup
+            const entriesMap = new Map(prevEntries.map(entry => [entry.id, entry]));
             
-            newEntries.forEach((newEntry: DiaryEntry) => {
-              if (!combinedEntries.some(entry => entry.id === newEntry.id)) {
-                combinedEntries.push(newEntry);
+            // Add new entries that don't already exist
+            newEntries.forEach(entry => {
+              if (!entriesMap.has(entry.id)) {
+                entriesMap.set(entry.id, entry);
               }
             });
             
-            return combinedEntries;
+            // Convert map values back to array and sort by date (newest first)
+            return Array.from(entriesMap.values()).sort((a, b) => 
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
           });
         }
       } catch (error) {
         console.error('Error fetching diary entries:', error);
+        if (isMounted) {
+          setHasMore(false);
+        }
       }
     };
     
     fetchEntries();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [offset, limit]);
   // Check if we should show evening prompt
   useEffect(() => {
@@ -108,18 +124,39 @@ export default function DiaryPage() {
     setShowPrompt(false);
     setShowNewEntry(true);
   };
-  const handleEntryCreated = () => {
+  const handleEntryCreated = async () => {
     setShowNewEntry(false);
     
     // Track when an entry was created for prompt logic
     const today = new Date().toISOString().split('T')[0];
     localStorage.setItem(`lastEntryTime:${today}`, Date.now().toString());
     
-    // Reset offset and entries, then refetch
-    setOffset(0);
-    setEntries([]);
-    setHasMore(true);
-    queryClient.invalidateQueries({ queryKey: ["/api/diary-entries"] });
+    try {
+      // Invalidate and refetch the first page
+      await queryClient.invalidateQueries({ 
+        queryKey: ["/api/diary-entries"],
+        refetchType: 'all'
+      });
+      
+      // Reset pagination and fetch fresh data
+      setOffset(0);
+      setHasMore(true);
+      
+      // Fetch the first page of entries
+      const response = await fetch(`/api/diary-entries?limit=${limit}&offset=0`);
+      if (!response.ok) throw new Error('Failed to fetch entries');
+      
+      const newEntries = await response.json();
+      setEntries(newEntries);
+      setHasMore(newEntries.length >= limit);
+      
+    } catch (error) {
+      console.error('Error refreshing entries:', error);
+      // Even if there's an error, we'll still update the UI optimistically
+      setOffset(0);
+      setEntries([]);
+      setHasMore(true);
+    }
   };
 
   // Set initial background image when entries change
