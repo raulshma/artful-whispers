@@ -14,6 +14,15 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
     });
   };
 
+  const formatTime = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   const getMoodIcon = (mood: string | null) => {
     if (!mood) return Heart;
     
@@ -53,9 +62,15 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
               <div className="w-8 h-8 bg-background/80 rounded-full flex items-center justify-center">
                 <MoodIcon className="text-gentle text-sm" size={16} />
               </div>
-              <div>
-                <p className="font-inter text-sm text-text-blue/80">{formatDate(entry.date)}</p>
-                <p className="font-inter text-xs text-text-blue/60 capitalize">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <p className="font-inter text-sm text-text-blue/80">{formatDate(entry.date)}</p>
+                  <span className="w-1 h-1 bg-text-blue/40 rounded-full"></span>
+                  <p className="font-inter text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                    {formatTime(entry.createdAt)}
+                  </p>
+                </div>
+                <p className="font-inter text-xs text-text-blue/60 capitalize mt-1">
                   {displayMood} {emotions.length > 0 && `• ${emotions.slice(0, 2).join(', ')}`}
                 </p>
               </div>

@@ -15,7 +15,7 @@ export default function TimePrompt({ onStartEntry, onClose }: TimePromptProps) {
           </div>
           <h2 className="font-crimson text-2xl font-semibold text-text-blue mb-4">Evening Reflection</h2>
           <p className="font-lora text-text-blue/80 mb-6 leading-relaxed">
-            It's time to capture today's moments. What story does your heart want to tell?
+            It's time to capture today's moments. What story does your heart want to tell? You can add as many reflections as you need.
           </p>
           <div className="flex space-x-3">
             <button 
@@ -28,7 +28,7 @@ export default function TimePrompt({ onStartEntry, onClose }: TimePromptProps) {
               onClick={onStartEntry}
               className="flex-1 bg-accent hover:bg-accent/90 text-text-blue font-medium py-3 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105"
             >
-              Begin Today's Story
+              Add Reflection
             </button>
           </div>
         </div>

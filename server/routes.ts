@@ -139,7 +139,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
-
   // Get diary entry by date (protected route)
   app.get(
     "/api/diary-entries/date/:date",
@@ -167,27 +166,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Get all diary entries for a specific date (protected route)
+  app.get(
+    "/api/diary-entries/date/:date/all",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const { date } = req.params;
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const entries = await storage.getDiaryEntriesByDate(req.user.id, date);
+        res.json(entries);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to fetch diary entries for date" });
+      }
+    }
+  );
+
   // Create new diary entry (protected route)
   app.post(
     "/api/diary-entries",
     requireAuth,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const validatedData = insertDiaryEntrySchema.parse(req.body);
-
-        if (!req.user) {
+        const validatedData = insertDiaryEntrySchema.parse(req.body);        if (!req.user) {
           return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        // Check if entry already exists for this date
-        const existingEntry = await storage.getDiaryEntryByDate(
-          req.user.id,
-          validatedData.date
-        );
-        if (existingEntry) {
-          return res
-            .status(400)
-            .json({ message: "Entry already exists for this date" });
         }
 
         const entry = await storage.createDiaryEntry({

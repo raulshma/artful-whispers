@@ -15,6 +15,7 @@ export interface IStorage {
   createDiaryEntry(entry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry>;
   updateDiaryEntry(id: number, updates: Partial<DiaryEntry>): Promise<DiaryEntry | undefined>;
   searchDiaryEntries(userId: string, query: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
+  getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -115,6 +116,17 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(diaryEntries.createdAt))
       .limit(limit)
       .offset(offset);
+    return entries;
+  }
+
+  async getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]> {
+    const entries = await db
+      .select()
+      .from(diaryEntries)
+      .where(
+        and(eq(diaryEntries.date, date), eq(diaryEntries.userId, userId))
+      )
+      .orderBy(desc(diaryEntries.createdAt));
     return entries;
   }
 }

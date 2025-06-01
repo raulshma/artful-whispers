@@ -67,7 +67,6 @@ export default function DiaryPage() {
     
     fetchEntries();
   }, [offset, limit]);
-
   // Check if we should show evening prompt
   useEffect(() => {
     const checkEveningPrompt = () => {
@@ -83,10 +82,14 @@ export default function DiaryPage() {
           return;
         }
         
-        // Check if there's already an entry for today
-        const hasEntryToday = entries.some(entry => entry.date === today);
+        // Check if there's been any entry activity today (show prompt regardless of existing entries)
+        // This allows users to add multiple entries per day
+        const lastEntryTime = localStorage.getItem(`lastEntryTime:${today}`);
+        const now = Date.now();
+        const twoHoursAgo = now - (2 * 60 * 60 * 1000); // 2 hours in milliseconds
         
-        if (!hasEntryToday) {
+        // Show prompt if no entry was created in the last 2 hours
+        if (!lastEntryTime || parseInt(lastEntryTime) < twoHoursAgo) {
           setShowPrompt(true);
         }
       }
@@ -105,9 +108,13 @@ export default function DiaryPage() {
     setShowPrompt(false);
     setShowNewEntry(true);
   };
-
   const handleEntryCreated = () => {
     setShowNewEntry(false);
+    
+    // Track when an entry was created for prompt logic
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem(`lastEntryTime:${today}`, Date.now().toString());
+    
     // Reset offset and entries, then refetch
     setOffset(0);
     setEntries([]);
@@ -164,17 +171,51 @@ export default function DiaryPage() {
             setShowPrompt(false);
           }}
         />
-      )}
+      )}        {/* Main Content */}
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 relative z-10">
+          {/* New Entry Card */}
+          {showNewEntry && (
+            <NewEntryCard
+              onEntryCreated={handleEntryCreated}
+              onCancel={() => setShowNewEntry(false)}
+            />
+          )}          {/* Helpful message for multiple entries */}
+          {entries.length === 0 && !showNewEntry && (
+            <div className="text-center py-12 mb-8">
+              <div className="bg-card/50 backdrop-blur-sm rounded-3xl p-8 border border-border/30">
+                <h3 className="font-crimson text-xl font-semibold text-foreground mb-3">
+                  Welcome to Your Digital Journal
+                </h3>
+                <p className="text-muted-foreground font-inter leading-relaxed mb-4">
+                  Capture your thoughts, moments, and reflections throughout the day. 
+                  There's no limit - write as many entries as your heart desires.
+                </p>
+                <p className="text-sm text-muted-foreground/80 font-inter">
+                  Click the + button below to start your first reflection
+                </p>
+              </div>
+            </div>
+          )}
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 relative z-10">
-        {/* New Entry Card */}
-        {showNewEntry && (
-          <NewEntryCard
-            onEntryCreated={handleEntryCreated}
-            onCancel={() => setShowNewEntry(false)}
-          />
-        )}
+          {/* Today's entry count */}
+          {entries.length > 0 && (() => {
+            const today = new Date().toISOString().split('T')[0];
+            const todayEntries = entries.filter(entry => entry.date === today);
+            
+            if (todayEntries.length > 0) {
+              return (
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
+                    <span>{todayEntries.length} reflection{todayEntries.length !== 1 ? 's' : ''} today</span>
+                    {todayEntries.length > 1 && (
+                      <span className="text-primary/60">• Multiple moments captured</span>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
 
         {/* Diary Entries with Infinite Scroll */}
         <InfiniteScroll
@@ -196,26 +237,43 @@ export default function DiaryPage() {
               <p className="font-inter text-sm">You've reached the end of your journal entries</p>
             </div>
           }
-          scrollThreshold={0.9}
-        >
+          scrollThreshold={0.9}        >
           <div className="relative pl-8">
-            {entries.map((entry) => (
-              <div
-                key={entry.id}
-                ref={el => {
-                  if (el) entryRefs.current[entry.id] = el;
-                }}
-                data-image-url={entry.imageUrl || ''}
-              >
-                <DiaryEntryCard entry={entry} />
-              </div>
-            ))}
+            {entries.map((entry, index) => {
+              // Check if this entry and the next entry are on the same date
+              const nextEntry = entries[index + 1];
+              const currentDate = entry.date;
+              const nextDate = nextEntry?.date;
+              const hasSameDayBefore = index > 0 && entries[index - 1]?.date === currentDate;
+              const hasSameDayAfter = nextDate === currentDate;
+              const isMultipleEntry = hasSameDayBefore || hasSameDayAfter;
+              
+              return (
+                <div
+                  key={entry.id}
+                  ref={el => {
+                    if (el) entryRefs.current[entry.id] = el;
+                  }}
+                  data-image-url={entry.imageUrl || ''}
+                  className={`relative ${isMultipleEntry ? 'ml-4 border-l-2 border-primary/20 pl-6' : ''}`}
+                >
+                  {isMultipleEntry && (
+                    <div className="absolute -left-2 top-8 w-4 h-4 bg-primary/30 rounded-full border-2 border-background"></div>
+                  )}
+                  <DiaryEntryCard entry={entry} />
+                </div>
+              );
+            })}
           </div>
         </InfiniteScroll>
-      </main>
-
-      {/* Floating Compose Button */}
-      <FloatingComposeButton onClick={() => setShowNewEntry(true)} />
+      </main>      {/* Floating Compose Button */}
+      <FloatingComposeButton 
+        onClick={() => setShowNewEntry(true)}
+        hasEntriesToday={(() => {
+          const today = new Date().toISOString().split('T')[0];
+          return entries.some(entry => entry.date === today);
+        })()}
+      />
     </div>
   );
 }

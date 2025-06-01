@@ -71,10 +71,10 @@ export default function NewEntryCard({ onEntryCreated, onCancel }: NewEntryCardP
         </div>
         <div className="flex-1">
           <h3 className="font-crimson text-xl font-semibold text-foreground mb-1">
-            Today's Reflection
+            New Reflection
           </h3>
           <p className="text-muted-foreground text-sm font-inter tracking-wide">
-            {currentDate}
+            {currentDate} • You can create multiple reflections each day
           </p>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function NewEntryCard({ onEntryCreated, onCancel }: NewEntryCardP
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-2xl blur-sm opacity-0 group-focus-within/textarea:opacity-100 transition-opacity duration-500"></div>
           <div className="relative bg-muted/30 rounded-2xl p-6 border border-border/30 group-focus-within/textarea:border-primary/30 transition-all duration-300">
             <Textarea 
-              placeholder="What made today meaningful? Let your thoughts flow gently onto the page..." 
+              placeholder="What's on your mind right now? Capture this moment - you can write as many reflections as you'd like throughout the day..." 
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="w-full min-h-44 bg-transparent border-none resize-none font-lora text-base text-foreground placeholder-muted-foreground/60 focus:outline-none leading-relaxed"
