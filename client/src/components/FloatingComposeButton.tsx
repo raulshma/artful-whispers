@@ -13,29 +13,27 @@ export default function FloatingComposeButton({
     ? "Add another reflection" 
     : "Add new reflection";
 
-  return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 group mobile-safe-area">
+  return (    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 group mobile-safe-area">
       <button
         onClick={onClick}
-        className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 animate-float flex items-center justify-center relative touch-manipulation mobile-touch-target"
+        className="w-14 h-14 sm:w-16 sm:h-16 bg-card/90 backdrop-blur-md hover:bg-card border border-border/50 hover:border-gentle/50 text-foreground hover:text-gentle rounded-full shadow-lg hover:shadow-xl transition-all duration-500 ease-out transform hover:scale-105 animate-float flex items-center justify-center relative touch-manipulation mobile-touch-target group"
         title={tooltipText}
         aria-label={tooltipText}
       >
-        <Plus className="text-lg sm:text-xl" size={24} />
+        <Plus className="text-lg sm:text-xl transition-colors duration-300 group-hover:text-gentle" size={24} />
         
-        {/* Pulse ring animation */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent opacity-30 animate-ping"></div>
+        {/* Subtle glow effect */}
+        <div className="absolute inset-0 rounded-full bg-gentle/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         
         {/* Small indicator for multiple entries */}
         {hasEntriesToday && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent border-2 border-background rounded-full"></div>
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-gentle border-2 border-background rounded-full shadow-sm"></div>
         )}
       </button>
-      
-      {/* Tooltip - only show on larger screens */}
-      <div className="hidden md:block absolute bottom-full right-0 mb-2 px-3 py-1 bg-background/90 backdrop-blur-sm text-foreground text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+        {/* Tooltip - only show on larger screens */}
+      <div className="hidden md:block absolute bottom-full right-0 mb-3 px-3 py-2 bg-card/95 backdrop-blur-md text-foreground text-sm rounded-lg shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
         {tooltipText}
-        <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-background/90"></div>
+        <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-card/95"></div>
       </div>
     </div>
   );

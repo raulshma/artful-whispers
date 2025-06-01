@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FloatingThemeToggle() {
   const { theme, toggleTheme } = useTheme();
-
   return (
     <motion.div
       className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 mobile-safe-area"
@@ -17,7 +16,7 @@ export default function FloatingThemeToggle() {
         onClick={toggleTheme}
         size="icon"
         variant="outline"
-        className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-background/80 backdrop-blur-md border-border/50 shadow-lg hover:shadow-xl transition-all duration-500 ease-out mobile-touch-target touch-manipulation"
+        className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-card/90 backdrop-blur-md border-border/50 hover:border-gentle/50 shadow-lg hover:shadow-xl transition-all duration-500 ease-out mobile-touch-target touch-manipulation hover:bg-card group"
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       >
         <AnimatePresence mode="wait">
@@ -33,7 +32,7 @@ export default function FloatingThemeToggle() {
                 scale: { type: "spring", stiffness: 300, damping: 20 }
               }}
             >
-              <Moon className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
+              <Moon className="h-5 w-5 sm:h-6 sm:w-6 text-foreground group-hover:text-gentle transition-colors duration-300" />
             </motion.div>
           ) : (
             <motion.div
@@ -47,10 +46,13 @@ export default function FloatingThemeToggle() {
                 scale: { type: "spring", stiffness: 300, damping: 20 }
               }}
             >
-              <Sun className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
+              <Sun className="h-5 w-5 sm:h-6 sm:w-6 text-foreground group-hover:text-gentle transition-colors duration-300" />
             </motion.div>
           )}
         </AnimatePresence>
+        
+        {/* Subtle glow effect */}
+        <div className="absolute inset-0 rounded-full bg-gentle/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       </Button>
     </motion.div>
   );
