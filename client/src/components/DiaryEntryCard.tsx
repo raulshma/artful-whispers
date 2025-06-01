@@ -45,18 +45,9 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
 
   return (
     <article className="mb-12 animate-fade-in">
-      <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-        {/* Background Image */}
-        <div className="absolute inset-0 image-overlay">
-          <img 
-            src={entry.imageUrl || "https://images.unsplash.com/photo-1507041957456-9c397ce39c97?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&h=1200"}
-            alt={`Artwork for ${entry.title}`}
-            className="w-full h-full object-cover opacity-60"
-          />
-        </div>
-        
+      <div className="relative">
         {/* Text Overlay */}
-        <div className="relative z-10 p-8 text-overlay-gradient min-h-96">
+        <div className="relative p-4">
           <div className="max-w-2xl">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-8 h-8 bg-background/80 rounded-full flex items-center justify-center">

@@ -91,10 +91,6 @@
     color: hsl(var(--text-blue));
   }
 
-  .text-overlay-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--secondary) / 0.8));
-  }
-
   .entry-card {
     backdrop-filter: blur(10px);
     border: 1px solid hsl(var(--accent) / 0.2);
@@ -104,8 +100,35 @@
     box-shadow: 0 8px 32px hsl(var(--text-blue) / 0.15);
   }
 
-  .image-overlay {
-    background: linear-gradient(45deg, hsl(var(--background) / 0.1), hsl(var(--accent) / 0.2));
+  .timeline-container {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: hsl(var(--accent));
+  }
+
+  .timeline-entry {
+    position: relative;
+    padding-bottom: 2rem;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: -2.25rem;
+    top: 0.5rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: hsl(var(--primary));
+    border: 2px solid hsl(var(--background));
   }
 }
 
