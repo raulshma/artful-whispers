@@ -24,7 +24,7 @@ export default function DiaryPage() {
   const [hasMore, setHasMore] = useState(true);
   const entryRefs = useRef<Record<string, HTMLDivElement>>({});
   const queryClient = useQueryClient();
-  const limit = 10;
+  const limit = 5;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
 
@@ -241,7 +241,7 @@ export default function DiaryPage() {
     <div className="min-h-screen bg-background mobile-safe-area relative">
       {/* Lofi Loading Overlay */}
       <AnimatePresence>
-        {(isLoading || isInitialLoad) && (
+        {isInitialLoad && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
