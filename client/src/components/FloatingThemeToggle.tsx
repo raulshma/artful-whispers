@@ -1,23 +1,57 @@
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FloatingThemeToggle() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <Button
-      onClick={toggleTheme}
-      size="icon"
-      variant="outline"
-      className="fixed top-4 left-4 z-50 h-12 w-12 rounded-full bg-background/80 backdrop-blur-md border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+    <motion.div
+      className="fixed top-4 left-4 z-50"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
-      {theme === 'light' ? (
-        <Moon className="h-5 w-5 text-foreground transition-all duration-300" />
-      ) : (
-        <Sun className="h-5 w-5 text-foreground transition-all duration-300" />
-      )}
-    </Button>
+      <Button
+        onClick={toggleTheme}
+        size="icon"
+        variant="outline"
+        className="h-12 w-12 rounded-full bg-background/80 backdrop-blur-md border-border/50 shadow-lg hover:shadow-xl transition-all duration-500 ease-out"
+        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      >
+        <AnimatePresence mode="wait">
+          {theme === 'light' ? (
+            <motion.div
+              key="moon"
+              initial={{ rotate: -180, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 180, opacity: 0, scale: 0.5 }}
+              transition={{ 
+                duration: 0.8, 
+                ease: [0.25, 0.46, 0.45, 0.94],
+                scale: { type: "spring", stiffness: 300, damping: 20 }
+              }}
+            >
+              <Moon className="h-5 w-5 text-foreground" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="sun"
+              initial={{ rotate: -180, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 180, opacity: 0, scale: 0.5 }}
+              transition={{ 
+                duration: 0.3, 
+                ease: [0.25, 0.46, 0.45, 0.94],
+                scale: { type: "spring", stiffness: 300, damping: 20 }
+              }}
+            >
+              <Sun className="h-5 w-5 text-foreground" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Button>
+    </motion.div>
   );
 }

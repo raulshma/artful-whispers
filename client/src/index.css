@@ -111,7 +111,8 @@ body {
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: "Inter", sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .font-crimson {
@@ -149,6 +150,23 @@ body {
   .floating-compose {
     box-shadow: 0 8px 32px hsl(var(--text-blue) / 0.15);
     transition: all 0.3s ease;
+  }
+
+  /* Prevent theme transition flashing */
+  html {
+    transition: color-scheme 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Smooth, soothing transitions for all themed elements */
+  * {
+    transition: background-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                border-color 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                color 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Ensure background images don't flash */
+  .bg-background {
+    transition: background-color 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   /* Dark mode specific styles */

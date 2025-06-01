@@ -23,12 +23,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setTheme(systemPrefersDark ? 'dark' : 'light');
     }
   }, []);
-
   useEffect(() => {
-    // Apply theme to document
+    // Apply theme to document immediately to prevent flashing
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
+    
+    // Use requestAnimationFrame to ensure smooth transition
+    requestAnimationFrame(() => {
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+    });
     
     // Save to localStorage
     localStorage.setItem('theme', theme);
