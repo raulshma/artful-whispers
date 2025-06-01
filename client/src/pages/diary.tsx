@@ -26,19 +26,25 @@ export default function DiaryPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const { isLoading, isSuccess } = useQuery<DiaryEntry[]>({
-    queryKey: ["/api/diary-entries", { limit, offset }],
+    queryKey: ["/api/diary-entries", { limit, offset }] as const,
+    queryFn: async () => {
+      const response = await fetch(`/api/diary-entries?limit=${limit}&offset=${offset}`);
+      if (!response.ok) throw new Error('Failed to fetch entries');
+      return response.json();
+    },
     select: (data: DiaryEntry[]) => data,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    onSettled: () => {
-      // After initial data is loaded, start fade out animation
-      if (isInitialLoad) {
-        const timer = setTimeout(() => {
-          setIsInitialLoad(false);
-        }, 500); // Short delay for a smoother transition
-        return () => clearTimeout(timer);
-      }
-    },
   });
+
+  // Handle initial load state
+  useEffect(() => {
+    if (isSuccess && isInitialLoad) {
+      const timer = setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, isInitialLoad]);
 
   // Reset initial load state if data is already loaded
   useEffect(() => {
@@ -190,19 +196,20 @@ export default function DiaryPage() {
 
   // Set initial background image when entries change
   useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const bgImageUrl =
-      entries.find((e) => e.date === today)?.imageUrl ||
-      entries[0]?.imageUrl ||
-      null;
-    setCurrentBgImage(bgImageUrl);
+    if (entries.length > 0) {
+      const today = new Date().toISOString().split("T")[0];
+      const bgImageUrl = entries.find((e) => e.date === today)?.imageUrl ||
+                       entries[0]?.imageUrl ||
+                       null;
+      setCurrentBgImage(bgImageUrl);
+    }
   }, [entries]);
 
   // Intersection observer to update background based on visible entry
   useEffect(() => {
     const callback = (entries: IntersectionObserverEntry[]) => {
       const visibleEntry = entries.find(
-        (entry) => entry.intersectionRatio >= 0.5
+        (entry) => entry.isIntersecting && entry.intersectionRatio >= 0.5
       );
       if (visibleEntry) {
         const imageUrl = (visibleEntry.target as HTMLElement).dataset.imageUrl;
@@ -211,13 +218,23 @@ export default function DiaryPage() {
       }
     };
 
-    const observer = new IntersectionObserver(callback, { threshold: 0.5 });
+    const observer = new IntersectionObserver(callback, { 
+      threshold: 0.5,
+      root: null,
+      rootMargin: '0px'
+    });
 
-    Object.values(entryRefs.current).forEach((ref) => {
+    const currentRefs = entryRefs.current;
+    Object.values(currentRefs).forEach((ref) => {
       if (ref) observer.observe(ref);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      Object.values(currentRefs).forEach((ref) => {
+        if (ref) observer.unobserve(ref);
+      });
+      observer.disconnect();
+    };
   }, [entries]);
   return (
     <div className="min-h-screen bg-background mobile-safe-area relative">
