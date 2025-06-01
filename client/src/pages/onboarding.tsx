@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { updateUserProfileSchema, type UpdateUserProfile } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/AuthContext";
 
 const timezones = [
   "UTC",
@@ -31,6 +32,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { refreshAuth } = useAuth();
 
   const form = useForm<UpdateUserProfile>({
     resolver: zodResolver(updateUserProfileSchema),
@@ -57,12 +59,14 @@ export default function OnboardingPage() {
       const response = await apiRequest("POST", "/api/user/complete-onboarding", {});
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Welcome to Daily Reflections!",
         description: "Your profile has been set up. Start writing your first reflection.",
       });
+      // Refresh auth session to update isOnboarded status
+      await refreshAuth();
       navigate("/");
     },
   });

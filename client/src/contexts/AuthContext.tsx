@@ -9,12 +9,18 @@ interface User {
   createdAt: Date;
   updatedAt: Date;
   image?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  bio?: string | null;
+  timezone?: string | null;
+  isOnboarded?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  needsOnboarding: boolean;
   signOut: () => Promise<void>;
   refreshAuth: () => Promise<void>;
 }
@@ -22,14 +28,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, isPending, error } = useSession();
+  const { data: session, isPending, error, refetch } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshAuth = async () => {
-    // The useSession hook handles the refresh automatically
-    // This function is here for manual refresh if needed
-    window.location.reload();
+    // Use better-auth's built-in refetch to refresh the session
+    await refetch();
   };
 
   const signOut = async () => {
@@ -52,11 +57,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
     }
   }, [session, isPending, error]);
-
   const value: AuthContextType = {
     user,
     isLoading: isLoading || isPending,
     isAuthenticated: !!user,
+    needsOnboarding: !!user && user.isOnboarded !== "true",
     signOut,
     refreshAuth,
   };
