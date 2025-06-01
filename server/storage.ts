@@ -73,12 +73,12 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedEntry || undefined;
   }
-
   async updateUserProfile(id: string, profile: UpdateUserProfile): Promise<User | undefined> {
     const [updatedUser] = await db
       .update(users)
       .set({
         ...profile,
+        languages: profile.languages ? JSON.stringify(profile.languages) : undefined,
         updatedAt: new Date(),
       })
       .where(eq(users.id, id))
