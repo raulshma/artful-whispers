@@ -13,6 +13,7 @@ import { updateUserProfileSchema, type UpdateUserProfile } from "@shared/schema"
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/AuthContext";
+import FloatingThemeToggle from "@/components/FloatingThemeToggle";
 
 const timezones = [
   "UTC",
@@ -110,6 +111,9 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Floating Theme Toggle */}
+      <FloatingThemeToggle />
+      
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">

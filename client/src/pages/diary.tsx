@@ -6,6 +6,7 @@ import NewEntryCard from "@/components/NewEntryCard";
 import DiaryEntryCard from "@/components/DiaryEntryCard";
 import FloatingComposeButton from "@/components/FloatingComposeButton";
 import FloatingProfileButton from "@/components/FloatingProfileButton";
+import FloatingThemeToggle from "@/components/FloatingThemeToggle";
 import DiaryBackground from "@/components/DiaryBackground";
 import InfiniteScroll from "react-infinite-scroll-component";
 import type { DiaryEntry } from "@shared/schema";
@@ -142,17 +143,15 @@ export default function DiaryPage() {
 
     return () => observer.disconnect();
   }, [entries]);
-
   return (
     <div className="min-h-screen bg-background">
       <DiaryBackground imageUrl={currentBgImage} />
       
-      {/* Semi-transparent overlay for better content legibility */}
-      {currentBgImage && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm pointer-events-none" />
-      )}
       {/* Floating Profile Button */}
       <FloatingProfileButton />
+
+      {/* Floating Theme Toggle */}
+      <FloatingThemeToggle />
 
       {/* Time Prompt */}
       {showPrompt && (

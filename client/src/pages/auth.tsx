@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { signIn, signUp } from "@/lib/auth";
 import { Heart, Eye, EyeOff } from "lucide-react";
+import FloatingThemeToggle from "@/components/FloatingThemeToggle";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -121,9 +122,11 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Floating Theme Toggle */}
+      <FloatingThemeToggle />
+      
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">

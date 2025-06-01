@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import FloatingThemeToggle from "@/components/FloatingThemeToggle";
 
 const timezones = [
   "UTC",
@@ -100,7 +101,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
+    <div className="p-4 max-w-lg mx-auto min-h-screen bg-background">
+      {/* Floating Theme Toggle */}
+      <FloatingThemeToggle />
+      
       <h1 className="text-2xl font-semibold mb-6">Edit Profile</h1>
       <Form {...form}>
         <div className="space-y-6">
