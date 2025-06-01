@@ -110,26 +110,26 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 mobile-safe-area">
       {/* Floating Theme Toggle */}
       <FloatingThemeToggle />
       
       <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="text-accent text-2xl" size={32} />
+        <div className="text-center mb-6 sm:mb-8 mt-16 sm:mt-0">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <Heart className="text-accent" size={28} />
           </div>
-          <h1 className="font-crimson text-3xl font-semibold text-text-blue mb-2">
+          <h1 className="font-crimson text-2xl sm:text-3xl font-semibold text-text-blue mb-2">
             Welcome to Daily Reflections
           </h1>
-          <p className="text-text-blue/70 font-inter">
+          <p className="text-text-blue/70 font-inter text-sm sm:text-base">
             Let's set up your personal space for daily journaling
           </p>
         </div>
 
-        <div className="bg-background/90 entry-card rounded-3xl p-6 shadow-lg">
+        <div className="bg-background/90 entry-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg">
           {/* Progress indicator */}
-          <div className="flex items-center justify-center space-x-2 mb-8">
+          <div className="flex items-center justify-center space-x-2 mb-6 sm:mb-8">
             {[1, 2, 3].map((stepNumber) => (
               <div
                 key={stepNumber}
@@ -142,10 +142,10 @@ export default function OnboardingPage() {
 
           <Form {...form}>
             {step === 1 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <User className="text-accent mx-auto mb-2" size={24} />
-                  <h2 className="font-crimson text-xl font-semibold text-text-blue">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <User className="text-accent mx-auto mb-2" size={20} />
+                  <h2 className="font-crimson text-lg sm:text-xl font-semibold text-text-blue">
                     Tell us about yourself
                   </h2>
                 </div>
@@ -155,12 +155,12 @@ export default function OnboardingPage() {
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-text-blue">First Name</FormLabel>
+                      <FormLabel className="text-text-blue text-sm">First Name</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Enter your first name"
                           {...field}
-                          className="bg-primary/20 border-none rounded-2xl"
+                          className="bg-primary/20 border-none rounded-xl sm:rounded-2xl h-12 sm:h-11 text-base"
                         />
                       </FormControl>
                       <FormMessage />
@@ -173,12 +173,12 @@ export default function OnboardingPage() {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-text-blue">Last Name</FormLabel>
+                      <FormLabel className="text-text-blue text-sm">Last Name</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Enter your last name"
                           {...field}
-                          className="bg-primary/20 border-none rounded-2xl"
+                          className="bg-primary/20 border-none rounded-xl sm:rounded-2xl h-12 sm:h-11 text-base"
                         />
                       </FormControl>
                       <FormMessage />
@@ -189,10 +189,10 @@ export default function OnboardingPage() {
             )}
 
             {step === 2 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <Clock className="text-accent mx-auto mb-2" size={24} />
-                  <h2 className="font-crimson text-xl font-semibold text-text-blue">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <Clock className="text-accent mx-auto mb-2" size={20} />
+                  <h2 className="font-crimson text-lg sm:text-xl font-semibold text-text-blue">
                     Choose your timezone
                   </h2>
                   <p className="text-text-blue/60 text-sm mt-2">
@@ -205,10 +205,10 @@ export default function OnboardingPage() {
                   name="timezone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-text-blue">Timezone</FormLabel>
+                      <FormLabel className="text-text-blue text-sm">Timezone</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-primary/20 border-none rounded-2xl">
+                          <SelectTrigger className="bg-primary/20 border-none rounded-xl sm:rounded-2xl h-12 sm:h-11 text-base">
                             <SelectValue placeholder="Select your timezone" />
                           </SelectTrigger>
                         </FormControl>
@@ -228,10 +228,10 @@ export default function OnboardingPage() {
             )}
 
             {step === 3 && (
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <Heart className="text-accent mx-auto mb-2" size={24} />
-                  <h2 className="font-crimson text-xl font-semibold text-text-blue">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-6">
+                  <Heart className="text-accent mx-auto mb-2" size={20} />
+                  <h2 className="font-crimson text-lg sm:text-xl font-semibold text-text-blue">
                     Tell your story
                   </h2>
                   <p className="text-text-blue/60 text-sm mt-2">
@@ -244,12 +244,12 @@ export default function OnboardingPage() {
                   name="bio"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-text-blue">About you</FormLabel>
+                      <FormLabel className="text-text-blue text-sm">About you</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="What brings you to daily reflection? What are your hopes for this journey?"
                           {...field}
-                          className="bg-primary/20 border-none rounded-2xl min-h-24 resize-none"
+                          className="bg-primary/20 border-none rounded-xl sm:rounded-2xl min-h-24 resize-none text-base"
                         />
                       </FormControl>
                       <FormMessage />
@@ -262,10 +262,10 @@ export default function OnboardingPage() {
                   name="gender"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-text-blue">Gender (optional)</FormLabel>
+                      <FormLabel className="text-text-blue text-sm">Gender (optional)</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-primary/20 border-none rounded-2xl">
+                          <SelectTrigger className="bg-primary/20 border-none rounded-xl sm:rounded-2xl h-12 sm:h-11 text-base">
                             <SelectValue placeholder="Select your gender" />
                           </SelectTrigger>
                         </FormControl>
@@ -287,12 +287,12 @@ export default function OnboardingPage() {
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-text-blue">Nationality (optional)</FormLabel>
+                      <FormLabel className="text-text-blue text-sm">Nationality (optional)</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g., American, British, Canadian"
                           {...field}
-                          className="bg-primary/20 border-none rounded-2xl"
+                          className="bg-primary/20 border-none rounded-xl sm:rounded-2xl h-12 sm:h-11 text-base"
                         />
                       </FormControl>
                       <FormMessage />
@@ -305,7 +305,7 @@ export default function OnboardingPage() {
                   name="languages"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-text-blue">Languages (optional)</FormLabel>
+                      <FormLabel className="text-text-blue text-sm">Languages (optional)</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g., English, Spanish, French (comma-separated)"
@@ -317,7 +317,7 @@ export default function OnboardingPage() {
                               .filter(lang => lang.length > 0);
                             field.onChange(languages);
                           }}
-                          className="bg-primary/20 border-none rounded-2xl"
+                          className="bg-primary/20 border-none rounded-xl sm:rounded-2xl h-12 sm:h-11 text-base"
                         />
                       </FormControl>
                       <FormMessage />
@@ -327,12 +327,12 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            <div className="flex justify-between mt-8">
+            <div className="flex justify-between mt-6 sm:mt-8">
               {step > 1 && (
                 <Button
                   variant="ghost"
                   onClick={() => setStep(step - 1)}
-                  className="text-text-blue/70 hover:text-text-blue"
+                  className="text-text-blue/70 hover:text-text-blue h-12 sm:h-11 px-4 mobile-touch-target"
                 >
                   Back
                 </Button>
@@ -342,7 +342,7 @@ export default function OnboardingPage() {
                 {step < 3 ? (
                   <Button
                     onClick={handleNext}
-                    className="bg-accent hover:bg-accent/90 text-text-blue font-medium py-2 px-6 rounded-xl"
+                    className="bg-accent hover:bg-accent/90 text-text-blue font-medium py-3 sm:py-2 px-6 rounded-xl h-12 sm:h-11 mobile-touch-target"
                   >
                     Next
                   </Button>
@@ -350,7 +350,7 @@ export default function OnboardingPage() {
                   <Button
                     onClick={handleComplete}
                     disabled={updateProfileMutation.isPending || completeOnboardingMutation.isPending}
-                    className="bg-accent hover:bg-accent/90 text-text-blue font-medium py-2 px-6 rounded-xl"
+                    className="bg-accent hover:bg-accent/90 text-text-blue font-medium py-3 sm:py-2 px-6 rounded-xl h-12 sm:h-11 mobile-touch-target"
                   >
                     {updateProfileMutation.isPending || completeOnboardingMutation.isPending 
                       ? "Setting up..." 

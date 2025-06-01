@@ -149,9 +149,8 @@ export default function DiaryPage() {
     });
 
     return () => observer.disconnect();
-  }, [entries]);
-  return (
-    <div className="min-h-screen bg-background">
+  }, [entries]);  return (
+    <div className="min-h-screen bg-background mobile-safe-area">
       <DiaryBackground imageUrl={currentBgImage} />
       
       {/* Floating Profile Button */}
@@ -172,7 +171,7 @@ export default function DiaryPage() {
           }}
         />
       )}        {/* Main Content */}
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 relative z-10">
+        <main className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pt-12 sm:pt-16 relative z-10 mobile-scroll">
           {/* New Entry Card */}
           {showNewEntry && (
             <NewEntryCard
@@ -181,17 +180,17 @@ export default function DiaryPage() {
             />
           )}          {/* Helpful message for multiple entries */}
           {entries.length === 0 && !showNewEntry && (
-            <div className="text-center py-12 mb-8">
-              <div className="bg-card/50 backdrop-blur-sm rounded-3xl p-8 border border-border/30">
-                <h3 className="font-crimson text-xl font-semibold text-foreground mb-3">
+            <div className="text-center py-8 sm:py-12 mb-6 sm:mb-8">
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-border/30">
+                <h3 className="font-crimson text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3">
                   Welcome to Your Digital Journal
                 </h3>
-                <p className="text-muted-foreground font-inter leading-relaxed mb-4">
+                <p className="text-muted-foreground font-inter leading-relaxed mb-3 sm:mb-4 text-sm sm:text-base">
                   Capture your thoughts, moments, and reflections throughout the day. 
                   There's no limit - write as many entries as your heart desires.
                 </p>
-                <p className="text-sm text-muted-foreground/80 font-inter">
-                  Click the + button below to start your first reflection
+                <p className="text-xs sm:text-sm text-muted-foreground/80 font-inter">
+                  Tap the + button below to start your first reflection
                 </p>
               </div>
             </div>
@@ -204,41 +203,39 @@ export default function DiaryPage() {
             
             if (todayEntries.length > 0) {
               return (
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
+                <div className="text-center mb-4 sm:mb-6">
+                  <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
                     <span>{todayEntries.length} reflection{todayEntries.length !== 1 ? 's' : ''} today</span>
                     {todayEntries.length > 1 && (
-                      <span className="text-primary/60">• Multiple moments captured</span>
+                      <span className="text-primary/60 hidden sm:inline">• Multiple moments captured</span>
                     )}
                   </div>
                 </div>
               );
             }
             return null;
-          })()}
-
-        {/* Diary Entries with Infinite Scroll */}
+          })()}        {/* Diary Entries with Infinite Scroll */}
         <InfiniteScroll
           dataLength={entries.length}
           next={fetchMoreData}
           hasMore={hasMore}
           loader={
-            <div className="text-center py-8">
+            <div className="text-center py-6 sm:py-8">
               <div className="inline-flex items-center space-x-2 text-text-blue/60">
                 <div className="w-2 h-2 bg-accent rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-accent rounded-full animate-bounce [animation-delay:0.1s]"></div>
                 <div className="w-2 h-2 bg-accent rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <span className="font-inter text-sm ml-3">Loading more reflections...</span>
+                <span className="font-inter text-xs sm:text-sm ml-3">Loading more reflections...</span>
               </div>
             </div>
           }
           endMessage={
-            <div className="text-center py-8 text-text-blue/60">
-              <p className="font-inter text-sm">You've reached the end of your journal entries</p>
+            <div className="text-center py-6 sm:py-8 text-text-blue/60">
+              <p className="font-inter text-xs sm:text-sm">You've reached the end of your journal entries</p>
             </div>
           }
           scrollThreshold={0.9}        >
-          <div className="relative pl-8">
+          <div className="relative">
             {entries.map((entry, index) => {
               // Check if this entry and the next entry are on the same date
               const nextEntry = entries[index + 1];
@@ -255,10 +252,10 @@ export default function DiaryPage() {
                     if (el) entryRefs.current[entry.id] = el;
                   }}
                   data-image-url={entry.imageUrl || ''}
-                  className={`relative ${isMultipleEntry ? 'ml-4 border-l-2 border-primary/20 pl-6' : ''}`}
+                  className={`relative ${isMultipleEntry ? 'ml-3 sm:ml-4 border-l-2 border-primary/20 pl-4 sm:pl-6' : ''}`}
                 >
                   {isMultipleEntry && (
-                    <div className="absolute -left-2 top-8 w-4 h-4 bg-primary/30 rounded-full border-2 border-background"></div>
+                    <div className="absolute -left-1.5 sm:-left-2 top-6 sm:top-8 w-3 h-3 sm:w-4 sm:h-4 bg-primary/30 rounded-full border-2 border-background"></div>
                   )}
                   <DiaryEntryCard entry={entry} />
                 </div>
@@ -266,7 +263,7 @@ export default function DiaryPage() {
             })}
           </div>
         </InfiniteScroll>
-      </main>      {/* Floating Compose Button */}
+      </main>{/* Floating Compose Button */}
       <FloatingComposeButton 
         onClick={() => setShowNewEntry(true)}
         hasEntriesToday={(() => {

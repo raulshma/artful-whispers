@@ -14,13 +14,14 @@ export default function FloatingComposeButton({
     : "Add new reflection";
 
   return (
-    <div className="fixed bottom-8 right-8 z-30 group">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 group mobile-safe-area">
       <button
         onClick={onClick}
-        className="w-14 h-14 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 animate-float flex items-center justify-center relative"
+        className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 animate-float flex items-center justify-center relative touch-manipulation mobile-touch-target"
         title={tooltipText}
+        aria-label={tooltipText}
       >
-        <Plus className="text-xl" size={28} />
+        <Plus className="text-lg sm:text-xl" size={24} />
         
         {/* Pulse ring animation */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent opacity-30 animate-ping"></div>
@@ -31,8 +32,8 @@ export default function FloatingComposeButton({
         )}
       </button>
       
-      {/* Tooltip */}
-      <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-background/90 backdrop-blur-sm text-foreground text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+      {/* Tooltip - only show on larger screens */}
+      <div className="hidden md:block absolute bottom-full right-0 mb-2 px-3 py-1 bg-background/90 backdrop-blur-sm text-foreground text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
         {tooltipText}
         <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-background/90"></div>
       </div>

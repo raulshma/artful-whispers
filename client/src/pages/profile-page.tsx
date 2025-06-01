@@ -101,21 +101,21 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto min-h-screen bg-background">
+    <div className="p-3 sm:p-4 max-w-lg mx-auto min-h-screen bg-background mobile-safe-area">
       {/* Floating Theme Toggle */}
       <FloatingThemeToggle />
       
-      <h1 className="text-2xl font-semibold mb-6">Edit Profile</h1>
+      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 mt-16 sm:mt-12">Edit Profile</h1>
       <Form {...form}>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <FormField
             control={form.control}
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel className="text-sm">First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="First Name" {...field} />
+                  <Input placeholder="First Name" {...field} className="h-12 sm:h-11 text-base" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -127,9 +127,9 @@ export default function ProfilePage() {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel className="text-sm">Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Last Name" {...field} />
+                  <Input placeholder="Last Name" {...field} className="h-12 sm:h-11 text-base" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -141,9 +141,9 @@ export default function ProfilePage() {
             name="bio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Bio</FormLabel>
+                <FormLabel className="text-sm">Bio</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Tell us about yourself" {...field} />
+                  <Textarea placeholder="Tell us about yourself" {...field} className="min-h-24 text-base" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,13 +155,13 @@ export default function ProfilePage() {
             name="timezone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Timezone</FormLabel>
+                <FormLabel className="text-sm">Timezone</FormLabel>
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 sm:h-11 text-base">
                       <SelectValue placeholder="Select timezone" />
                     </SelectTrigger>
                     <SelectContent>
@@ -183,9 +183,9 @@ export default function ProfilePage() {
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gender</FormLabel>
+                <FormLabel className="text-sm">Gender</FormLabel>
                 <FormControl>
-                  <Input placeholder="Gender" {...field} />
+                  <Input placeholder="Gender" {...field} className="h-12 sm:h-11 text-base" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -197,9 +197,9 @@ export default function ProfilePage() {
             name="nationality"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nationality</FormLabel>
+                <FormLabel className="text-sm">Nationality</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nationality" {...field} />
+                  <Input placeholder="Nationality" {...field} className="h-12 sm:h-11 text-base" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             name="languages"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Languages (comma separated)</FormLabel>
+                <FormLabel className="text-sm">Languages (comma separated)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g. English, Spanish"
@@ -224,6 +224,7 @@ export default function ProfilePage() {
                           .filter(Boolean)
                       )
                     }
+                    className="h-12 sm:h-11 text-base"
                   />
                 </FormControl>
                 <FormMessage />
@@ -232,11 +233,12 @@ export default function ProfilePage() {
           />
         </div>
 
-        <div className="flex justify-end mt-6">
+        <div className="flex justify-end mt-6 sm:mt-8">
           <Button
             type="button"
             onClick={form.handleSubmit(onSubmit)}
             disabled={updateProfileMutation.isPending}
+            className="w-full sm:w-auto h-12 sm:h-11 text-base mobile-touch-target"
           >
             {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}
           </Button>
