@@ -146,7 +146,7 @@ export default function AuthPage() {
         className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 mobile-safe-area overflow-hidden"
         style={{
           backgroundImage: "url(/background.png)",
-          backgroundSize: "fixed",
+          backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           position: "relative",
