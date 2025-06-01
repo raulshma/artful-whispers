@@ -23,6 +23,7 @@ const timezones = [
   "Asia/Tokyo",
   "Asia/Shanghai",
   "Australia/Sydney",
+  "Asia/Kolkata",
 ];
 
 export default function OnboardingPage() {
