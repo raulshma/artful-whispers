@@ -253,9 +253,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const imagePrompt = `Create a lofi-style illustration: ${analysisData.imagePrompt}. Style: soft watercolor, pastel colors, dreamy atmosphere, aesthetic, minimalist, peaceful, cozy. Character: lofi girl/boy in a relaxing environment that matches the mood: ${analysisData.mood}`;
 
-          const imageResult = await imageModel.generateContent([imagePrompt]);
-
-          // For now, fallback to curated lofi images since Gemini image generation may need additional setup
+          // Skip Gemini image generation and use fallback directly
+          // The current Gemini model configuration is causing errors
           const imageUrl = generateLofiImageUrl(
             analysisData.mood,
             analysisData.emotions,
