@@ -6,6 +6,7 @@ import {
   updateUserProfileSchema,
 } from "@shared/schema";
 import { GoogleGenAI, Modality } from "@google/genai";
+import { put } from "@vercel/blob";
 import {
   requireAuth,
   optionalAuth,
@@ -340,22 +341,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           if (imageData) {
-            // TODO: Implement proper image storage
-            // For now, we'll use the fallback URL until we implement proper image storage
-            // Example of how to save the image:
-            // const buffer = Buffer.from(imageData, "base64");
-            // fs.writeFileSync(`./public/images/diary-${entry.id}.png`, buffer);
-            // const imageUrl = `/images/diary-${entry.id}.png`;
-            
-            // Using fallback URL for now
-            const imageUrl = generateLofiImageUrl(
-              analysisData.mood,
-              analysisData.emotions
-            );
-            
-            await storage.updateDiaryEntry(entry.id, {
-              imageUrl: imageUrl,
-            });
+            try {
+              // Convert base64 to buffer
+              const buffer = Buffer.from(imageData, "base64");
+              
+              // Generate a unique filename based on entry ID and timestamp
+              const filename = `diary-${entry.id}-${Date.now()}.png`;
+              
+              // Upload to Vercel Blob
+              const { url } = await put(filename, buffer, {
+                access: 'public',
+                contentType: 'image/png'
+                // Removed metadata as it's not supported by Vercel Blob
+              });
+              
+              // Store the Vercel Blob URL in the database
+              await storage.updateDiaryEntry(entry.id, {
+                imageUrl: url,
+              });
+              
+              console.log(`Image stored successfully at: ${url}`);
+            } catch (blobError) {
+              console.error("Failed to store image in Vercel Blob:", blobError);
+              // Fallback to Unsplash if Blob storage fails
+              const imageUrl = generateLofiImageUrl(
+                analysisData.mood,
+                analysisData.emotions
+              );
+              
+              await storage.updateDiaryEntry(entry.id, {
+                imageUrl: imageUrl,
+              });
+            }
           } else {
             throw new Error("No image data returned");
           }
