@@ -1,0 +1,46 @@
+node_modules
+dist
+.DS_Store
+server/public
+public/reports
+vite.config.ts.*
+*.tar.gz
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+#chromadb
+chroma-data
+cache
+
+#sonarqube
+.scannerwork
+
+#project
+repos/
+.vscode/settings.json
