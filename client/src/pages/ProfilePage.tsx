@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { UpdateUserProfile, updateUserProfileSchema } from "@shared/schema";
+import { UpdateUserProfile, updateUserProfileSchema, User } from "@shared/schema";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,14 +29,14 @@ export default function ProfilePage() {
   const { toast } = useToast();
 
   // Fetch current user
-  const { data: user, isLoading } = useQuery(
-    ["/api/user"],
-    async () => {
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: async (): Promise<User> => {
       const res = await apiRequest("GET", "/api/user");
       if (!res.ok) throw new Error("Failed to fetch user");
-      return res.json();
+      return await res.json();
     }
-  );
+  });
 
   // Initialize form
   const form = useForm<UpdateUserProfile>({
@@ -211,7 +211,7 @@ export default function ProfilePage() {
                 <FormControl>
                   <Input
                     placeholder="e.g. English, Spanish"
-                    value={field.value.join(", ")}
+                    value={(field.value || []).join(", ")}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value
@@ -232,9 +232,9 @@ export default function ProfilePage() {
           <Button
             type="button"
             onClick={form.handleSubmit(onSubmit)}
-            disabled={updateProfileMutation.isLoading}
+            disabled={updateProfileMutation.isPending}
           >
-            {updateProfileMutation.isLoading ? "Saving..." : "Save Profile"}
+            {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}
           </Button>
         </div>
       </Form>
