@@ -24,6 +24,8 @@
   --border: 0 0% 89.8039%;
   --input: 0 0% 96.8627%;
   --ring: 231.6667 45.0000% 84.3137%;
+  --gentle: 197.4000 71.4286% 72.5490%;
+  --text-blue: 220.0000 14.7541% 11.9608%;
   --chart-1: 87.7686 50.2075% 52.7451%;
   --chart-2: 35.7647 100% 50%;
   --chart-3: 206.5714 89.7436% 54.1176%;
@@ -53,25 +55,27 @@
 }
 
 .dark {
-  --background: 0 0% 18.4314%;
-  --foreground: 0 0% 100%;
-  --card: 0 0% 20%;
-  --card-foreground: 0 0% 80%;
-  --popover: 0 0% 26.6667%;
-  --popover-foreground: 0 0% 66.6667%;
-  --primary: 207.2727 44% 49.0196%;
-  --primary-foreground: 0 0% 96.8627%;
-  --secondary: 122.2500 39.2157% 40%;
+  --background: 20 14.3% 4.1%;
+  --foreground: 0 0% 95%;
+  --card: 20 14.3% 4.1%;
+  --card-foreground: 0 0% 95%;
+  --popover: 20 14.3% 4.1%;
+  --popover-foreground: 0 0% 95%;
+  --primary: 197.4000 71.4286% 72.5490%;
+  --primary-foreground: 220.0000 14.7541% 11.9608%;
+  --secondary: 123.7500 40.5063% 30.9804%;
   --secondary-foreground: 122.2222 33.3333% 84.1176%;
   --muted: 0 0% 33.3333%;
-  --muted-foreground: 240 10.6383% 90.7843%;
-  --accent: 220.0000 14.7541% 11.9608%;
-  --accent-foreground: 197.4000 71.4286% 72.5490%;
+  --muted-foreground: 0 0% 63.9216%;
+  --accent: 218.5401 79.1908% 66.0784%;
+  --accent-foreground: 220.0000 14.7541% 11.9608%;
   --destructive: 352.5581 86.5772% 29.2157%;
-  --destructive-foreground: 349.5238 100% 87.6471%;
+  --destructive-foreground: 0 100.0000% 88.6275%;
   --border: 0 0% 33.3333%;
-  --input: 0 0% 26.6667%;
-  --ring: 230.4000 17.4825% 28.0392%;
+  --input: 0 0% 33.3333%;
+  --ring: 197.4000 71.4286% 72.5490%;
+  --gentle: 197.4000 71.4286% 65%;
+  --text-blue: 0 0% 95%;
   --chart-1: 122.2500 39.2157% 40%;
   --chart-2: 35.7647 100% 50%;
   --chart-3: 206.5714 89.7436% 54.1176%;
@@ -212,6 +216,15 @@ body {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.8s ease-in-out;
 }
@@ -222,4 +235,15 @@ body {
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--primary) / 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }

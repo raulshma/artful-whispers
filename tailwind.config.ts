@@ -61,6 +61,8 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        gentle: "hsl(var(--gentle))",
+        "text-blue": "hsl(var(--text-blue))",
       },
       keyframes: {
         "accordion-down": {

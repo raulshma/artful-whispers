@@ -68,7 +68,7 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
               <div className="font-lora text-text-blue/90 leading-loose">
                 {entry.content.split('\n').map((paragraph, index) => (
                   paragraph.trim() && (
-                    <p key={index} className="mb-3 text-justify">
+                    <p key={index} className="mb-3 text-justify text-shadow-sm">
                       {paragraph}
                     </p>
                   )
