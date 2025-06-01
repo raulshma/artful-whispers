@@ -66,7 +66,7 @@ export default function OnboardingPage() {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "Welcome to Daily Reflections!",
+        title: "Welcome to Artful Whispers!",
         description: "Your profile has been set up. Start writing your first reflection.",
       });
       // Refresh auth session to update isOnboarded status
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
             <Heart className="text-accent" size={28} />
           </div>
           <h1 className="font-crimson text-2xl sm:text-3xl font-semibold text-text-blue mb-2">
-            Welcome to Daily Reflections
+            Welcome to Artful Whispers
           </h1>
           <p className="text-text-blue/70 font-inter text-sm sm:text-base">
             Let's set up your personal space for daily journaling

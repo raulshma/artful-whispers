@@ -113,7 +113,7 @@ export default function AuthPage() {
         return;
       }      toast({
         title: "Account Created!",
-        description: "Welcome to Daily Reflections. Let's set up your profile.",
+        description: "Welcome to Artful Whispers. Let's set up your profile.",
       });
 
       await refreshAuth();
@@ -152,7 +152,7 @@ export default function AuthPage() {
             <Heart className="text-white" size={28} />
           </div>
           <h1 className="font-crimson text-2xl sm:text-3xl font-semibold text-white mb-2 text-shadow">
-            Daily Reflections
+            Artful Whispers
           </h1>
           <p className="text-white font-inter text-sm sm:text-base text-shadow">
             Your personal space for mindful journaling
