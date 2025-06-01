@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import TimePrompt from "@/components/TimePrompt";
@@ -6,6 +6,7 @@ import NewEntryCard from "@/components/NewEntryCard";
 import DiaryEntryCard from "@/components/DiaryEntryCard";
 import FloatingComposeButton from "@/components/FloatingComposeButton";
 import FloatingProfileButton from "@/components/FloatingProfileButton";
+import DiaryBackground from "@/components/DiaryBackground";
 import InfiniteScroll from "react-infinite-scroll-component";
 import type { DiaryEntry } from "@shared/schema";
 
@@ -13,9 +14,11 @@ export default function DiaryPage() {
   const { user } = useAuth();
   const [showPrompt, setShowPrompt] = useState(false);
   const [showNewEntry, setShowNewEntry] = useState(false);
+  const [currentBgImage, setCurrentBgImage] = useState<string | null>(null);
   const [offset, setOffset] = useState(0);
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const entryRefs = useRef<Record<string, HTMLDivElement>>({});
   const queryClient = useQueryClient();
   const limit = 10;
 
@@ -111,21 +114,41 @@ export default function DiaryPage() {
     queryClient.invalidateQueries({ queryKey: ["/api/diary-entries"] });
   };
 
-  // Derive background image URL
-  const today = new Date().toISOString().split('T')[0];
-  const bgImageUrl = entries.find(e => e.date === today)?.imageUrl 
-                    || entries[0]?.imageUrl 
-                    || null;
+  // Set initial background image when entries change
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const bgImageUrl = entries.find(e => e.date === today)?.imageUrl 
+                      || entries[0]?.imageUrl 
+                      || null;
+    setCurrentBgImage(bgImageUrl);
+  }, [entries]);
+
+  // Intersection observer to update background based on visible entry
+  useEffect(() => {
+    const callback = (entries: IntersectionObserverEntry[]) => {
+      const visibleEntry = entries.find(entry => entry.intersectionRatio >= 0.5);
+      if (visibleEntry) {
+        const imageUrl = (visibleEntry.target as HTMLElement).dataset.imageUrl;
+        const newUrl = imageUrl || null;
+        setCurrentBgImage(prev => prev !== newUrl ? newUrl : prev);
+      }
+    };
+
+    const observer = new IntersectionObserver(callback, { threshold: 0.5 });
+
+    Object.values(entryRefs.current).forEach(ref => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [entries]);
 
   return (
-    <div 
-      className="min-h-screen bg-background bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : undefined
-      }}
-    >
+    <div className="min-h-screen bg-background">
+      <DiaryBackground imageUrl={currentBgImage} />
+      
       {/* Semi-transparent overlay for better content legibility */}
-      {bgImageUrl && (
+      {currentBgImage && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm pointer-events-none" />
       )}
       {/* Floating Profile Button */}
@@ -178,7 +201,15 @@ export default function DiaryPage() {
         >
           <div className="space-y-12">
             {entries.map((entry) => (
-              <DiaryEntryCard key={entry.id} entry={entry} />
+              <div
+                key={entry.id}
+                ref={el => {
+                  if (el) entryRefs.current[entry.id] = el;
+                }}
+                data-image-url={entry.imageUrl || ''}
+              >
+                <DiaryEntryCard entry={entry} />
+              </div>
             ))}
           </div>
         </InfiniteScroll>
