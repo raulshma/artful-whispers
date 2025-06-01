@@ -36,7 +36,7 @@ A beautifully crafted digital diary application that transforms your daily refle
 ## 🛠️ Tech Stack
 
 ### **Frontend**
-- **React 18** with TypeScript
+- **React 19** with TypeScript
 - **Vite** for fast development and building
 - **TailwindCSS** for styling with custom theme system
 - **Framer Motion** for smooth animations and transitions
@@ -236,11 +236,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🐛 Bug Reports & Feature Requests
 
-Please use the [GitHub Issues](https://github.com/yourusername/artful-whispers/issues) page to report bugs or request features.
-
-## 📞 Support
-
-For support, email support@artfulwhispers.com or join our Discord community.
+Please use the [GitHub Issues](https://github.com/raulshma/artful_whispers/issues) page to report bugs or request features.
 
 ---
 
