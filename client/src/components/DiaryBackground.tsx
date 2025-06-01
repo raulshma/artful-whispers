@@ -59,7 +59,7 @@ function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
                 opacity: 0,
               }}
               animate={{
-                opacity: theme === "dark" ? 0.75 : 0.7,
+                opacity: theme === "dark" ? 0.85 : 0.8
               }}
               transition={{ duration: 0.4, ease: soothingEase, delay: 0.1 }}
             />
