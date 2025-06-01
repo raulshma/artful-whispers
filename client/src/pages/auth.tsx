@@ -12,6 +12,12 @@ import { Heart, Eye, EyeOff } from "lucide-react";
 import FloatingThemeToggle from "@/components/FloatingThemeToggle";
 
 export default function AuthPage() {
+  // Custom CSS for text shadow
+  const textShadowStyle = `
+    .text-shadow {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+  `;
   const navigate = useNavigate();
   const { refreshAuth } = useAuth();
   const { toast } = useToast();
@@ -122,36 +128,42 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };  return (
+    <>
+      {/* Inject custom CSS */}
+      <style>{textShadowStyle}</style>
     <div 
-      className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 mobile-safe-area"
+      className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 mobile-safe-area overflow-hidden"
       style={{
         backgroundImage: 'url(/background.png)',
-        backgroundSize: 'cover',
+        backgroundSize: 'fixed',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundRepeat: 'no-repeat',
+        position: 'relative'
       }}
     >
+      {/* Semi-transparent overlay for better text contrast */}
+      <div className="absolute inset-0 bg-black/30" />
       {/* Floating Theme Toggle */}
       <FloatingThemeToggle />
       
       <div className="max-w-md w-full">
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <Heart className="text-accent" size={28} />
+        <div className="text-center mb-6 sm:mb-8 relative z-10">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-accent/40 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+            <Heart className="text-white" size={28} />
           </div>
-          <h1 className="font-crimson text-2xl sm:text-3xl font-semibold text-text-blue mb-2">
+          <h1 className="font-crimson text-2xl sm:text-3xl font-semibold text-white mb-2 text-shadow">
             Daily Reflections
           </h1>
-          <p className="text-text-blue/70 font-inter text-sm sm:text-base">
+          <p className="text-white font-inter text-sm sm:text-base text-shadow">
             Your personal space for mindful journaling
           </p>
         </div>
 
-        <Card className="bg-background/90 border-primary/20 shadow-lg">
+        <Card className="bg-background/95 border-primary/20 shadow-lg backdrop-blur-sm relative z-10 overflow-visible">
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 mobile-touch-target">
-              <TabsTrigger value="signin" className="mobile-touch-target">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="mobile-touch-target">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin" className="mobile-touch-target text-text-blue font-medium">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="mobile-touch-target text-text-blue font-medium">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">              <CardHeader className="text-center pb-3 sm:pb-4">
@@ -294,5 +306,6 @@ export default function AuthPage() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
