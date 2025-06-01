@@ -72,6 +72,12 @@ export default function DiaryPage() {
       
       if (hour >= 20) { // After 8 PM
         const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const skipKey = `eveningPromptSkipped:${today}`;
+        
+        // Check if user already clicked "Later" today
+        if (localStorage.getItem(skipKey) === 'true') {
+          return;
+        }
         
         // Check if there's already an entry for today
         const hasEntryToday = entries.some(entry => entry.date === today);
@@ -105,8 +111,23 @@ export default function DiaryPage() {
     queryClient.invalidateQueries({ queryKey: ["/api/diary-entries"] });
   };
 
+  // Derive background image URL
+  const today = new Date().toISOString().split('T')[0];
+  const bgImageUrl = entries.find(e => e.date === today)?.imageUrl 
+                    || entries[0]?.imageUrl 
+                    || null;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : undefined
+      }}
+    >
+      {/* Semi-transparent overlay for better content legibility */}
+      {bgImageUrl && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm pointer-events-none" />
+      )}
       {/* Floating Profile Button */}
       <FloatingProfileButton />
 
@@ -114,12 +135,17 @@ export default function DiaryPage() {
       {showPrompt && (
         <TimePrompt
           onStartEntry={handleStartNewEntry}
-          onClose={() => setShowPrompt(false)}
+          onClose={() => {
+            const today = new Date().toISOString().split('T')[0];
+            const skipKey = `eveningPromptSkipped:${today}`;
+            localStorage.setItem(skipKey, 'true');
+            setShowPrompt(false);
+          }}
         />
       )}
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 relative z-10">
         {/* New Entry Card */}
         {showNewEntry && (
           <NewEntryCard
