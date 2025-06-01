@@ -99,37 +99,6 @@
   .floating-compose {
     box-shadow: 0 8px 32px hsl(var(--text-blue) / 0.15);
   }
-
-  .timeline-container {
-    position: relative;
-    padding-left: 2rem;
-  }
-
-  .timeline-container::before {
-    content: '';
-    position: absolute;
-    left: 0.75rem;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background-color: hsl(var(--accent));
-  }
-
-  .timeline-entry {
-    position: relative;
-    padding-bottom: 2rem;
-  }
-
-  .timeline-marker {
-    position: absolute;
-    left: -1.55rem;
-    top: 0.5rem;
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background-color: hsl(var(--primary));
-    border: 2px solid hsl(var(--background));
-  }
 }
 
 @keyframes fadeIn {

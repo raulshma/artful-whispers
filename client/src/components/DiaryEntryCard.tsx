@@ -48,7 +48,7 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
       <div className="relative">
         {/* Text Overlay */}
         <div className="relative p-4">
-          <div className="max-w-2xl">
+          <div className="w-full">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-8 h-8 bg-background/80 rounded-full flex items-center justify-center">
                 <MoodIcon className="text-gentle text-sm" size={16} />
@@ -68,7 +68,7 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
               <div className="font-lora text-text-blue/90 leading-loose">
                 {entry.content.split('\n').map((paragraph, index) => (
                   paragraph.trim() && (
-                    <p key={index} className="mb-3">
+                    <p key={index} className="mb-3 text-justify">
                       {paragraph}
                     </p>
                   )

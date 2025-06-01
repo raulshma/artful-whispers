@@ -199,17 +199,15 @@ export default function DiaryPage() {
           }
           scrollThreshold={0.9}
         >
-          <div className="relative pl-8 timeline-container">
+          <div className="relative pl-8">
             {entries.map((entry) => (
               <div
                 key={entry.id}
-                className="relative pb-12 timeline-entry"
                 ref={el => {
                   if (el) entryRefs.current[entry.id] = el;
                 }}
                 data-image-url={entry.imageUrl || ''}
               >
-                <div className="timeline-marker" />
                 <DiaryEntryCard entry={entry} />
               </div>
             ))}
