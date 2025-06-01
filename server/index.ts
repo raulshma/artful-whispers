@@ -1,10 +1,33 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { auth } from "./auth";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Add better-auth API routes
+app.all("/api/auth/*", async (req, res) => {
+  // Convert Express request to Web API Request
+  const url = new URL(req.url!, `http://${req.headers.host}`);
+  const webRequest = new Request(url, {
+    method: req.method,
+    headers: req.headers as any,
+    body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+  });
+
+  const response = await auth.handler(webRequest);
+  
+  // Convert Web API Response to Express response
+  res.status(response.status);
+  response.headers.forEach((value, key) => {
+    res.setHeader(key, value);
+  });
+  
+  const body = await response.text();
+  res.send(body);
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

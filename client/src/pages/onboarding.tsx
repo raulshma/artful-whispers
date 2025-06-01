@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { User, Heart, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ const timezones = [
 ];
 
 export default function OnboardingPage() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -63,7 +63,7 @@ export default function OnboardingPage() {
         title: "Welcome to Daily Reflections!",
         description: "Your profile has been set up. Start writing your first reflection.",
       });
-      setLocation("/");
+      navigate("/");
     },
   });
 

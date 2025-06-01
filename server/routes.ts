@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertDiaryEntrySchema, updateUserProfileSchema } from "@shared/schema";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -11,32 +12,29 @@ const DEFAULT_MODEL_LITE = "gemini-2.0-flash-lite";
 const DEFAULT_MODEL_IMAGE = "gemini-2.0-flash-preview-image-generation";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Get current user
-  app.get("/api/user", async (req, res) => {
+  // Get current user (protected route)
+  app.get("/api/user", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      // For demo purposes, we'll use user ID 1 or create a demo user
-      let user = await storage.getUser(1);
-      
-      if (!user) {
-        user = await storage.createUser({
-          username: "demo_user",
-          password: "demo_password"
-        });
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
       }
       
-      res.json(user);
+      res.json(req.user);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  // Update user profile
-  app.patch("/api/user/profile", async (req, res) => {
+  // Update user profile (protected route)
+  app.patch("/api/user/profile", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = updateUserProfileSchema.parse(req.body);
-      const userId = 1; // Mock user ID
       
-      const updatedUser = await storage.updateUserProfile(userId, validatedData);
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const updatedUser = await storage.updateUserProfile(req.user.id, validatedData);
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
@@ -48,11 +46,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Complete onboarding
-  app.post("/api/user/complete-onboarding", async (req, res) => {
+  // Complete onboarding (protected route)
+  app.post("/api/user/complete-onboarding", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = 1; // Mock user ID
-      const updatedUser = await storage.markUserOnboarded(userId);
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const updatedUser = await storage.markUserOnboarded(req.user.id);
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
@@ -64,8 +65,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Search diary entries
-  app.get("/api/diary-entries/search", async (req, res) => {
+  // Search diary entries (protected route)
+  app.get("/api/diary-entries/search", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const query = req.query.q as string;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -75,31 +76,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
       
-      const entries = await storage.searchDiaryEntries(query.trim(), limit, offset);
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const entries = await storage.searchDiaryEntries(req.user.id, query.trim(), limit, offset);
       res.json(entries);
     } catch (error) {
       res.status(500).json({ message: "Failed to search diary entries" });
     }
   });
 
-  // Get diary entries with pagination
-  app.get("/api/diary-entries", async (req, res) => {
+  // Get diary entries with pagination (protected route)
+  app.get("/api/diary-entries", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = parseInt(req.query.offset as string) || 0;
 
-      const entries = await storage.getDiaryEntries(limit, offset);
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const entries = await storage.getDiaryEntries(req.user.id, limit, offset);
       res.json(entries);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch diary entries" });
     }
   });
 
-  // Get diary entry by date
-  app.get("/api/diary-entries/date/:date", async (req, res) => {
+  // Get diary entry by date (protected route)
+  app.get("/api/diary-entries/date/:date", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const { date } = req.params;
-      const entry = await storage.getDiaryEntryByDate(date);
+      
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const entry = await storage.getDiaryEntryByDate(req.user.id, date);
 
       if (!entry) {
         return res
@@ -113,13 +127,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new diary entry
-  app.post("/api/diary-entries", async (req, res) => {
+  // Create new diary entry (protected route)
+  app.post("/api/diary-entries", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertDiaryEntrySchema.parse(req.body);
 
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       // Check if entry already exists for this date
       const existingEntry = await storage.getDiaryEntryByDate(
+        req.user.id,
         validatedData.date,
       );
       if (existingEntry) {
@@ -128,7 +147,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Entry already exists for this date" });
       }
 
-      const entry = await storage.createDiaryEntry(validatedData);
+      const entry = await storage.createDiaryEntry({
+        ...validatedData,
+        userId: req.user.id,
+      });
 
       // Start sentiment analysis and image generation in background
       analyzeSentimentAndGenerateImage(entry);
@@ -139,11 +161,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update diary entry
-  app.patch("/api/diary-entries/:id", async (req, res) => {
+  // Update diary entry (protected route)
+  app.patch("/api/diary-entries/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
+
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
 
       const updatedEntry = await storage.updateDiaryEntry(id, updates);
 

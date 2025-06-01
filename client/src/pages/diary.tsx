@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, Settings, Search, Feather } from "lucide-react";
+import { Heart, Settings, Search, Feather, LogOut, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import TimePrompt from "@/components/TimePrompt";
 import NewEntryCard from "@/components/NewEntryCard";
 import DiaryEntryCard from "@/components/DiaryEntryCard";
@@ -8,6 +17,7 @@ import FloatingComposeButton from "@/components/FloatingComposeButton";
 import type { DiaryEntry } from "@shared/schema";
 
 export default function DiaryPage() {
+  const { user, signOut } = useAuth();
   const [showPrompt, setShowPrompt] = useState(false);
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -64,6 +74,10 @@ export default function DiaryPage() {
     refetch();
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -84,6 +98,28 @@ export default function DiaryPage() {
               <button className="text-text-blue/70 hover:text-text-blue transition-colors">
                 <Settings size={18} />
               </button>
+              
+              {/* User Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-text-blue/70 hover:text-text-blue p-2">
+                    <User size={18} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5 text-sm font-medium text-text-blue">
+                    {user?.name || user?.email}
+                  </div>
+                  <div className="px-2 py-1.5 text-xs text-text-blue/60">
+                    {user?.email}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

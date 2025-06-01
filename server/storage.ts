@@ -1,46 +1,38 @@
-import { users, diaryEntries, type User, type InsertUser, type DiaryEntry, type InsertDiaryEntry, type UpdateUserProfile } from "@shared/schema";
+import { users, diaryEntries, type User, type DiaryEntry, type InsertDiaryEntry, type UpdateUserProfile } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, ilike, or } from "drizzle-orm";
+import { eq, desc, ilike, or, and } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUserProfile(id: number, profile: UpdateUserProfile): Promise<User | undefined>;
-  markUserOnboarded(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  updateUserProfile(id: string, profile: UpdateUserProfile): Promise<User | undefined>;
+  markUserOnboarded(id: string): Promise<User | undefined>;
   
   // Diary entry methods
-  getDiaryEntries(limit?: number, offset?: number): Promise<DiaryEntry[]>;
+  getDiaryEntries(userId: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
   getDiaryEntry(id: number): Promise<DiaryEntry | undefined>;
-  getDiaryEntryByDate(date: string): Promise<DiaryEntry | undefined>;
-  createDiaryEntry(entry: InsertDiaryEntry): Promise<DiaryEntry>;
+  getDiaryEntryByDate(userId: string, date: string): Promise<DiaryEntry | undefined>;
+  createDiaryEntry(entry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry>;
   updateDiaryEntry(id: number, updates: Partial<DiaryEntry>): Promise<DiaryEntry | undefined>;
-  searchDiaryEntries(query: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
+  searchDiaryEntries(userId: string, query: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
-  }
-
-  async getDiaryEntries(limit = 10, offset = 0): Promise<DiaryEntry[]> {
+  async getDiaryEntries(userId: string, limit = 10, offset = 0): Promise<DiaryEntry[]> {
     const entries = await db
       .select()
       .from(diaryEntries)
+      .where(eq(diaryEntries.userId, userId))
       .orderBy(desc(diaryEntries.createdAt))
       .limit(limit)
       .offset(offset);
@@ -52,12 +44,17 @@ export class DatabaseStorage implements IStorage {
     return entry || undefined;
   }
 
-  async getDiaryEntryByDate(date: string): Promise<DiaryEntry | undefined> {
-    const [entry] = await db.select().from(diaryEntries).where(eq(diaryEntries.date, date));
+  async getDiaryEntryByDate(userId: string, date: string): Promise<DiaryEntry | undefined> {
+    const [entry] = await db
+      .select()
+      .from(diaryEntries)
+      .where(
+        and(eq(diaryEntries.date, date), eq(diaryEntries.userId, userId))
+      );
     return entry || undefined;
   }
 
-  async createDiaryEntry(insertEntry: InsertDiaryEntry): Promise<DiaryEntry> {
+  async createDiaryEntry(insertEntry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry> {
     const [entry] = await db
       .insert(diaryEntries)
       .values({
@@ -77,7 +74,7 @@ export class DatabaseStorage implements IStorage {
     return updatedEntry || undefined;
   }
 
-  async updateUserProfile(id: number, profile: UpdateUserProfile): Promise<User | undefined> {
+  async updateUserProfile(id: string, profile: UpdateUserProfile): Promise<User | undefined> {
     const [updatedUser] = await db
       .update(users)
       .set({
@@ -89,7 +86,7 @@ export class DatabaseStorage implements IStorage {
     return updatedUser || undefined;
   }
 
-  async markUserOnboarded(id: number): Promise<User | undefined> {
+  async markUserOnboarded(id: string): Promise<User | undefined> {
     const [updatedUser] = await db
       .update(users)
       .set({
@@ -101,15 +98,18 @@ export class DatabaseStorage implements IStorage {
     return updatedUser || undefined;
   }
 
-  async searchDiaryEntries(query: string, limit = 10, offset = 0): Promise<DiaryEntry[]> {
+  async searchDiaryEntries(userId: string, query: string, limit = 10, offset = 0): Promise<DiaryEntry[]> {
     const entries = await db
       .select()
       .from(diaryEntries)
       .where(
-        or(
-          ilike(diaryEntries.title, `%${query}%`),
-          ilike(diaryEntries.content, `%${query}%`),
-          ilike(diaryEntries.mood, `%${query}%`)
+        and(
+          eq(diaryEntries.userId, userId),
+          or(
+            ilike(diaryEntries.title, `%${query}%`),
+            ilike(diaryEntries.content, `%${query}%`),
+            ilike(diaryEntries.mood, `%${query}%`)
+          )
         )
       )
       .orderBy(desc(diaryEntries.createdAt))
