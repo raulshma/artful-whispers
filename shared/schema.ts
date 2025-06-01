@@ -12,6 +12,9 @@ export const users = pgTable("users", {
   lastName: text("last_name"),
   bio: text("bio"),
   timezone: text("timezone").default("UTC"),
+  gender: text("gender"),
+  nationality: text("nationality"),
+  languages: text("languages"), // JSON string array
   isOnboarded: text("is_onboarded").default("false"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -71,6 +74,9 @@ export const updateUserProfileSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   bio: z.string().optional(),
   timezone: z.string().default("UTC"),
+  gender: z.string().optional(),
+  nationality: z.string().optional(),
+  languages: z.array(z.string()).optional(),
 });
 
 export const insertDiaryEntrySchema = createInsertSchema(diaryEntries).pick({

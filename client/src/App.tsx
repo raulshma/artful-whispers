@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import DiaryPage from "@/pages/diary";
 import AuthPage from "@/pages/auth";
 import OnboardingPage from "@/pages/onboarding";
+import ProfilePage from "@/pages/ProfilePage";
 
 function App() {
   return (
@@ -41,6 +42,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <OnboardingPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
                   </ProtectedRoute>
                 } 
               />

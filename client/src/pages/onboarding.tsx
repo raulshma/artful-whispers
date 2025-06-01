@@ -41,6 +41,9 @@ export default function OnboardingPage() {
       lastName: "",
       bio: "",
       timezone: "UTC",
+      gender: "",
+      nationality: "",
+      languages: [],
     },
   });
 
@@ -243,6 +246,74 @@ export default function OnboardingPage() {
                           placeholder="What brings you to daily reflection? What are your hopes for this journey?"
                           {...field}
                           className="bg-primary/20 border-none rounded-2xl min-h-24 resize-none"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-text-blue">Gender (optional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-primary/20 border-none rounded-2xl">
+                            <SelectValue placeholder="Select your gender" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="non-binary">Non-binary</SelectItem>
+                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="nationality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-text-blue">Nationality (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., American, British, Canadian"
+                          {...field}
+                          className="bg-primary/20 border-none rounded-2xl"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="languages"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-text-blue">Languages (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., English, Spanish, French (comma-separated)"
+                          value={field.value?.join(", ") || ""}
+                          onChange={(e) => {
+                            const languages = e.target.value
+                              .split(",")
+                              .map(lang => lang.trim())
+                              .filter(lang => lang.length > 0);
+                            field.onChange(languages);
+                          }}
+                          className="bg-primary/20 border-none rounded-2xl"
                         />
                       </FormControl>
                       <FormMessage />

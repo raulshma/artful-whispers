@@ -256,6 +256,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analyze sentiment, generate title and image
   async function analyzeSentimentAndGenerateImage(entry: any) {
     try {
+      // Fetch user data to personalize prompts
+      const user = await storage.getUser(entry.userId);
+      
+      // Build persona from user details
+      const persona = [user?.gender, user?.nationality].filter(Boolean).join(' ');
+      const personaDescription = persona || 'person';
+      
+      // Include languages in context if available
+      const languageContext = user?.languages ? ` The person speaks ${user.languages}.` : '';
+
       // Create a new instance of GoogleGenAI for text and image generation
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -264,13 +274,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         Analyze this diary entry and respond with ONLY a valid JSON object (no markdown formatting):
         
         Entry: "${entry.content}"
+        Context: This entry is from a ${personaDescription}.${languageContext}
         
         Respond with exactly this format:
         {
           "title": "a short, poetic 2-4 word title that captures the essence of this entry",
           "mood": "one word describing the primary mood",
           "emotions": ["array", "of", "emotions", "detected"],
-          "imagePrompt": "a detailed prompt for generating a lofi-style image featuring a person (lofi girl/boy style) in a setting that matches the diary's emotional essence. Include soft colors, gentle lighting, peaceful scenes, and aesthetic elements that reflect the mood and emotions"
+          "imagePrompt": "a detailed prompt for generating a lofi-style image featuring a ${personaDescription} (lofi girl/boy style) in a setting that matches the diary's emotional essence. Include soft colors, gentle lighting, peaceful scenes, and aesthetic elements that reflect the mood and emotions"
         }
       `;
 
@@ -315,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Generate lofi-style image using Gemini image generation
         try {
-          const imagePrompt = `Create a lofi-style illustration: ${analysisData.imagePrompt}. Style: soft watercolor, pastel colors, dreamy atmosphere, aesthetic, minimalist, peaceful, cozy. Character: lofi girl/boy in a relaxing environment that matches the mood: ${analysisData.mood}`;
+          const imagePrompt = `Create a lofi-style illustration: ${analysisData.imagePrompt}. Style: soft watercolor, pastel colors, dreamy atmosphere, aesthetic, minimalist, peaceful, cozy. Character: ${personaDescription} in a relaxing environment that matches the mood: ${analysisData.mood}`;
 
           // Image generation using the new API format with both TEXT and IMAGE modalities
           const imageResponse = await ai.models.generateContent({

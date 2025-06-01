@@ -1,5 +1,6 @@
 import { User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +13,14 @@ import { LogOut } from "lucide-react";
 
 export default function FloatingProfileButton() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
   };
 
   // Get initials for avatar fallback
@@ -50,6 +56,10 @@ export default function FloatingProfileButton() {
             {user?.email}
           </div>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleProfileClick}>
+            <User className="mr-2 h-4 w-4" />
+            Profile
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:text-red-600">
             <LogOut className="mr-2 h-4 w-4" />
             Sign out

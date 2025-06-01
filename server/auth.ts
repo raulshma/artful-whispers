@@ -50,6 +50,18 @@ export const auth = betterAuth({
         required: false,
         defaultValue: "false",
       },
+      gender: {
+        type: "string",
+        required: false,
+      },
+      nationality: {
+        type: "string",
+        required: false,
+      },
+      languages: {
+        type: "string",
+        required: false,
+      },
     },
   },
   trustedOrigins: [
