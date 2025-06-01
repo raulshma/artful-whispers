@@ -24,6 +24,7 @@ export default function DiaryPage() {
   const queryClient = useQueryClient();
   const limit = 10;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const { isLoading, isSuccess } = useQuery<DiaryEntry[]>({
     queryKey: ["/api/diary-entries", { limit, offset }] as const,
@@ -36,23 +37,21 @@ export default function DiaryPage() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Handle initial load state
+  // Handle initial load state and animation sequence
   useEffect(() => {
-    if (isSuccess && isInitialLoad) {
-      const timer = setTimeout(() => {
-        setIsInitialLoad(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isSuccess, isInitialLoad]);
-
-  // Reset initial load state if data is already loaded
-  useEffect(() => {
-    if (isSuccess && isInitialLoad) {
-      const timer = setTimeout(() => {
-        setIsInitialLoad(false);
-      }, 500);
-      return () => clearTimeout(timer);
+    if (isSuccess) {
+      if (isInitialLoad) {
+        // First, show the coffee animation for 2.5 seconds
+        const animationTimer = setTimeout(() => {
+          setIsInitialLoad(false);
+          // Then show welcome message after animation completes
+          const welcomeTimer = setTimeout(() => {
+            setShowWelcome(true);
+          }, 500);
+          return () => clearTimeout(welcomeTimer);
+        }, 2500);
+        return () => clearTimeout(animationTimer);
+      }
     }
   }, [isSuccess, isInitialLoad]);
 
@@ -379,7 +378,7 @@ export default function DiaryPage() {
           />
         )}{" "}
         {/* Helpful message for multiple entries */}
-        {entries.length === 0 && !showNewEntry && (
+        {entries.length === 0 && !showNewEntry && showWelcome && !isInitialLoad && (
           <div className="text-center py-8 sm:py-12 mb-6 sm:mb-8">
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-border/30">
               <h3 className="font-crimson text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3">
