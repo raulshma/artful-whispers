@@ -1,162 +1,247 @@
-# Artful Whispers v1.0.0  
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
+# 🌟 Artful Whispers
 
-## Description
-Artful Whispers is a comprehensive, self-hosted AI-powered platform for creative content generation and sharing. It leverages multiple AI models to help users create, refine, and share various types of creative content including stories, poetry, art prompts, and visual designs. Whether you're a creative professional looking to enhance your workflow or an enthusiast exploring AI-assisted creativity, Artful Whispers provides the tools and community to bring your ideas to life.
+A beautifully crafted digital diary application that transforms your daily reflections into visual art. Artful Whispers combines mindful journaling with AI-powered sentiment analysis and automatic image generation to create a unique, immersive journaling experience.
 
-## Table of Contents
-- [Features](#features)
-- [Tech Stack](#tech-stack)  
-- [Prerequisites](#prerequisites)  
-- [Environment Variables](#environment-variables)  
-- [Getting Started](#getting-started)  
-- [Project Structure](#project-structure)  
-- [Configuration](#configuration)  
-- [Available Scripts](#available-scripts)  
-- [Build & Production](#build--production)  
-- [Contributing](#contributing)  
-- [License](#license)  
+## ✨ Features
 
-## Features
+### 📝 **Intelligent Journaling**
+- Create unlimited diary entries throughout the day
+- AI-powered title generation based on content
+- Automatic sentiment analysis and emotion detection
+- Multiple entries per day with smart time-based prompting
 
-### Content Generation
-- **Multi-Model AI Integration**: Connect to Google Gemini, OpenAI, or Anthropic models based on your preference and API availability
-- **Text Generation**: Create stories, poems, scripts, and other written content with AI assistance
-- **Visual Prompt Engineering**: Generate detailed prompts for visual art creation
-- **Content Refinement**: Edit and refine generated content with AI suggestions
-- **Style Transfer**: Apply different creative styles to your existing content
+### 🎨 **AI-Generated Artwork**
+- Automatic lofi-style image generation for each entry using Google Gemini
+- Personalized artwork based on your emotions and mood
+- Dynamic background imagery that adapts to your current entry
+- Beautiful, aesthetic visuals that capture the essence of your reflections
 
-### User Experience
-- **Responsive Design**: Fully responsive interface that works across desktop, tablet, and mobile devices
-- **Customizable Workspace**: Personalize your creative environment with themes and layout options
-- **Collaboration Tools**: Share projects, receive feedback, and collaborate with others
-- **Version History**: Track changes and maintain multiple versions of your creative works
-- **Export Options**: Download your content in various formats (PDF, TXT, JSON)
+### 🔐 **Secure Authentication**
+- Email and password authentication powered by Better Auth
+- Protected routes and secure session management
+- User profile customization with personal details
 
-### Platform
-- **Self-Hosted Solution**: Full control over your data and AI integrations
-- **User Management**: Multi-user support with roles and permissions
-- **Content Library**: Organize and search through your generated content
-- **API Access**: Integrate with other tools and services via REST API
-- **Privacy-Focused**: Keep your creative process and data secure
+### 🌙 **Adaptive User Experience**
+- Dark/Light theme toggle with smooth transitions
+- Mobile-responsive design with touch-optimized interactions
+- Infinite scroll for seamless browsing of past entries
+- Time-aware prompts to encourage regular journaling
 
-### Community
-- **Public/Private Sharing**: Choose what content to share and with whom
-- **Inspiration Feed**: Discover content shared by other users (optional)
-- **Collaboration Spaces**: Create shared workspaces for team projects
-- **Feedback System**: Request and provide constructive feedback
+### 🔍 **Smart Organization**
+- Search through your diary entries by content, title, or mood
+- Date-based organization and filtering
+- Visual timeline of your emotional journey
+- Entry grouping for multiple reflections on the same day
 
-## Tech Stack
-- **Frontend**
-  - React 18, Vite, TypeScript  
-  - Tailwind CSS, Framer Motion  
-  - Radix UI, shadcn/ui (New York style)  
-- **Backend**
-  - Node.js, Express  
-  - Drizzle ORM & migrations  
-  - Zod & drizzle-zod for schema validation  
-  - openid-client for OAuth  
-- **Database & Storage**
-  - PostgreSQL (via @neondatabase/serverless)  
-  - Vercel Blob Storage (@vercel/blob)  
-- **AI Integrations**
-  - Google Gemini, OpenAI, Anthropic  
-  - @google/genai, @google/generative-ai  
-- **Utilities**
-  - better-auth, @better-auth/expo  
-  - nanoid, clsx, date-fns  
+## 🛠️ Tech Stack
 
-## Prerequisites
-- Node.js >= 16  
-- pnpm package manager  
-- PostgreSQL instance (local or hosted)
+### **Frontend**
+- **React 18** with TypeScript
+- **Vite** for fast development and building
+- **TailwindCSS** for styling with custom theme system
+- **Framer Motion** for smooth animations and transitions
+- **Radix UI** components for accessibility
+- **React Query** for state management and data fetching
+- **React Router** for client-side navigation
 
-## Environment Variables
-Copy and rename `.env.example` to `.env`.  
+### **Backend**
+- **Express.js** with TypeScript
+- **Better Auth** for authentication and session management
+- **Drizzle ORM** with PostgreSQL database
+- **Google Gemini AI** for text analysis and image generation
+- **Vercel Blob** for image storage
 
-| Variable                | Description                                 | Required |
-|-------------------------|---------------------------------------------|:--------:|
-| `DATABASE_URL`          | PostgreSQL connection URL                   | Yes      |
-| `ENCRYPTION_KEY`        | Key for data encryption                     | Yes      |
-| `PGSSLMODE`             | PostgreSQL SSL mode (default: disable)      | No       |
-| `NODE_ENV`              | Node environment (default: development)     | No       |
-| `GEMINI_API_KEY`        | Google Gemini API key                       | No       |
-| `OPENAI_API_KEY`        | OpenAI API key                              | No       |
-| `ANTHROPIC_API_KEY`     | Anthropic API key                           | No       |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob Storage read/write token        | No       |
+### **Database & Storage**
+- **PostgreSQL** with Neon serverless
+- **Drizzle Kit** for database migrations
+- **Vercel Blob** for image asset storage
 
-## Getting Started
+### **AI & ML**
+- **Google Gemini 2.0** for sentiment analysis
+- **Google Gemini Image Generation** for automatic artwork creation
+- Personalized prompts based on user profile and preferences
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ and pnpm
+- PostgreSQL database (Neon recommended)
+- Google Gemini API key
+- Vercel account for blob storage
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/artful-whispers.git
+   cd artful-whispers
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Environment Setup**
+   Create a `.env` file in the root directory:
+   ```env
+   DATABASE_URL="your_postgresql_connection_string"
+   GEMINI_API_KEY="your_google_gemini_api_key"
+   BLOB_READ_WRITE_TOKEN="your_vercel_blob_token"
+   BETTER_AUTH_SECRET="your_auth_secret_key"
+   NODE_ENV="development"
+   ```
+
+4. **Database Setup**
+   ```bash
+   pnpm db:push
+   ```
+
+5. **Start Development Server**
+   ```bash
+   pnpm dev
+   ```
+
+   The application will be available at `http://localhost:5000`
+
+### Production Build
+
 ```bash
-git clone <repository-url>
-cd artful-whispers
-pnpm install
-cp .env.example .env
-pnpm db:push       # apply database migrations
-pnpm dev           # start dev server (frontend + backend)
+# Build the application
+pnpm build
+
+# Start production server
+pnpm start
 ```
 
-## Project Structure
+## 📁 Project Structure
+
 ```
-.
-├── client/           # React application (src, index.html, index.css)
-├── server/           # Express server entrypoint (server/index.ts)
-├── shared/           # Shared schema, types, utilities
-├── migrations/       # Drizzle-generated migrations
-├── attached_assets/  # Static assets alias (@assets)
-├── tsconfig.json     # TypeScript configuration & path aliases
-├── vite.config.ts    # Vite configuration & aliases
-├── tailwind.config.ts# Tailwind CSS theme & plugins
-├── drizzle.config.ts # Drizzle ORM configuration
-└── components.json   # shadcn UI component generator config
+artful-whispers/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   │   ├── ui/         # Radix UI components
+│   │   │   └── ...         # Custom components
+│   │   ├── contexts/       # React contexts
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── lib/            # Utility libraries
+│   │   ├── pages/          # Page components
+│   │   └── ...
+│   └── index.html
+├── server/                 # Express backend
+│   ├── auth.ts            # Authentication setup
+│   ├── db.ts              # Database configuration
+│   ├── index.ts           # Server entry point
+│   ├── middleware.ts      # Express middleware
+│   ├── routes.ts          # API routes
+│   ├── storage.ts         # Database operations
+│   └── vite.ts            # Vite integration
+├── shared/                 # Shared types and schemas
+│   ├── schema.ts          # Database schema and types
+│   └── utils/
+├── migrations/             # Database migrations
+├── package.json
+├── vite.config.ts
+├── tailwind.config.ts
+├── drizzle.config.ts
+└── README.md
 ```
 
-## Configuration
+## 🎯 Key Features Deep Dive
 
-**Path Aliases**  
-- In `tsconfig.json`:
-  - `"@/*"` → `client/src/*`  
-  - `"@shared/*"` → `shared/*`  
-- In `vite.config.ts`:
-  - `"@"` → `client/src`  
-  - `"@shared"` → `shared`  
-  - `"@assets"` → `attached_assets`  
-- In `components.json` (shadcn/ui):
-  - `"components"` → `@/components`  
-  - `"utils"` → `@/lib/utils`  
-  - `"ui"` → `@/components/ui`  
-  - `"lib"` → `@/lib`  
-  - `"hooks"` → `@/hooks`  
+### **AI-Powered Content Analysis**
+- Analyzes diary entries using Google Gemini to determine mood and emotions
+- Generates personalized, poetic titles for each entry
+- Creates detailed image prompts based on emotional content
+- Adapts to user's personal profile (gender, nationality, languages)
 
-**Tailwind CSS**  
-- Dark mode via `class` strategy  
-- Content paths: `./client/index.html`, `./client/src/**/*.{js,jsx,ts,tsx}`  
-- Extended theme: custom radius, colors, charts, sidebar, keyframes & animations  
-- Plugins: `tailwindcss-animate`, `@tailwindcss/typography`  
+### **Dynamic Visual Experience**
+- Background images change based on the currently viewed entry
+- Smooth transitions between different moods and themes
+- Lofi-aesthetic artwork generation that matches your emotional state
+- Theme-aware overlays for optimal readability
 
-## Available Scripts
-From `package.json`:
-- `pnpm dev`  
-  Start development server (Vite + Express).  
-- `pnpm build`  
-  Build frontend (Vite) and bundle backend (esbuild).  
-- `pnpm start`  
-  Run production server (`dist/index.js`).  
-- `pnpm check`  
-  Run TypeScript type checks (`tsc`).  
-- `pnpm db:push`  
-  Push migrations to the database (Drizzle Kit).  
+### **Smart User Engagement**
+- Evening prompts to encourage reflection (after 8 PM)
+- Intelligent spacing between prompts (2-hour minimum)
+- Multiple entries per day support
+- Visual indicators for productive journaling days
 
-## Build & Production
-```bash
-pnpm build        # generate production assets
-pnpm start        # start production server
-```
-- Frontend output: `dist/public/`  
-- Backend bundle: `dist/index.js`  
+### **Responsive Design**
+- Mobile-first approach with touch-optimized interfaces
+- Adaptive layouts for desktop, tablet, and mobile
+- Accessibility features with proper ARIA labels
+- Smooth animations that enhance user experience
 
-## Contributing
-Please follow code conventions (Prettier, ESLint) and branch naming like `feature/xyz` or `fix/abc`. Submit PRs against `main`.  
+## 📊 Database Schema
 
-## License
-This project is licensed under the MIT License.  
-See the [LICENSE](LICENSE) file for details.
+### Users Table
+- Personal profile information
+- Timezone and language preferences
+- Onboarding status tracking
+- Authentication data
+
+### Diary Entries Table
+- Entry content and metadata
+- AI-generated titles and sentiment data
+- Image URLs and prompts
+- Date and time tracking
+
+### Authentication Tables
+- Sessions and tokens management
+- Account linking and verification
+- Secure credential storage
+
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /api/auth/sign-in` - User sign in
+- `POST /api/auth/sign-up` - User registration
+- `POST /api/auth/sign-out` - User sign out
+
+### User Management
+- `GET /api/user` - Get current user
+- `PATCH /api/user/profile` - Update user profile
+- `POST /api/user/onboard` - Complete onboarding
+
+### Diary Entries
+- `GET /api/diary-entries` - Get entries with pagination
+- `POST /api/diary-entries` - Create new entry
+- `PATCH /api/diary-entries/:id` - Update entry
+- `GET /api/diary-entries/search` - Search entries
+- `GET /api/diary-entries/date/:date` - Get entries by date
+
+## 🌟 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Google Gemini** for powerful AI capabilities
+- **Radix UI** for accessible component primitives
+- **Vercel** for seamless deployment and blob storage
+- **Neon** for serverless PostgreSQL hosting
+- **Better Auth** for robust authentication
+
+## 🐛 Bug Reports & Feature Requests
+
+Please use the [GitHub Issues](https://github.com/yourusername/artful-whispers/issues) page to report bugs or request features.
+
+## 📞 Support
+
+For support, email support@artfulwhispers.com or join our Discord community.
+
+---
+
+**Made with ❤️ for mindful reflection and creative expression**

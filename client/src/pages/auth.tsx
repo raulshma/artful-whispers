@@ -122,7 +122,15 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 mobile-safe-area">
+    <div 
+      className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 mobile-safe-area"
+      style={{
+        backgroundImage: 'url(/background.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       {/* Floating Theme Toggle */}
       <FloatingThemeToggle />
       
