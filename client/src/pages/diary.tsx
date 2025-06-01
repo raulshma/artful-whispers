@@ -472,7 +472,7 @@ export default function DiaryPage() {
           }
           scrollThreshold={0.9}
         >
-          <div className="relative">
+          <div className="relative space-y-0.5">
             {entries.map((entry, index) => {
               // Check if this entry and the next entry are on the same date
               const nextEntry = entries[index + 1];
@@ -484,23 +484,26 @@ export default function DiaryPage() {
               const isMultipleEntry = hasSameDayBefore || hasSameDayAfter;
 
               return (
-                <div
+                <motion.div
                   key={entry.id}
                   ref={(el) => {
                     if (el) entryRefs.current[entry.id] = el;
                   }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                   data-image-url={entry.imageUrl || ""}
-                  className={`relative ${
+                  className={`relative transition-colors duration-200 hover:bg-foreground/5 rounded-lg ${
                     isMultipleEntry
-                      ? "ml-3 sm:ml-4 border-l-2 border-primary/20 pl-4 sm:pl-6"
+                      ? "ml-2 sm:ml-3 border-l border-foreground/10 pl-3 sm:pl-4"
                       : ""
                   }`}
                 >
                   {isMultipleEntry && (
-                    <div className="absolute -left-1.5 sm:-left-2 top-6 sm:top-8 w-3 h-3 sm:w-4 sm:h-4 bg-primary/30 rounded-full border-2 border-background"></div>
+                    <div className="absolute -left-1.5 sm:-left-1.5 top-6 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary/20 rounded-full border border-background"></div>
                   )}
                   <DiaryEntryCard entry={entry} />
-                </div>
+                </motion.div>
               );
             })}
           </div>
