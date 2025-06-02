@@ -1,11 +1,12 @@
 import { Heart, Share, Book, Waves, Leaf } from "lucide-react";
+import { memo } from "react";
 import type { DiaryEntry } from "@shared/schema";
 
 interface DiaryEntryCardProps {
   entry: DiaryEntry;
 }
 
-export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
+function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
@@ -110,8 +111,7 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
               </div>
 
               <div className="text-xs sm:text-sm text-text-blue/50 font-inter">
-                {getReadTime(entry.content)}
-              </div>
+                {getReadTime(entry.content)}              </div>
             </div>
           </div>
         </div>
@@ -119,3 +119,5 @@ export default function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
     </article>
   );
 }
+
+export default memo(DiaryEntryCard);

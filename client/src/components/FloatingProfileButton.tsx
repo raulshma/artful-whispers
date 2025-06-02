@@ -1,6 +1,7 @@
 import { User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { memo, useCallback, useMemo } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,26 +12,25 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
 
-export default function FloatingProfileButton() {
+function FloatingProfileButton() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
-  };
+  }, [signOut]);
 
-  const handleProfileClick = () => {
+  const handleProfileClick = useCallback(() => {
     navigate("/profile");
-  };
-
-  // Get initials for avatar fallback
-  const getInitials = () => {
+  }, [navigate]);
+  // Get initials for avatar fallback - memoized
+  const initials = useMemo(() => {
     if (!user) return "U";
     if (user.name) {
       return user.name.split(" ").map(n => n[0]).join("").toUpperCase();
     }
     return user.email.substring(0, 2).toUpperCase();
-  };  return (
+  }, [user]);return (
     <div className="fixed top-4 right-4 z-50 mobile-safe-area">
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
@@ -38,9 +38,8 @@ export default function FloatingProfileButton() {
             <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
               {user?.image ? (
                 <AvatarImage src={user.image} alt={user.name || user.email} />
-              ) : (
-                <AvatarFallback className="bg-gentle/20 text-foreground text-xs sm:text-sm border border-gentle/30">
-                  {getInitials()}
+              ) : (                <AvatarFallback className="bg-gentle/20 text-foreground text-xs sm:text-sm border border-gentle/30">
+                  {initials}
                 </AvatarFallback>
               )}
             </Avatar>
@@ -64,7 +63,8 @@ export default function FloatingProfileButton() {
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+      </DropdownMenu>    </div>
   );
 }
+
+export default memo(FloatingProfileButton);

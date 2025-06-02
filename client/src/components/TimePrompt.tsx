@@ -1,11 +1,12 @@
 import { Moon } from "lucide-react";
+import { memo } from "react";
 
 interface TimePromptProps {
   onStartEntry: () => void;
   onClose: () => void;
 }
 
-export default function TimePrompt({ onStartEntry, onClose }: TimePromptProps) {
+function TimePrompt({ onStartEntry, onClose }: TimePromptProps) {
   return (
     <div className="fixed inset-0 bg-text-blue/20 backdrop-blur-sm z-40 flex items-center justify-center p-4 sm:p-6">
       <div className="bg-background rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-sm sm:max-w-md w-full shadow-2xl border border-primary/30 animate-fade-in">
@@ -36,3 +37,5 @@ export default function TimePrompt({ onStartEntry, onClose }: TimePromptProps) {
     </div>
   );
 }
+
+export default memo(TimePrompt);

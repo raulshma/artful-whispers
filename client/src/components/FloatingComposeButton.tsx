@@ -1,11 +1,12 @@
 import { Plus } from "lucide-react";
+import { memo } from "react";
 
 interface FloatingComposeButtonProps {
   onClick: () => void;
   hasEntriesToday?: boolean;
 }
 
-export default function FloatingComposeButton({
+function FloatingComposeButton({
   onClick,
   hasEntriesToday = false,
 }: FloatingComposeButtonProps) {
@@ -34,7 +35,8 @@ export default function FloatingComposeButton({
       <div className="hidden md:block absolute bottom-full right-0 mb-3 px-3 py-2 bg-card/95 backdrop-blur-md text-foreground text-sm rounded-lg shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
         {tooltipText}
         <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-card/95"></div>
-      </div>
-    </div>
+      </div>    </div>
   );
 }
+
+export default memo(FloatingComposeButton);
