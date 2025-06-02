@@ -27,6 +27,7 @@ export default function DiaryPage() {
   // Sequential animation states
   const [animationPhase, setAnimationPhase] = useState<'loading' | 'welcome' | 'content' | 'complete'>('loading');
   const [showContent, setShowContent] = useState(false);
+  const [isInitialEntryLoad, setIsInitialEntryLoad] = useState(true);
   
   // Check for reduced motion preference
   const prefersReducedMotion = useMemo(() => 
@@ -56,13 +57,15 @@ export default function DiaryPage() {
 
   // Optimized intersection observer for background image updates
   const handleIntersection = useCallback((entry: IntersectionObserverEntry) => {
-    const imageUrl = (entry.target as HTMLElement).dataset.imageUrl;
-    const newUrl = imageUrl || null;
-    setCurrentBgImage(prev => prev !== newUrl ? newUrl : prev);
+    if (entry.isIntersecting) {
+      const imageUrl = (entry.target as HTMLElement).dataset.imageUrl;
+      const newUrl = imageUrl || null;
+      setCurrentBgImage(prev => prev !== newUrl ? newUrl : prev);
+    }
   }, []);
 
   const { observeElement } = useIntersectionObserver({
-    threshold: 0.9,
+    threshold: 0.3,
     onIntersect: handleIntersection,
   });
 
@@ -146,15 +149,61 @@ export default function DiaryPage() {
     await refreshEntries();
   }, [refreshEntries]);
 
-  // Set initial background image when entries change
+  // Set initial background image when entries change (only for first load)
   useEffect(() => {
-    if (entries.length > 0) {
+    if (entries.length > 0 && isInitialEntryLoad) {
+      // Only set initial background on the very first load
       const bgImageUrl = entries.find((e) => e.date === today)?.imageUrl ||
                        entries[0]?.imageUrl ||
                        null;
       setCurrentBgImage(bgImageUrl);
+      setIsInitialEntryLoad(false);
     }
-  }, [entries, today]);
+  }, [entries, today, isInitialEntryLoad]);
+
+  // Fallback: Update background based on most prominent visible entry when scrolling stops
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
+    
+    const handleScrollEnd = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        // Find the entry that's most prominently visible
+        const visibleEntryElements = document.querySelectorAll('[data-image-url]');
+        let mostVisibleElement: HTMLElement | null = null;
+        let maxVisibleArea = 0;
+        
+        for (let i = 0; i < visibleEntryElements.length; i++) {
+          const element = visibleEntryElements[i] as HTMLElement;
+          const rect = element.getBoundingClientRect();
+          
+          // Calculate visible area
+          const visibleTop = Math.max(0, rect.top);
+          const visibleBottom = Math.min(window.innerHeight, rect.bottom);
+          const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+          const visibleArea = visibleHeight * rect.width;
+          
+          if (visibleArea > maxVisibleArea && visibleHeight > 0) {
+            maxVisibleArea = visibleArea;
+            mostVisibleElement = element;
+          }
+        }
+        
+        if (mostVisibleElement) {
+          const imageUrl = mostVisibleElement.dataset.imageUrl;
+          if (imageUrl !== currentBgImage) {
+            setCurrentBgImage(imageUrl || null);
+          }
+        }
+      }, 150); // Debounce for 150ms after scrolling stops
+    };
+
+    window.addEventListener('scroll', handleScrollEnd, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScrollEnd);
+      clearTimeout(scrollTimeout);
+    };
+  }, [currentBgImage]);
 
   // Memoized close prompt handler
   const handleClosePrompt = useCallback(() => {

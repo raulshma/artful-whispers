@@ -13,13 +13,18 @@ export function useIntersectionObserver({
 }: UseIntersectionObserverOptions) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const elementsRef = useRef<Map<string, HTMLElement>>(new Map());
-
   const callback = useCallback((entries: IntersectionObserverEntry[]) => {
-    const visibleEntry = entries.find(
+    // Find the entry with the highest intersection ratio that meets the threshold
+    const visibleEntries = entries.filter(
       (entry) => entry.isIntersecting && entry.intersectionRatio >= threshold
     );
-    if (visibleEntry && onIntersect) {
-      onIntersect(visibleEntry);
+    
+    if (visibleEntries.length > 0 && onIntersect) {
+      // Sort by intersection ratio descending and pick the most visible one
+      const mostVisibleEntry = visibleEntries.reduce((prev, current) => 
+        current.intersectionRatio > prev.intersectionRatio ? current : prev
+      );
+      onIntersect(mostVisibleEntry);
     }
   }, [onIntersect, threshold]);
 
