@@ -12,7 +12,10 @@ interface NewEntryCardProps {
   onCancel: () => void;
 }
 
-export default function NewEntryCard({ onEntryCreated, onCancel }: NewEntryCardProps) {
+export default function NewEntryCard({
+  onEntryCreated,
+  onCancel,
+}: NewEntryCardProps) {
   const [content, setContent] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -49,18 +52,19 @@ export default function NewEntryCard({ onEntryCreated, onCancel }: NewEntryCardP
       return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     createEntryMutation.mutate({
       content: content.trim(),
       date: today,
     });
   };
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });  return (
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  return (
     <div className="group bg-card/95 backdrop-blur-md entry-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 mb-6 sm:mb-8 shadow-xl border border-border/50 animate-slide-up hover:shadow-2xl transition-all duration-500 ease-out">
       {/* Header with gentle animation */}
       <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
@@ -76,22 +80,21 @@ export default function NewEntryCard({ onEntryCreated, onCancel }: NewEntryCardP
           </p>
         </div>
       </div>
-      
+
       <div className="space-y-4 sm:space-y-6">
         {/* Enhanced textarea container with subtle border animation */}
         <div className="relative group/textarea">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-xl sm:rounded-2xl blur-sm opacity-0 group-focus-within/textarea:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative bg-muted/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border/30 group-focus-within/textarea:border-primary/30 transition-all duration-300">
-            <Textarea 
-              placeholder="What's on your mind right now? Capture this moment - you can write as many reflections as you'd like throughout the day..." 
+          <div className="relative bg-muted/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border/30 group-focus-within/textarea:border-primary/30 transition-all duration-300">            <Textarea
+              placeholder="What's on your mind right now? Capture this moment - you can write as many reflections as you'd like throughout the day..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-40 sm:min-h-44 bg-transparent border-none resize-none font-lora text-base sm:text-base text-foreground placeholder-muted-foreground/60 focus:outline-none leading-relaxed mobile-input-font"
+              className="w-full min-h-40 sm:min-h-44 bg-transparent border-none resize-none font-lora text-base sm:text-base text-foreground placeholder-muted-foreground/60 focus:outline-none focus-visible:outline-none outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 leading-relaxed mobile-input-font"
               autoFocus
             />
           </div>
         </div>
-      
+
         {/* Enhanced footer with better spacing and subtle animations */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 space-y-3 sm:space-y-0">
           <div className="flex items-center space-x-2">
@@ -100,7 +103,7 @@ export default function NewEntryCard({ onEntryCreated, onCancel }: NewEntryCardP
               AI will craft a beautiful title and artwork
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <Button
               variant="ghost"

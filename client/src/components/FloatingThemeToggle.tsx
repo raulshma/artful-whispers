@@ -7,7 +7,7 @@ export default function FloatingThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   return (
     <motion.div
-      className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 mobile-safe-area"
+      className="fixed top-4 left-4 z-50 mobile-safe-area"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -16,7 +16,7 @@ export default function FloatingThemeToggle() {
         onClick={toggleTheme}
         size="icon"
         variant="outline"
-        className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-card/90 backdrop-blur-md border-border/50 hover:border-gentle/50 shadow-lg hover:shadow-xl transition-all duration-500 ease-out mobile-touch-target touch-manipulation hover:bg-card group"
+        className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-card/90 backdrop-blur-md border-border/50 hover:border-gentle/50 shadow-lg hover:shadow-xl transition-all duration-500 ease-out mobile-touch-target touch-manipulation hover:bg-card group"
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       >
         <AnimatePresence mode="wait">

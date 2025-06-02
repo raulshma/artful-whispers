@@ -13,10 +13,10 @@ export default function FloatingComposeButton({
     ? "Add another reflection" 
     : "Add new reflection";
 
-  return (    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 group mobile-safe-area">
+  return (    <div className="fixed bottom-4 right-4 z-30 group mobile-safe-area">
       <button
         onClick={onClick}
-        className="w-14 h-14 sm:w-16 sm:h-16 bg-card/90 backdrop-blur-md hover:bg-card border border-border/50 hover:border-gentle/50 text-foreground hover:text-gentle rounded-full shadow-lg hover:shadow-xl transition-all duration-500 ease-out transform hover:scale-105 animate-float flex items-center justify-center relative touch-manipulation mobile-touch-target group"
+        className="w-10 h-10 sm:w-12 sm:h-12 bg-card/90 backdrop-blur-md hover:bg-card border border-border/50 hover:border-gentle/50 text-foreground hover:text-gentle rounded-full shadow-lg hover:shadow-xl transition-all duration-500 ease-out transform hover:scale-105 animate-float flex items-center justify-center relative touch-manipulation mobile-touch-target group"
         title={tooltipText}
         aria-label={tooltipText}
       >

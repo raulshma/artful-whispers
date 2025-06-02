@@ -32,9 +32,9 @@ export default function FloatingProfileButton() {
     return user.email.substring(0, 2).toUpperCase();
   };  return (
     <div className="fixed top-4 right-4 z-50 mobile-safe-area">
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <button className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-card/90 backdrop-blur-md hover:bg-card shadow-lg hover:shadow-xl transition-all duration-500 ease-out transform hover:scale-105 flex items-center justify-center border border-border/50 hover:border-gentle/50 touch-manipulation mobile-touch-target group">
+          <button className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-card/90 backdrop-blur-md hover:bg-card shadow-lg hover:shadow-xl transition-all duration-500 ease-out transform hover:scale-105 flex items-center justify-center border border-border/50 hover:border-gentle/50 touch-manipulation mobile-touch-target group">
             <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
               {user?.image ? (
                 <AvatarImage src={user.image} alt={user.name || user.email} />
