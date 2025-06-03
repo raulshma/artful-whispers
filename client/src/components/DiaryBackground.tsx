@@ -21,7 +21,7 @@ function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
           backgroundColor:
             theme === "dark" ? "hsl(222, 84%, 4.9%)" : "hsl(36, 100%, 98%)",
         }}
-        transition={{ duration: 0.4, ease: soothingEase }}
+        transition={{ duration: 0.3, ease: soothingEase }}
       />
 
       <AnimatePresence mode="sync">
@@ -33,9 +33,9 @@ function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.01 }}
             transition={{
-              duration: 0.8,
+              duration: 0.6,
               ease: soothingEase,
-              scale: { duration: 1, ease: soothingEase },
+              scale: { duration: 0.8, ease: soothingEase },
             }}
           >
             {/* Background Image with gentle scale animation */}
@@ -46,7 +46,7 @@ function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
               }}
               initial={{ filter: "blur(2px)" }}
               animate={{ filter: "blur(0px)" }}
-              transition={{ duration: 0.4, ease: soothingEase, delay: 0.1 }}
+              transition={{ duration: 0.3, ease: soothingEase, delay: 0.05 }}
             />
             {/* Theme-aware overlay with smooth opacity transition */}
             <motion.div
@@ -59,9 +59,9 @@ function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
                 opacity: 0,
               }}
               animate={{
-                opacity: theme === "dark" ? 0.85 : 0.8
+                opacity: theme === "dark" ? 0.85 : 0.8,
               }}
-              transition={{ duration: 0.4, ease: soothingEase, delay: 0.1 }}
+              transition={{ duration: 0.3, ease: soothingEase, delay: 0.05 }}
             />
           </motion.div>
         )}

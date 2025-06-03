@@ -72,10 +72,10 @@ export default function DiaryPage() {
   // Handle sequential animation phases
   useEffect(() => {
     if (isSuccess && animationPhase === 'loading') {
-      // Respect reduced motion preferences
-      const loadingDuration = prefersReducedMotion ? 500 : 2500;
-      const welcomeDuration = prefersReducedMotion ? 100 : (entries.length === 0 ? 2000 : 100);
-      const contentDelay = prefersReducedMotion ? 0 : 500;
+      // Respect reduced motion preferences with improved timing
+      const loadingDuration = prefersReducedMotion ? 300 : 1800; // Reduced from 2500ms to 1800ms
+      const welcomeDuration = prefersReducedMotion ? 50 : (entries.length === 0 ? 1200 : 80); // Reduced from 2000ms to 1200ms
+      const contentDelay = prefersReducedMotion ? 0 : 300; // Reduced from 500ms to 300ms
       
       // Phase 1: Loading animation
       const loadingTimer = setTimeout(() => {
@@ -195,7 +195,7 @@ export default function DiaryPage() {
             setCurrentBgImage(imageUrl || null);
           }
         }
-      }, 150); // Debounce for 150ms after scrolling stops
+      }, 100); // Reduced debounce from 150ms to 100ms for more responsive background changes
     };
 
     window.addEventListener('scroll', handleScrollEnd, { passive: true });
@@ -250,7 +250,7 @@ export default function DiaryPage() {
           opacity: animationPhase === 'content' || animationPhase === 'complete' ? 1 : 0,
           y: prefersReducedMotion ? 0 : (animationPhase === 'content' || animationPhase === 'complete' ? 0 : 20)
         }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: "easeOut" }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
       >
         {/* New Entry Card */}
         {showNewEntry && showContent && (
@@ -266,14 +266,14 @@ export default function DiaryPage() {
             className="text-center py-8 sm:py-12 mb-6 sm:mb-8"
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 1, ease: "easeOut", delay: animationPhase === 'welcome' ? 0 : 0.2 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: "easeOut", delay: animationPhase === 'welcome' ? 0 : 0.15 }}
           >
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-border/30">
               <motion.h3
                 className="font-crimson text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3"
                 initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: animationPhase === 'welcome' ? 0.3 : 0.5 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: animationPhase === 'welcome' ? 0.2 : 0.35 }}
               >
                 Welcome to Your Digital Journal
               </motion.h3>
@@ -281,7 +281,7 @@ export default function DiaryPage() {
                 className="text-muted-foreground font-inter leading-relaxed mb-3 sm:mb-4 text-sm sm:text-base"
                 initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: animationPhase === 'welcome' ? 0.6 : 0.8 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: animationPhase === 'welcome' ? 0.4 : 0.55 }}
               >
                 Capture your thoughts, moments, and reflections throughout the
                 day. There's no limit - write as many entries as your heart
@@ -291,7 +291,7 @@ export default function DiaryPage() {
                 className="text-xs sm:text-sm text-muted-foreground/80 font-inter"
                 initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: animationPhase === 'welcome' ? 0.9 : 1.1 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: animationPhase === 'welcome' ? 0.6 : 0.75 }}
               >
                 Tap the + button below to start your first reflection
               </motion.p>
@@ -305,7 +305,7 @@ export default function DiaryPage() {
             className="text-center mb-4 sm:mb-6"
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.3 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
           >
             <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
               <span>
@@ -326,7 +326,7 @@ export default function DiaryPage() {
           <motion.div
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: entries.length === 0 ? 0.5 : 0.2 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: entries.length === 0 ? 0.3 : 0.15 }}
           >
             <InfiniteScroll
               dataLength={entries.length}
@@ -373,9 +373,9 @@ export default function DiaryPage() {
                       initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { 
-                        duration: 0.5, 
+                        duration: 0.4, 
                         ease: "easeOut",
-                        delay: Math.min(index * 0.1, 1.0) // Stagger animations with max delay
+                        delay: Math.min(index * 0.06, 0.6) // Improved stagger: reduced from 0.1s to 0.06s, max delay from 1.0s to 0.6s
                       }}
                       data-image-url={entry.imageUrl || ""}
                       className={`relative transition-colors duration-200 hover:bg-foreground/5 rounded-lg ${
@@ -402,7 +402,7 @@ export default function DiaryPage() {
         <motion.div
           initial={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.4, type: "spring", stiffness: 200 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.25, type: "spring", stiffness: 260, damping: 20 }}
         >
           <FloatingComposeButton
             onClick={() => setShowNewEntry(true)}

@@ -29,34 +29,32 @@ function FloatingThemeToggle() {
               key="moon"
               initial={{ rotate: -180, opacity: 0, scale: 0.5 }}
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
-              exit={{ rotate: 180, opacity: 0, scale: 0.5 }}
-              transition={{ 
-                duration: 0.8, 
+              exit={{ rotate: 180, opacity: 0, scale: 0.5 }}              transition={{ 
+                duration: 0.6, 
                 ease: [0.25, 0.46, 0.45, 0.94],
-                scale: { type: "spring", stiffness: 300, damping: 20 }
+                scale: { type: "spring", stiffness: 320, damping: 25 }
               }}
             >
-              <Moon className="h-5 w-5 sm:h-6 sm:w-6 text-foreground group-hover:text-gentle transition-colors duration-300" />
+              <Moon className="h-5 w-5 sm:h-6 sm:w-6 text-foreground group-hover:text-gentle transition-colors duration-200" />
             </motion.div>
           ) : (
             <motion.div
               key="sun"
               initial={{ rotate: -180, opacity: 0, scale: 0.5 }}
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
-              exit={{ rotate: 180, opacity: 0, scale: 0.5 }}
-              transition={{ 
-                duration: 0.3, 
+              exit={{ rotate: 180, opacity: 0, scale: 0.5 }}              transition={{ 
+                duration: 0.4, 
                 ease: [0.25, 0.46, 0.45, 0.94],
-                scale: { type: "spring", stiffness: 300, damping: 20 }
+                scale: { type: "spring", stiffness: 320, damping: 25 }
               }}
             >
-              <Sun className="h-5 w-5 sm:h-6 sm:w-6 text-foreground group-hover:text-gentle transition-colors duration-300" />
+              <Sun className="h-5 w-5 sm:h-6 sm:w-6 text-foreground group-hover:text-gentle transition-colors duration-200" />
             </motion.div>
           )}
         </AnimatePresence>
         
         {/* Subtle glow effect */}
-        <div className="absolute inset-0 rounded-full bg-gentle/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>      </Button>
+        <div className="absolute inset-0 rounded-full bg-gentle/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>      </Button>
     </motion.div>
   );
 }

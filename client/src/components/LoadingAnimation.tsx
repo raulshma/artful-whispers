@@ -23,7 +23,7 @@ const LoadingAnimation = memo(function LoadingAnimation({ theme, isVisible }: Lo
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={prefersReducedMotion ? { duration: 0.3 } : { duration: 1, ease: soothingEase }}
+          transition={prefersReducedMotion ? { duration: 0.2 } : { duration: 0.8, ease: soothingEase }}
           className={`fixed inset-0 z-50 flex items-center justify-center ${
             theme === 'dark' 
               ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
@@ -35,12 +35,11 @@ const LoadingAnimation = memo(function LoadingAnimation({ theme, isVisible }: Lo
               className="relative mx-auto w-32 h-32 mb-8"
               animate={prefersReducedMotion ? {} : {
                 y: [0, -10, 0],
-              }}
-              transition={prefersReducedMotion ? { duration: 0 } : {
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+              }}                transition={prefersReducedMotion ? { duration: 0 } : {
+                  duration: 1.8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
             >
               {/* Coffee cup */}
               <div 
@@ -54,11 +53,10 @@ const LoadingAnimation = memo(function LoadingAnimation({ theme, isVisible }: Lo
                 className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-12 ${
                   theme === 'dark' ? 'bg-[#5a3d2b]' : 'bg-[#6f4e37]'
                 } rounded-b-2xl origin-bottom`}
-                animate={prefersReducedMotion ? {} : {
-                  scaleY: [1, 0.8, 1],
+                animate={prefersReducedMotion ? {} : {                  scaleY: [1, 0.8, 1],
                 }}
                 transition={prefersReducedMotion ? { duration: 0 } : {
-                  duration: 3,
+                  duration: 2.4,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
@@ -77,12 +75,11 @@ const LoadingAnimation = memo(function LoadingAnimation({ theme, isVisible }: Lo
                     y: -40,
                     opacity: 0,
                     scale: [1, 1.5, 1],
-                  }}
-                  transition={{
-                    duration: 3,
-                    delay: i * 0.5,
+                  }}                  transition={{
+                    duration: 2.5,
+                    delay: i * 0.4,
                     repeat: Infinity,
-                    repeatDelay: 1,
+                    repeatDelay: 0.8,
                     ease: "easeOut",
                   }}
                 />
@@ -92,7 +89,7 @@ const LoadingAnimation = memo(function LoadingAnimation({ theme, isVisible }: Lo
               className="text-center"
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.3, duration: 0.8 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.2, duration: 0.6 }}
             >
               <h2 className={`text-2xl font-light ${
                 theme === 'dark' ? 'text-[#d4b59e]' : 'text-[#4a2d1e]'
@@ -131,9 +128,8 @@ const LoadingAnimation = memo(function LoadingAnimation({ theme, isVisible }: Lo
                 y: [0, -20, 0],
                 x: [0, Math.random() * 20 - 10, 0],
                 opacity: [0.1, 0.2, 0.1],
-              }}
-              transition={{
-                duration: Math.random() * 8 + 8,
+              }}              transition={{
+                duration: Math.random() * 6 + 6,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
