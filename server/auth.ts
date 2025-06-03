@@ -63,12 +63,13 @@ export const auth = betterAuth({
         required: false,
       },
     },
-  },
-  trustedOrigins: [
+  },  trustedOrigins: [
     "http://localhost:5173", // Vite dev server
     "http://localhost:3000", // Alternative port
     "http://localhost:5000", // Alternative port
     "exp://", // Expo development
+    "http://192.168.1.100:5000", // Local network access for mobile
+    "*", // Allow all origins for development (remove in production)
   ],
 });
 

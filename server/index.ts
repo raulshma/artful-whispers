@@ -7,6 +7,37 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+const allowedOrigins = [
+  "http://localhost:5000",
+  "http://localhost:8081",
+  "exp://192.168.0.194:8081",
+];
+// Add CORS middleware for mobile app support
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log(origin);
+
+  if (allowedOrigins.includes(origin!)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 // Add better-auth API routes
 app.all("/api/auth/*", async (req, res) => {
   // Convert Express request to Web API Request
@@ -14,17 +45,20 @@ app.all("/api/auth/*", async (req, res) => {
   const webRequest = new Request(url, {
     method: req.method,
     headers: req.headers as any,
-    body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+    body:
+      req.method !== "GET" && req.method !== "HEAD"
+        ? JSON.stringify(req.body)
+        : undefined,
   });
 
   const response = await auth.handler(webRequest);
-  
+
   // Convert Web API Response to Express response
   res.status(response.status);
   response.headers.forEach((value, key) => {
     res.setHeader(key, value);
   });
-  
+
   const body = await response.text();
   res.send(body);
 });
@@ -83,10 +117,13 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  server.listen(
+    {
+      port,
+      host: "0.0.0.0",
+    },
+    () => {
+      log(`serving on port ${port}`);
+    }
+  );
 })();
