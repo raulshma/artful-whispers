@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -31,6 +31,40 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [currentBgImage, setCurrentBgImage] = useState<string | null>(null);
 
+  // Viewability configuration for background image changes
+  const viewabilityConfigRef = useRef({
+    itemVisiblePercentThreshold: 50,
+    minimumViewTime: 100,
+  });
+
+  const onViewableItemsChangedRef = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      // Find the most visible item overall
+      let mostVisibleItem = viewableItems[0];
+      for (const item of viewableItems) {
+        if (item.percentVisible > mostVisibleItem.percentVisible) {
+          mostVisibleItem = item;
+        }
+      }
+      
+      // Update background image based on the most visible item
+      const newImageUrl = mostVisibleItem.item.imageUrl || null;
+      
+      // Debug logging
+      console.log('Most visible item:', {
+        date: mostVisibleItem.item.date,
+        hasImage: !!mostVisibleItem.item.imageUrl,
+        imageUrl: mostVisibleItem.item.imageUrl,
+        percentVisible: mostVisibleItem.percentVisible
+      });
+      
+      if (newImageUrl !== currentBgImage) {
+        console.log('Updating background from:', currentBgImage, 'to:', newImageUrl);
+        setCurrentBgImage(newImageUrl);
+      }
+    }
+  });
+
   const {
     data,
     fetchNextPage,
@@ -57,10 +91,16 @@ export default function HomeScreen() {
   // Set initial background image when entries change
   useEffect(() => {
     if (entries.length > 0) {
-      const bgImageUrl = entries.find((e) => e.date === today)?.imageUrl ||
-                       entries[0]?.imageUrl ||
+      // Priority order: today's entries with images -> any entry with image -> fallback to null
+      const todayEntriesWithImages = entries.filter(e => e.date === today && e.imageUrl);
+      const entriesWithImages = entries.filter(e => e.imageUrl);
+      
+      const bgImageUrl = todayEntriesWithImages[0]?.imageUrl ||
+                       entriesWithImages[0]?.imageUrl ||
                        null;
       setCurrentBgImage(bgImageUrl);
+    } else {
+      setCurrentBgImage(null);
     }
   }, [entries, today]);
 
@@ -279,6 +319,8 @@ export default function HomeScreen() {
             tintColor={isDark ? '#60a5fa' : '#3b82f6'}
           />
         }
+        onViewableItemsChanged={onViewableItemsChangedRef.current}
+        viewabilityConfig={viewabilityConfigRef.current}
       />
 
       <FloatingComposeButton
