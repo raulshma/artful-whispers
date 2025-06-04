@@ -1,0 +1,101 @@
+import React from 'react';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { useColorScheme } from '@/hooks/useColorScheme';
+
+interface FloatingComposeButtonProps {
+  onPress: () => void;
+  hasEntriesToday?: boolean;
+}
+
+export default function FloatingComposeButton({
+  onPress,
+  hasEntriesToday = false,
+}: FloatingComposeButtonProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={[
+          styles.button,
+          {
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+          }
+        ]}
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
+        <BlurView
+          intensity={isDark ? 30 : 20}
+          style={styles.blurButton}
+          tint={isDark ? 'dark' : 'light'}
+        >
+          <Ionicons 
+            name="add" 
+            size={24} 
+            color={isDark ? '#ffffff' : '#333333'} 
+          />
+          
+          {/* Small indicator for multiple entries */}
+          {hasEntriesToday && (
+            <View style={[
+              styles.indicator,
+              {
+                backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
+                borderColor: isDark ? '#0a0b0d' : '#fffef7',
+              }
+            ]} />
+          )}
+        </BlurView>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    zIndex: 30,
+  },
+  button: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  blurButton: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  indicator: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+  },
+});

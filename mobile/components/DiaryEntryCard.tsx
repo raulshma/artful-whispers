@@ -7,6 +7,9 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { DiaryEntry } from '@/hooks/useDiary';
 
 interface DiaryEntryCardProps {
@@ -36,34 +39,41 @@ export default function DiaryEntryCard({ entry, onPress }: DiaryEntryCardProps) 
       hour12: true,
     });
   };
+  const getMoodIcon = (mood: string | null) => {
+    if (!mood) return 'heart-outline';
 
-  const getMoodEmoji = (mood: string | null) => {
-    if (!mood) return '💭';
-    
-    const moodEmojis: Record<string, string> = {
-      happy: '😊',
-      sad: '😢',
-      excited: '🎉',
-      calm: '😌',
-      anxious: '😰',
-      angry: '😠',
-      grateful: '🙏',
-      confused: '😕',
-      peaceful: '🕊️',
-      energetic: '⚡',
-      tired: '😴',
-      hopeful: '🌟',
-      nostalgic: '🌅',
-      content: '😌',
-      frustrated: '😤',
-      inspired: '💡',
-      melancholy: '🌧️',
-      joyful: '✨',
-      reflective: '🤔',
-      motivated: '🔥',
-    };
-    
-    return moodEmojis[mood.toLowerCase()] || '💭';
+    switch (mood.toLowerCase()) {
+      case 'peaceful':
+      case 'calm':
+        return 'leaf-outline';
+      case 'contemplative':
+      case 'reflective':
+        return 'water-outline';
+      case 'cozy':
+      case 'comfortable':
+        return 'book-outline';
+      case 'happy':
+      case 'joyful':
+        return 'happy-outline';
+      case 'excited':
+        return 'flash-outline';
+      case 'grateful':
+        return 'heart-outline';
+      case 'energetic':
+        return 'flash-outline';
+      case 'hopeful':
+        return 'sunny-outline';
+      case 'inspired':
+        return 'bulb-outline';
+      default:
+        return 'heart-outline';
+    }
+  };
+
+  const getReadTime = (content: string) => {
+    const words = content.split(' ').length;
+    const readTime = Math.max(1, Math.ceil(words / 200)); // Average reading speed
+    return `${readTime} min read`;
   };
 
   const parseEmotions = (emotions: string | null): string[] => {
@@ -74,65 +84,136 @@ export default function DiaryEntryCard({ entry, onPress }: DiaryEntryCardProps) 
       return [];
     }
   };
-
   const emotions = parseEmotions(entry.emotions);
+  const moodIcon = getMoodIcon(entry.mood);
+  const displayMood = entry.mood || 'Reflective';
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-      {entry.imageUrl && (
-        <Image source={{ uri: entry.imageUrl }} style={styles.image} />
-      )}
-      
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title} numberOfLines={1}>
-              {entry.title || 'Untitled Entry'}
-            </Text>
-            {entry.mood && (
-              <Text style={styles.moodEmoji}>
-                {getMoodEmoji(entry.mood)}
-              </Text>
-            )}
-          </View>
-          
-          <View style={styles.dateContainer}>
-            <Text style={styles.date}>{formatDate(entry.createdAt)}</Text>
-            <Text style={styles.time}>{formatTime(entry.createdAt)}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.excerpt} numberOfLines={3}>
-          {entry.content}
-        </Text>
-
-        {emotions.length > 0 && (
-          <View style={styles.emotionsContainer}>
-            {emotions.slice(0, 3).map((emotion, index) => (
-              <View key={index} style={styles.emotionTag}>
-                <Text style={styles.emotionText}>
-                  {emotion}
+    <View style={[
+      styles.card,
+      {
+        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+      }
+    ]}>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
+        <BlurView
+          intensity={isDark ? 20 : 30}
+          style={styles.blurContent}
+          tint={isDark ? 'dark' : 'light'}
+        >
+          {/* Header with mood icon and date */}
+          <View style={styles.header}>
+            <View style={styles.moodContainer}>
+              <View style={[
+                styles.moodIconContainer,
+                {
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                }
+              ]}>
+                <Ionicons 
+                  name={moodIcon as any} 
+                  size={16} 
+                  color={isDark ? '#60a5fa' : '#3b82f6'} 
+                />
+              </View>
+              <View style={styles.dateTimeContainer}>
+                <Text style={[
+                  styles.date,
+                  { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
+                ]}>
+                  {formatDate(entry.date)}
+                </Text>
+                <View style={styles.timeRow}>
+                  <View style={[
+                    styles.timeChip,
+                    {
+                      backgroundColor: isDark ? 'rgba(96, 165, 250, 0.2)' : 'rgba(59, 130, 246, 0.1)',
+                    }
+                  ]}>
+                    <Text style={[
+                      styles.time,
+                      { color: isDark ? '#60a5fa' : '#3b82f6' }
+                    ]}>
+                      {formatTime(entry.createdAt)}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[
+                  styles.mood,
+                  { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
+                ]}>
+                  {displayMood}
+                  {emotions.length > 0 && ` • ${emotions.slice(0, 2).join(', ')}`}
                 </Text>
               </View>
-            ))}
-            {emotions.length > 3 && (
-              <Text style={styles.moreEmotions}>
-                +{emotions.length - 3} more
-              </Text>
+            </View>
+          </View>
+
+          {/* Title */}
+          <Text style={[
+            styles.title,
+            { color: isDark ? '#ffffff' : '#1f2937' }
+          ]}>
+            {entry.title || 'Untitled Entry'}
+          </Text>
+
+          {/* Content excerpt */}
+          <View style={styles.contentContainer}>
+            {entry.content.split('\n').map((paragraph, index) => 
+              paragraph.trim() && (
+                <Text
+                  key={index}
+                  style={[
+                    styles.content,
+                    { color: isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)' }
+                  ]}
+                  numberOfLines={paragraph === entry.content.split('\n')[0] ? 3 : 1}
+                >
+                  {paragraph}
+                </Text>
+              )
             )}
           </View>
-        )}
-      </View>
-    </TouchableOpacity>
+
+          {/* Footer with read time and actions */}
+          <View style={styles.footer}>
+            <View style={styles.actions}>
+              <TouchableOpacity style={styles.actionButton}>
+                <Ionicons 
+                  name="heart-outline" 
+                  size={16} 
+                  color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'} 
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton}>
+                <Ionicons 
+                  name="share-outline" 
+                  size={16} 
+                  color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'} 
+                />
+              </TouchableOpacity>
+            </View>
+            <Text style={[
+              styles.readTime,
+              { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
+            ]}>
+              {getReadTime(entry.content)}
+            </Text>
+          </View>
+        </BlurView>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
     borderRadius: 16,
     marginHorizontal: 20,
-    marginVertical: 8,
+    marginVertical: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -142,78 +223,85 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     overflow: 'hidden',
+    borderWidth: 1,
   },
-  image: {
-    width: '100%',
-    height: 180,
-    resizeMode: 'cover',
+  touchable: {
+    flex: 1,
   },
-  content: {
+  blurContent: {
     padding: 16,
   },
   header: {
+    marginBottom: 16,
+  },
+  moodContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    gap: 12,
   },
-  titleContainer: {
-    flex: 1,
-    flexDirection: 'row',
+  moodIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+  dateTimeContainer: {
     flex: 1,
-  },
-  moodEmoji: {
-    fontSize: 20,
-    marginLeft: 8,
-  },
-  dateContainer: {
-    alignItems: 'flex-end',
+    gap: 4,
   },
   date: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 14,
     fontWeight: '500',
   },
-  time: {
-    fontSize: 11,
-    color: '#999',
-    marginTop: 2,
-  },
-  excerpt: {
-    fontSize: 14,
-    color: '#555',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  emotionsContainer: {
+  timeRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
-  emotionTag: {
-    backgroundColor: '#f0f9ff',
-    borderRadius: 12,
+  timeChip: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: '#e0f2fe',
+    borderRadius: 12,
   },
-  emotionText: {
-    fontSize: 11,
-    color: '#0369a1',
+  time: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  mood: {
+    fontSize: 12,
+    textTransform: 'capitalize',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 12,
+    lineHeight: 28,
+  },
+  contentContainer: {
+    marginBottom: 16,
+    gap: 8,
+  },
+  content: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'justify',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  actionButton: {
+    padding: 8,
+    borderRadius: 20,
+  },
+  readTime: {
+    fontSize: 12,
     fontWeight: '500',
-  },
-  moreEmotions: {
-    fontSize: 11,
-    color: '#999',
-    fontStyle: 'italic',
   },
 });
