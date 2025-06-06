@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import sharp from "sharp";
 import {
   insertDiaryEntrySchema,
   updateUserProfileSchema,
@@ -385,13 +386,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (imageData) {
             try {
               // Convert base64 to buffer
-              const buffer = Buffer.from(imageData, "base64");
+              // Convert base64 to buffer
+              const originalBuffer = Buffer.from(imageData, "base64");
+              
+              // Compress image using sharp
+              const compressedBuffer = await sharp(originalBuffer)
+                .png({ quality: 90, compressionLevel: 9 })
+                .toBuffer();
               
               // Generate a unique filename based on entry ID and timestamp
               const filename = `diary-${entry.id}-${Date.now()}.png`;
               
-              // Upload to Vercel Blob
-              const { url } = await put(filename, buffer, {
+              // Upload compressed image to Vercel Blob
+              const { url } = await put(filename, compressedBuffer, {
                 access: 'public',
                 contentType: 'image/png'
                 // Removed metadata as it's not supported by Vercel Blob

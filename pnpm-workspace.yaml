@@ -3,3 +3,4 @@ onlyBuiltDependencies:
   - bufferutil
   - es5-ext
   - esbuild
+  - sharp
