@@ -31,10 +31,15 @@ export default function DiaryPage() {
   
   // Sequential animation states
   const location = useLocation();
-  const skipLoading = location.state?.skipLoading;
-  const [animationPhase, setAnimationPhase] = useState<'loading' | 'welcome' | 'content' | 'complete'>(
-    skipLoading ? 'content' : 'loading'
-  );
+  const [fromProfile, setFromProfile] = useState(location.state?.skipLoading === true);
+  const [animationPhase, setAnimationPhase] = useState<'loading' | 'welcome' | 'content' | 'complete'>('loading');
+
+  // Reset location state after using it
+  useEffect(() => {
+    if (location.state?.skipLoading) {
+      window.history.replaceState({}, '');
+    }
+  }, [location]);
   const [showContent, setShowContent] = useState(false);
   const [isInitialEntryLoad, setIsInitialEntryLoad] = useState(true);
   
@@ -77,20 +82,22 @@ export default function DiaryPage() {
     onIntersect: handleIntersection,
   });
 
-  // Handle sequential animation phases
+  // Handle immediate completion when coming from profile
   useEffect(() => {
-    if (skipLoading) {
-      // When coming back from profile, immediately show content
+    if (fromProfile && isSuccess) {
       setShowContent(true);
       setAnimationPhase('complete');
-      return;
+      setFromProfile(false); // Reset the flag
     }
+  }, [fromProfile, isSuccess]);
 
-    if (isSuccess && animationPhase === 'loading') {
+  // Handle sequential animation phases
+  useEffect(() => {
+    if (isSuccess && animationPhase === 'loading' && !fromProfile) {
       // Respect reduced motion preferences with improved timing
-      const loadingDuration = prefersReducedMotion ? 300 : 1800; // Reduced from 2500ms to 1800ms
-      const welcomeDuration = prefersReducedMotion ? 50 : (entries.length === 0 ? 1200 : 80); // Reduced from 2000ms to 1200ms
-      const contentDelay = prefersReducedMotion ? 0 : 300; // Reduced from 500ms to 300ms
+      const loadingDuration = prefersReducedMotion ? 300 : 1800;
+      const welcomeDuration = prefersReducedMotion ? 50 : (entries.length === 0 ? 1200 : 80);
+      const contentDelay = prefersReducedMotion ? 0 : 300;
       
       // Phase 1: Loading animation
       const loadingTimer = setTimeout(() => {
