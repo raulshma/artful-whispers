@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { signIn, signUp } from '@/lib/auth';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
+import { config } from '@/config';
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -11,11 +13,27 @@ export default function AuthScreen() {
   const [name, setName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();  const handleAuth = async () => {
+  const router = useRouter();
+  const { refreshAuth, isAuthenticated, user } = useAuth();
+
+  // Debug effect to log platform and config info
+  useEffect(() => {
+    console.log('🐛 Auth Screen Debug Info:');
+    console.log('Platform:', Platform.OS);
+    console.log('API Base URL:', config.API_BASE_URL);
+    console.log('Is Authenticated:', isAuthenticated);
+    console.log('User:', user);
+  }, [isAuthenticated, user]);
+
+  const handleAuth = async () => {
     if (!email || !password || (isSignUp && !name)) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
+
+    console.log('🔐 Starting authentication process...');
+    console.log('Platform:', Platform.OS);
+    console.log('API URL:', config.API_BASE_URL);
 
     setIsLoading(true);
     try {
@@ -35,8 +53,15 @@ export default function AuthScreen() {
           password,
         });
         console.log('Sign in successful:', result);
-        // Don't navigate immediately - let the AuthContext handle the redirect
-        // The ProtectedRoute will automatically redirect once the session is updated
+        
+        // Force refresh the auth context to get the updated session
+        console.log('Refreshing auth context...');
+        await refreshAuth();
+        
+        // Small delay to ensure session is updated
+        setTimeout(() => {
+          console.log('Auth refresh completed, context should handle navigation');
+        }, 100);
       }
     } catch (error: any) {
       console.error('Auth error:', error);
@@ -54,6 +79,11 @@ export default function AuthScreen() {
       <ThemedView style={styles.content}>
         <ThemedText type="title" style={styles.title}>
           {isSignUp ? 'Sign Up' : 'Sign In'}
+        </ThemedText>
+        
+        {/* Debug info */}
+        <ThemedText style={styles.debugText}>
+          Platform: {Platform.OS} | API: {config.API_BASE_URL.substring(0, 25)}...
         </ThemedText>
         
         {isSignUp && (
@@ -115,6 +145,12 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     marginBottom: 30,
+  },
+  debugText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 20,
+    opacity: 0.7,
   },
   input: {
     height: 50,

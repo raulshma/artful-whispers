@@ -51,9 +51,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Failed to sign out:', error);
     }
-  };
-  useEffect(() => {
+  };  useEffect(() => {
     console.log('Session effect - isPending:', isPending, 'session:', session, 'error:', error);
+    console.log('Platform:', require('react-native').Platform.OS);
+    
     if (!isPending) {
       if (session?.user) {
         console.log('Setting user:', session.user);
@@ -66,25 +67,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       setIsLoading(true);
     }
-  }, [session, isPending, error]);
-  // Handle navigation based on authentication state
+  }, [session, isPending, error]);  // Handle navigation based on authentication state
   useEffect(() => {
     console.log('Navigation effect - isLoading:', isLoading, 'user:', !!user, 'segments:', segments);
     if (isLoading) return; // Don't navigate while loading
 
     const inAuthGroup = segments[0] === '(tabs)';
     const isAuthenticated = !!user;
+    const onAuthScreen = segments[0] === 'auth' || segments.some((segment: string) => segment === 'auth');
 
-    console.log('Navigation state - inAuthGroup:', inAuthGroup, 'isAuthenticated:', isAuthenticated);
+    console.log('Navigation state - inAuthGroup:', inAuthGroup, 'isAuthenticated:', isAuthenticated, 'onAuthScreen:', onAuthScreen);
 
-    if (isAuthenticated && !inAuthGroup) {
-      // User is authenticated but not in the main app, redirect to tabs
-      console.log('Redirecting authenticated user to tabs');
+    // Only handle redirecting authenticated users to the main app
+    // Let ProtectedRoute handle redirecting unauthenticated users to auth
+    if (isAuthenticated && onAuthScreen) {
+      console.log('Redirecting authenticated user from auth to tabs');
       router.replace('/(tabs)');
-    } else if (!isAuthenticated && inAuthGroup) {
-      // User is not authenticated but trying to access protected routes, redirect to auth
-      console.log('Redirecting unauthenticated user to auth');
-      router.replace('/auth');
     }
   }, [user, segments, isLoading]);
 

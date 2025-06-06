@@ -4,6 +4,11 @@ import { Platform } from 'react-native';
 const getLocalIP = (): string => {
   if (!__DEV__) return "https://your-production-url.com";
   
+  // For web, use localhost
+  if (Platform.OS === 'web') {
+    return "http://localhost:5000";
+  }
+  
   // For Android, check if we should use emulator IP or physical device IP
   if (Platform.OS === 'android') {
     // Use environment variable to override, otherwise default to emulator IP
@@ -35,5 +40,11 @@ if (__DEV__) {
   }
   if (process.env.EXPO_PUBLIC_ANDROID_IP) {
     console.log('🤖 Android IP (env):', process.env.EXPO_PUBLIC_ANDROID_IP);
+  }
+  
+  // Web-specific debugging
+  if (Platform.OS === 'web') {
+    console.log('🌐 Web platform detected, using localhost:5000');
+    console.log('🔍 Current URL:', typeof window !== 'undefined' ? window.location.href : 'N/A');
   }
 }

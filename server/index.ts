@@ -10,13 +10,21 @@ app.use(express.urlencoded({ extended: false }));
 const allowedOrigins = [
   "http://localhost:5000",
   "http://localhost:8081",
+  "http://localhost:19006", // Default Expo web port
   "exp://192.168.0.194:8081",
+  "exp://localhost:8081",
 ];
 // Add CORS middleware for mobile app support
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  console.log(`🌐 CORS check - Origin: ${origin}, Path: ${req.path}`);
+  
   if (allowedOrigins.includes(origin!)) {
     res.header("Access-Control-Allow-Origin", origin);
+    console.log(`✅ CORS allowed for origin: ${origin}`);
+  } else {
+    console.log(`❌ CORS not allowed for origin: ${origin}`);
+    console.log(`📝 Allowed origins:`, allowedOrigins);
   }
 
   res.header(
@@ -30,6 +38,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
+    console.log(`🔄 CORS preflight for ${req.path}`);
     res.sendStatus(200);
   } else {
     next();
