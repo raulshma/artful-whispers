@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useInfiniteEntries } from "@/hooks/useInfiniteEntries";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
@@ -29,7 +30,11 @@ export default function DiaryPage() {
   const favoriteToggle = useFavoriteToggle();
   
   // Sequential animation states
-  const [animationPhase, setAnimationPhase] = useState<'loading' | 'welcome' | 'content' | 'complete'>('loading');
+  const location = useLocation();
+  const skipLoading = location.state?.skipLoading;
+  const [animationPhase, setAnimationPhase] = useState<'loading' | 'welcome' | 'content' | 'complete'>(
+    skipLoading ? 'content' : 'loading'
+  );
   const [showContent, setShowContent] = useState(false);
   const [isInitialEntryLoad, setIsInitialEntryLoad] = useState(true);
   
@@ -74,6 +79,13 @@ export default function DiaryPage() {
 
   // Handle sequential animation phases
   useEffect(() => {
+    if (skipLoading) {
+      // When coming back from profile, immediately show content
+      setShowContent(true);
+      setAnimationPhase('complete');
+      return;
+    }
+
     if (isSuccess && animationPhase === 'loading') {
       // Respect reduced motion preferences with improved timing
       const loadingDuration = prefersReducedMotion ? 300 : 1800; // Reduced from 2500ms to 1800ms

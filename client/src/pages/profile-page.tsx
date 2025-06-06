@@ -147,7 +147,7 @@ export default function ProfilePage() {
               variant="ghost"
               size="icon"
               className="h-10 w-10 rounded-full hover:bg-background/80"
-              onClick={() => navigate('/diary')}
+              onClick={() => navigate('/diary', { state: { skipLoading: true } })}
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
