@@ -242,6 +242,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Toggle favorite status for diary entry (protected route)
+  app.patch(
+    "/api/diary-entries/:id/favorite",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const id = parseInt(req.params.id);
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const updatedEntry = await storage.toggleFavorite(id, req.user.id);
+
+        if (!updatedEntry) {
+          return res.status(404).json({ message: "Diary entry not found" });
+        }
+
+        res.json(updatedEntry);
+      } catch (error) {
+        res.status(400).json({ message: "Failed to toggle favorite" });
+      }
+    }
+  );
+
   // Generate lofi-style image URL based on mood and emotions
   function generateLofiImageUrl(mood: string, emotions: string[]): string {
     const lofiKeywords = [

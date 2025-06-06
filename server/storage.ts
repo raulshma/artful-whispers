@@ -16,6 +16,7 @@ export interface IStorage {
   updateDiaryEntry(id: number, updates: Partial<DiaryEntry>): Promise<DiaryEntry | undefined>;
   searchDiaryEntries(userId: string, query: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
   getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]>;
+  toggleFavorite(id: number, userId: string): Promise<DiaryEntry | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -128,6 +129,27 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(diaryEntries.createdAt));
     return entries;
+  }
+
+  async toggleFavorite(id: number, userId: string): Promise<DiaryEntry | undefined> {
+    // First get the current entry to check ownership and current favorite status
+    const [currentEntry] = await db
+      .select()
+      .from(diaryEntries)
+      .where(and(eq(diaryEntries.id, id), eq(diaryEntries.userId, userId)));
+    
+    if (!currentEntry) {
+      return undefined;
+    }
+
+    // Toggle the favorite status
+    const [updatedEntry] = await db
+      .update(diaryEntries)
+      .set({ isFavorite: !currentEntry.isFavorite })
+      .where(eq(diaryEntries.id, id))
+      .returning();
+    
+    return updatedEntry || undefined;
   }
 }
 

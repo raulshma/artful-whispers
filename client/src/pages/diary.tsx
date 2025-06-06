@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useInfiniteEntries } from "@/hooks/useInfiniteEntries";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useFavoriteToggle } from "@/hooks/useFavoriteToggle";
 import TimePrompt from "@/components/TimePrompt";
 import NewEntryCard from "@/components/NewEntryCard";
 import DiaryEntryCard from "@/components/DiaryEntryCard";
@@ -23,6 +24,9 @@ export default function DiaryPage() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [currentBgImage, setCurrentBgImage] = useState<string | null>(null);
+  
+  // Favorite toggle hook
+  const favoriteToggle = useFavoriteToggle();
   
   // Sequential animation states
   const [animationPhase, setAnimationPhase] = useState<'loading' | 'welcome' | 'content' | 'complete'>('loading');
@@ -172,6 +176,11 @@ export default function DiaryPage() {
     todayEntries.length > 0, 
     [todayEntries]
   );
+
+  // Handle favorite toggle
+  const handleToggleFavorite = useCallback(async (entryId: number) => {
+    await favoriteToggle.mutateAsync(entryId);
+  }, [favoriteToggle]);
   return (
     <div className="min-h-screen bg-background mobile-safe-area relative">
       {/* Lazy-loaded Loading Overlay */}
@@ -341,7 +350,10 @@ export default function DiaryPage() {
                       {isMultipleEntry && (
                         <div className="absolute -left-1.5 sm:-left-1.5 top-6 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary/20 rounded-full border border-background"></div>
                       )}
-                      <DiaryEntryCard entry={entry} />
+                      <DiaryEntryCard 
+                        entry={entry} 
+                        onToggleFavorite={handleToggleFavorite}
+                      />
                     </motion.div>
                   );
                 })}

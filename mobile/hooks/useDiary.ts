@@ -10,6 +10,7 @@ export interface DiaryEntry {
   emotions: string | null;
   imageUrl: string | null;
   imagePrompt: string | null;
+  isFavorite?: boolean;
   date: string;
   createdAt: string;
   updatedAt?: string;
@@ -67,14 +68,50 @@ export function useUpdateDiaryEntry() {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateDiaryEntryData }) => {
-      return apiRequest<DiaryEntry>(`/api/diary-entries/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      return await apiRequest<DiaryEntry>(
+        `/api/diary-entries/${id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify(data),
+        }
+      );
     },
     onSuccess: () => {
       // Invalidate and refetch diary entries
       queryClient.invalidateQueries({ queryKey: ['diary-entries'] });
+    },
+  });
+}
+
+export function useFavoriteToggle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (entryId: number): Promise<DiaryEntry> => {
+      return await apiRequest<DiaryEntry>(
+        `/api/diary-entries/${entryId}/favorite`,
+        {
+          method: 'PATCH',
+        }
+      );
+    },
+    onSuccess: (updatedEntry) => {
+      // Update the infinite query cache
+      queryClient.setQueriesData(
+        { queryKey: ['diary-entries'] },
+        (oldData: any) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: DiaryEntry[]) =>
+              page.map((entry) =>
+                entry.id === updatedEntry.id ? updatedEntry : entry
+              )
+            ),
+          };
+        }
+      );
     },
   });
 }

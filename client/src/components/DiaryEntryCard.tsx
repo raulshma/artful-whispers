@@ -1,12 +1,27 @@
-import { Heart, Share, Book, Waves, Leaf } from "lucide-react";
-import { memo } from "react";
+import { Heart, Book, Waves, Leaf } from "lucide-react";
+import { memo, useState } from "react";
 import type { DiaryEntry } from "@shared/schema";
 
 interface DiaryEntryCardProps {
   entry: DiaryEntry;
+  onToggleFavorite?: (id: number) => Promise<void>;
 }
 
-function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
+function DiaryEntryCard({ entry, onToggleFavorite }: DiaryEntryCardProps) {
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+
+  const handleToggleFavorite = async () => {
+    if (!onToggleFavorite || isTogglingFavorite) return;
+
+    setIsTogglingFavorite(true);
+    try {
+      await onToggleFavorite(entry.id);
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
@@ -80,7 +95,6 @@ function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
                 </p>
               </div>
             </div>
-
             <div className="space-y-3 sm:space-y-4">
               <h2 className="font-crimson text-lg sm:text-xl md:text-2xl font-semibold text-text-blue leading-relaxed">
                 {entry.title}
@@ -98,20 +112,32 @@ function DiaryEntryCard({ entry }: DiaryEntryCardProps) {
                     )
                 )}
               </div>
-            </div>
-
+            </div>{" "}
             <div className="flex items-center justify-between mt-4 sm:mt-6 md:mt-8">
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <button className="text-text-blue/60 hover:text-text-blue transition-colors touch-manipulation mobile-touch-target p-2 -m-2 rounded-full hover:bg-background/50">
-                  <Heart size={16} />
-                </button>
-                <button className="text-text-blue/60 hover:text-text-blue transition-colors touch-manipulation mobile-touch-target p-2 -m-2 rounded-full hover:bg-background/50">
-                  <Share size={16} />
-                </button>
-              </div>
-
+              <button
+                onClick={handleToggleFavorite}
+                disabled={isTogglingFavorite}
+                className={`transition-all duration-200 touch-manipulation mobile-touch-target p-2 -m-2 rounded-full hover:bg-background/50 flex items-center justify-center ${
+                  entry.isFavorite
+                    ? "text-red-500 hover:text-red-600"
+                    : "text-text-blue/60 hover:text-text-blue"
+                } ${isTogglingFavorite ? "opacity-50 cursor-not-allowed" : ""}`}
+                aria-label={
+                  entry.isFavorite
+                    ? "Remove from favorites"
+                    : "Add to favorites"
+                }
+              >
+                <Heart
+                  size={16}
+                  className={`transition-all duration-200 ${
+                    entry.isFavorite ? "fill-current" : ""
+                  }`}
+                />
+              </button>
               <div className="text-xs sm:text-sm text-text-blue/50 font-inter">
-                {getReadTime(entry.content)}              </div>
+                {getReadTime(entry.content)}{" "}
+              </div>
             </div>
           </div>
         </div>

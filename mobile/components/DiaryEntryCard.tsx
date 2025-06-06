@@ -15,12 +15,13 @@ import { DiaryEntry } from '@/hooks/useDiary';
 interface DiaryEntryCardProps {
   entry: DiaryEntry;
   onPress?: () => void;
+  onToggleFavorite?: (id: number) => Promise<void>;
 }
 
 const { width } = Dimensions.get('window');
 const cardWidth = width - 40; // 20px margin on each side
 
-export default function DiaryEntryCard({ entry, onPress }: DiaryEntryCardProps) {
+export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: DiaryEntryCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -176,23 +177,17 @@ export default function DiaryEntryCard({ entry, onPress }: DiaryEntryCardProps) 
                 </Text>
               )
             )}
-          </View>
-
-          {/* Footer with read time and actions */}
+          </View>          {/* Footer with read time and actions */}
           <View style={styles.footer}>
             <View style={styles.actions}>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => onToggleFavorite?.(entry.id)}
+              >
                 <Ionicons 
-                  name="heart-outline" 
+                  name={entry.isFavorite ? "heart" : "heart-outline"}
                   size={16} 
-                  color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'} 
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                <Ionicons 
-                  name="share-outline" 
-                  size={16} 
-                  color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'} 
+                  color={entry.isFavorite ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)')} 
                 />
               </TouchableOpacity>
             </View>

@@ -64,6 +64,7 @@ export const diaryEntries = pgTable("diary_entries", {
   emotions: text("emotions"), // JSON string array
   imagePrompt: text("image_prompt"),
   imageUrl: text("image_url"),
+  isFavorite: boolean("is_favorite").default(false),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   date: text("date").notNull(), // YYYY-MM-DD format
