@@ -11,9 +11,7 @@ export default function AuthScreen() {
   const [name, setName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-
-  const handleAuth = async () => {
+  const router = useRouter();  const handleAuth = async () => {
     if (!email || !password || (isSignUp && !name)) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -22,20 +20,26 @@ export default function AuthScreen() {
     setIsLoading(true);
     try {
       if (isSignUp) {
+        console.log('Attempting sign up...');
         await signUp.email({
           email,
           password,
           name,
         });
         Alert.alert('Success', 'Account created successfully!');
+        // Don't navigate immediately for sign up, let user sign in
       } else {
-        await signIn.email({
+        console.log('Attempting sign in...');
+        const result = await signIn.email({
           email,
           password,
         });
+        console.log('Sign in successful:', result);
+        // Don't navigate immediately - let the AuthContext handle the redirect
+        // The ProtectedRoute will automatically redirect once the session is updated
       }
-      router.replace('/(tabs)');
     } catch (error: any) {
+      console.error('Auth error:', error);
       Alert.alert('Error', error.message || 'Authentication failed');
     } finally {
       setIsLoading(false);

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSession } from '../lib/auth';
+import { useRouter, useSegments } from 'expo-router';
 
 interface User {
   id: string;
@@ -34,6 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, isPending, error, refetch } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const segments = useSegments();
 
   const refreshAuth = async () => {
     // Use better-auth's built-in refetch to refresh the session
@@ -49,12 +52,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Failed to sign out:', error);
     }
   };
-
   useEffect(() => {
+    console.log('Session effect - isPending:', isPending, 'session:', session, 'error:', error);
     if (!isPending) {
       if (session?.user) {
+        console.log('Setting user:', session.user);
         setUser(session.user as User);
       } else {
+        console.log('Clearing user');
         setUser(null);
       }
       setIsLoading(false);
@@ -62,6 +67,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
     }
   }, [session, isPending, error]);
+  // Handle navigation based on authentication state
+  useEffect(() => {
+    console.log('Navigation effect - isLoading:', isLoading, 'user:', !!user, 'segments:', segments);
+    if (isLoading) return; // Don't navigate while loading
+
+    const inAuthGroup = segments[0] === '(tabs)';
+    const isAuthenticated = !!user;
+
+    console.log('Navigation state - inAuthGroup:', inAuthGroup, 'isAuthenticated:', isAuthenticated);
+
+    if (isAuthenticated && !inAuthGroup) {
+      // User is authenticated but not in the main app, redirect to tabs
+      console.log('Redirecting authenticated user to tabs');
+      router.replace('/(tabs)');
+    } else if (!isAuthenticated && inAuthGroup) {
+      // User is not authenticated but trying to access protected routes, redirect to auth
+      console.log('Redirecting unauthenticated user to auth');
+      router.replace('/auth');
+    }
+  }, [user, segments, isLoading]);
 
   const value: AuthContextType = {
     user,

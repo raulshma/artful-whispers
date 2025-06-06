@@ -10,12 +10,6 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-  React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/auth' as any);
-    }
-  }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (
@@ -26,7 +20,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <ThemedView style={styles.container}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </ThemedView>
+    );
   }
 
   return <>{children}</>;
