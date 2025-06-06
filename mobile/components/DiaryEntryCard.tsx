@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -40,6 +41,7 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
       hour12: true,
     });
   };
+
   const getMoodIcon = (mood: string | null) => {
     if (!mood) return 'heart-outline';
 
@@ -85,11 +87,112 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
       return [];
     }
   };
+
   const emotions = parseEmotions(entry.emotions);
   const moodIcon = getMoodIcon(entry.mood);
   const displayMood = entry.mood || 'Reflective';
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+
+  const renderCardContent = () => (
+    <>
+      {/* Header with mood icon and date */}
+      <View style={styles.header}>
+        <View style={styles.moodContainer}>
+          <View style={[
+            styles.moodIconContainer,
+            {
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+            }
+          ]}>
+            <Ionicons 
+              name={moodIcon as any} 
+              size={16} 
+              color={isDark ? '#60a5fa' : '#3b82f6'} 
+            />
+          </View>
+          <View style={styles.dateTimeContainer}>
+            <Text style={[
+              styles.date,
+              { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
+            ]}>
+              {formatDate(entry.date)}
+            </Text>
+            <View style={styles.timeRow}>
+              <View style={[
+                styles.timeChip,
+                {
+                  backgroundColor: isDark ? 'rgba(96, 165, 250, 0.2)' : 'rgba(59, 130, 246, 0.1)',
+                }
+              ]}>
+                <Text style={[
+                  styles.time,
+                  { color: isDark ? '#60a5fa' : '#3b82f6' }
+                ]}>
+                  {formatTime(entry.createdAt)}
+                </Text>
+              </View>
+            </View>
+            <Text style={[
+              styles.mood,
+              { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
+            ]}>
+              {displayMood}
+              {emotions.length > 0 && ` • ${emotions.slice(0, 2).join(', ')}`}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Title */}
+      <Text style={[
+        styles.title,
+        { color: isDark ? '#ffffff' : '#1f2937' }
+      ]}>
+        {entry.title || 'Untitled Entry'}
+      </Text>
+
+      {/* Content excerpt */}
+      <View style={styles.contentContainer}>
+        {entry.content.split('\n').map((paragraph, index) => 
+          paragraph.trim() && (
+            <Text
+              key={index}
+              style={[
+                styles.content,
+                { color: isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)' }
+              ]}
+              numberOfLines={paragraph === entry.content.split('\n')[0] ? 3 : 1}
+            >
+              {paragraph}
+            </Text>
+          )
+        )}
+      </View>
+
+      {/* Footer with read time and actions */}
+      <View style={styles.footer}>
+        <View style={styles.actions}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => onToggleFavorite?.(entry.id)}
+          >
+            <Ionicons 
+              name={entry.isFavorite ? "heart" : "heart-outline"}
+              size={16} 
+              color={entry.isFavorite ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)')} 
+            />
+          </TouchableOpacity>
+        </View>
+        <Text style={[
+          styles.readTime,
+          { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
+        ]}>
+          {getReadTime(entry.content)}
+        </Text>
+      </View>
+    </>
+  );
 
   return (
     <View style={[
@@ -100,105 +203,34 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
       }
     ]}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
-        <BlurView
-          intensity={isDark ? 20 : 30}
-          style={styles.blurContent}
-          tint={isDark ? 'dark' : 'light'}
-        >
-          {/* Header with mood icon and date */}
-          <View style={styles.header}>
-            <View style={styles.moodContainer}>
-              <View style={[
-                styles.moodIconContainer,
-                {
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-                }
-              ]}>
-                <Ionicons 
-                  name={moodIcon as any} 
-                  size={16} 
-                  color={isDark ? '#60a5fa' : '#3b82f6'} 
-                />
-              </View>
-              <View style={styles.dateTimeContainer}>
-                <Text style={[
-                  styles.date,
-                  { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
-                ]}>
-                  {formatDate(entry.date)}
-                </Text>
-                <View style={styles.timeRow}>
-                  <View style={[
-                    styles.timeChip,
-                    {
-                      backgroundColor: isDark ? 'rgba(96, 165, 250, 0.2)' : 'rgba(59, 130, 246, 0.1)',
-                    }
-                  ]}>
-                    <Text style={[
-                      styles.time,
-                      { color: isDark ? '#60a5fa' : '#3b82f6' }
-                    ]}>
-                      {formatTime(entry.createdAt)}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={[
-                  styles.mood,
-                  { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
-                ]}>
-                  {displayMood}
-                  {emotions.length > 0 && ` • ${emotions.slice(0, 2).join(', ')}`}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Title */}
-          <Text style={[
-            styles.title,
-            { color: isDark ? '#ffffff' : '#1f2937' }
-          ]}>
-            {entry.title || 'Untitled Entry'}
-          </Text>
-
-          {/* Content excerpt */}
-          <View style={styles.contentContainer}>
-            {entry.content.split('\n').map((paragraph, index) => 
-              paragraph.trim() && (
-                <Text
-                  key={index}
-                  style={[
-                    styles.content,
-                    { color: isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)' }
-                  ]}
-                  numberOfLines={paragraph === entry.content.split('\n')[0] ? 3 : 1}
-                >
-                  {paragraph}
-                </Text>
-              )
-            )}
-          </View>          {/* Footer with read time and actions */}
-          <View style={styles.footer}>
-            <View style={styles.actions}>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={() => onToggleFavorite?.(entry.id)}
-              >
-                <Ionicons 
-                  name={entry.isFavorite ? "heart" : "heart-outline"}
-                  size={16} 
-                  color={entry.isFavorite ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)')} 
-                />
-              </TouchableOpacity>
-            </View>
-            <Text style={[
-              styles.readTime,
-              { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
-            ]}>
-              {getReadTime(entry.content)}
-            </Text>
-          </View>
-        </BlurView>
+        {entry.imageUrl ? (
+          <ImageBackground
+            source={{ uri: entry.imageUrl }}
+            style={styles.backgroundImage}
+            resizeMode="cover"
+          >
+            <BlurView
+              intensity={isDark ? 85 : 80}
+              style={styles.imageBlurOverlay}
+              tint={isDark ? 'dark' : 'light'}
+            />
+            <BlurView
+              intensity={isDark ? 20 : 30}
+              style={styles.blurContent}
+              tint={isDark ? 'dark' : 'light'}
+            >
+              {renderCardContent()}
+            </BlurView>
+          </ImageBackground>
+        ) : (
+          <BlurView
+            intensity={isDark ? 20 : 30}
+            style={styles.blurContent}
+            tint={isDark ? 'dark' : 'light'}
+          >
+            {renderCardContent()}
+          </BlurView>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -223,8 +255,19 @@ const styles = StyleSheet.create({
   touchable: {
     flex: 1,
   },
+  backgroundImage: {
+    flex: 1,
+  },
+  imageBlurOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   blurContent: {
     padding: 16,
+    flex: 1,
   },
   header: {
     marginBottom: 16,

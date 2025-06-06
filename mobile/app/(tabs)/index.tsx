@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,7 +16,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useInfiniteDiaryEntries } from '@/hooks/useDiary';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import DiaryEntryCard from '@/components/DiaryEntryCard';
-import DiaryBackground from '@/components/DiaryBackground';
 import FloatingComposeButton from '@/components/FloatingComposeButton';
 import NewEntryForm from '@/components/NewEntryForm';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,44 +25,8 @@ import { BlurView } from 'expo-blur';
 export default function HomeScreen() {
   const { user } = useAuth();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const [showNewEntry, setShowNewEntry] = useState(false);
+  const isDark = colorScheme === 'dark';  const [showNewEntry, setShowNewEntry] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentBgImage, setCurrentBgImage] = useState<string | null>(null);
-
-  // Viewability configuration for background image changes
-  const viewabilityConfigRef = useRef({
-    itemVisiblePercentThreshold: 50,
-    minimumViewTime: 100,
-  });
-
-  const onViewableItemsChangedRef = useRef(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
-      // Find the most visible item overall
-      let mostVisibleItem = viewableItems[0];
-      for (const item of viewableItems) {
-        if (item.percentVisible > mostVisibleItem.percentVisible) {
-          mostVisibleItem = item;
-        }
-      }
-      
-      // Update background image based on the most visible item
-      const newImageUrl = mostVisibleItem.item.imageUrl || null;
-      
-      // Debug logging
-      console.log('Most visible item:', {
-        date: mostVisibleItem.item.date,
-        hasImage: !!mostVisibleItem.item.imageUrl,
-        imageUrl: mostVisibleItem.item.imageUrl,
-        percentVisible: mostVisibleItem.percentVisible
-      });
-      
-      if (newImageUrl !== currentBgImage) {
-        console.log('Updating background from:', currentBgImage, 'to:', newImageUrl);
-        setCurrentBgImage(newImageUrl);
-      }
-    }
-  });
 
   const {
     data,
@@ -85,24 +48,7 @@ export default function HomeScreen() {
   // Memoized today's entries
   const todayEntries = useMemo(() => 
     entries.filter(entry => entry.date === today), 
-    [entries, today]
-  );
-
-  // Set initial background image when entries change
-  useEffect(() => {
-    if (entries.length > 0) {
-      // Priority order: today's entries with images -> any entry with image -> fallback to null
-      const todayEntriesWithImages = entries.filter(e => e.date === today && e.imageUrl);
-      const entriesWithImages = entries.filter(e => e.imageUrl);
-      
-      const bgImageUrl = todayEntriesWithImages[0]?.imageUrl ||
-                       entriesWithImages[0]?.imageUrl ||
-                       null;
-      setCurrentBgImage(bgImageUrl);
-    } else {
-      setCurrentBgImage(null);
-    }
-  }, [entries, today]);
+    [entries, today]  );
 
   // Refresh data when screen comes into focus
   useFocusEffect(
@@ -186,11 +132,9 @@ export default function HomeScreen() {
     </View>
   );
 
-  if (isLoading) {
-    return (
+  if (isLoading) {    return (
       <View style={[styles.container, { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }]}>
         <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-        <DiaryBackground imageUrl={null} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator 
             size="large" 
@@ -207,11 +151,9 @@ export default function HomeScreen() {
     );
   }
 
-  if (isError) {
-    return (
+  if (isError) {    return (
       <View style={[styles.container, { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }]}>
         <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-        <DiaryBackground imageUrl={null} />
         <View style={styles.errorContainer}>
           <Ionicons 
             name="alert-circle-outline" 
@@ -243,11 +185,9 @@ export default function HomeScreen() {
       </View>
     );
   }
-
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <DiaryBackground imageUrl={currentBgImage} />
       
       {/* Header with greeting */}
       <BlurView
@@ -310,8 +250,7 @@ export default function HomeScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
+        ListEmptyComponent={renderEmptyState}        refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
@@ -319,8 +258,6 @@ export default function HomeScreen() {
             tintColor={isDark ? '#60a5fa' : '#3b82f6'}
           />
         }
-        onViewableItemsChanged={onViewableItemsChangedRef.current}
-        viewabilityConfig={viewabilityConfigRef.current}
       />
 
       <FloatingComposeButton
