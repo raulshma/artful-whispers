@@ -13,7 +13,6 @@ import FloatingProfileButton from "@/components/FloatingProfileButton";
 import FloatingThemeToggle from "@/components/FloatingThemeToggle"
 import DiaryBackground from "@/components/DiaryBackground";
 import InfiniteScroll from "react-infinite-scroll-component";
-import type { DiaryEntry } from "@shared/schema";
 import { motion } from "framer-motion";
 
 // Lazy load the heavy loading animation
