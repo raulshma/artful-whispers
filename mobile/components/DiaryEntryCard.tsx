@@ -145,7 +145,7 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
         { color: theme.colors.text }
       ]}>
         {entry.title || 'Untitled Entry'}
-      </Text>      {/* Content excerpt */}
+      </Text>      {/* Complete content */}
       <View style={styles.contentContainer}>
         {entry.content.split('\n').map((paragraph, index) => {
           if (!paragraph.trim()) return null;
@@ -156,7 +156,6 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
                 styles.content,
                 { color: theme.colors.text }
               ]}
-              numberOfLines={paragraph === entry.content.split('\n')[0] ? 3 : 1}
             >
               {paragraph}
             </Text>
@@ -194,8 +193,7 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
         backgroundColor: theme.colors.card,
         borderColor: theme.colors.border,
       }
-    ]}>
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
+    ]}>      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
         {entry.imageUrl ? (
           <ImageBackground
             source={{ uri: entry.imageUrl }}
@@ -203,26 +201,30 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
             resizeMode="cover"
           >
             <BlurView
-              intensity={theme.isDark ? 85 : 80}
+              intensity={theme.isDark ? 60 : 70}
               style={styles.imageBlurOverlay}
               tint={theme.isDark ? 'dark' : 'light'}
             />
-            <BlurView
-              intensity={theme.isDark ? 20 : 30}
-              style={styles.blurContent}
-              tint={theme.isDark ? 'dark' : 'light'}
-            >
+            <View style={[
+              styles.contentOverlay,
+              {
+                backgroundColor: theme.isDark 
+                  ? 'rgba(0, 0, 0, 0.6)' 
+                  : 'rgba(255, 255, 255, 0.65)',
+              }
+            ]}>
               {renderCardContent()}
-            </BlurView>
+            </View>
           </ImageBackground>
         ) : (
-          <BlurView
-            intensity={theme.isDark ? 20 : 30}
-            style={styles.blurContent}
-            tint={theme.isDark ? 'dark' : 'light'}
-          >
+          <View style={[
+            styles.plainContent,
+            {
+              backgroundColor: theme.colors.card,
+            }
+          ]}>
             {renderCardContent()}
-          </BlurView>
+          </View>
         )}
       </TouchableOpacity>
     </View>
@@ -231,17 +233,9 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
+    borderRadius: 12,
     marginHorizontal: 20,
     marginVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
     overflow: 'hidden',
     borderWidth: 1,
   },
@@ -250,15 +244,18 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-  },
-  imageBlurOverlay: {
+  },  imageBlurOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
-  blurContent: {
+  contentOverlay: {
+    padding: 16,
+    flex: 1,
+  },
+  plainContent: {
     padding: 16,
     flex: 1,
   },
@@ -308,15 +305,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
     lineHeight: 28,
-  },
-  contentContainer: {
+  },  contentContainer: {
     marginBottom: 16,
-    gap: 8,
-  },
-  content: {
+  },content: {
     fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'justify',
+    lineHeight: 24,
+    textAlign: 'left',
+    marginBottom: 8,
   },
   footer: {
     flexDirection: 'row',
