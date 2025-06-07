@@ -349,28 +349,28 @@ const styles = StyleSheet.create({
   // Compact calendar styles
   compactContainer: {
     backgroundColor: 'transparent',
-  },
-  compactHeader: {
-    fontSize: 12,
+  },  compactHeader: {
+    fontSize: 10,
     fontWeight: '500',
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: 'center',
-  },
-  compactCalendar: {
+  },compactCalendar: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    maxWidth: 150, // Constrain width to fit in stat cards
   },
   compactDayCell: {
     width: '14.28%',
     aspectRatio: 1,
-    margin: 1,
-    borderRadius: 2,
+    margin: 0.5, // Reduce margin for tighter layout
+    borderRadius: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    minWidth: 8, // Ensure minimum size
   },
   compactMoodDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
   },
 });

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Text,
   RefreshControl,
+  Dimensions,
 } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -47,6 +48,14 @@ export default function JournalStatsScreen() {
   const { theme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Calculate available width for charts in stat cards
+  const screenWidth = Dimensions.get('window').width;
+  const cardPadding = 32; // Total horizontal padding (16 * 2)
+  const cardGap = 12; // Gap between cards
+  const availableWidth = screenWidth - cardPadding;
+  const cardWidth = (availableWidth - cardGap) / 2;
+  const chartWidth = Math.max(120, cardWidth - 20); // Ensure minimum width
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -125,9 +134,7 @@ export default function JournalStatsScreen() {
                 showValues={true}
               />
             </View>
-          </View>
-
-          {/* Statistics Cards Row */}
+          </View>          {/* Statistics Cards Row */}
           <View style={styles.statsRow}>
             {/* Most Frequent Emotion Card */}
             <View style={styles.statCard}>
@@ -136,12 +143,11 @@ export default function JournalStatsScreen() {
                 value="Joy"
                 subtitle="68% of entries"
                 trend={{ value: 12, isPositive: true }}
-              />
-              <View style={styles.emotionChart}>
+              />              <View style={styles.emotionChart}>
                 <HorizontalBarChart
                   data={mockEmotionData}
-                  width={140}
-                  height={80}
+                  width={chartWidth}
+                  height={90}
                 />
               </View>
             </View>
@@ -263,8 +269,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     alignItems: 'center',
     paddingVertical: 16,
-  },
-  statsRow: {
+  },  statsRow: {
     flexDirection: 'row',
     gap: 12,
     marginBottom: 24,
@@ -272,15 +277,21 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     gap: 8,
+    minWidth: 0, // Allow flex items to shrink below their content size
   },
   emotionChart: {
     marginTop: 8,
+    alignItems: 'center',
+    overflow: 'hidden', // Prevent chart from overflowing
   },
   calendarContainer: {
     marginTop: 8,
+    alignItems: 'center',
+    overflow: 'hidden', // Prevent calendar from overflowing
   },
   compactCalendar: {
     alignSelf: 'center',
+    maxWidth: '100%', // Ensure it doesn't exceed container width
   },
   additionalStats: {
     gap: 12,
