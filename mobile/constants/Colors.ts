@@ -1,21 +1,26 @@
 /**
  * Color palette for the Artful Whispers mobile app
  * Based on modern mood tracking and journal app design principles
+ * Updated to match the green-themed UI design
  */
 
-// Primary brand colors
-const primaryBlue = '#4A90E2';
-const primaryBlueDark = '#357ABD';
+// Primary brand colors (Updated to green theme)
+const primaryGreen = '#8DB596';
+const primaryGreenDark = '#7A9F83';
+const accentGreen = '#9BC53D';
 
-// Mood colors for emotional tracking
+// Mood colors for emotional tracking (Updated to match design)
 const moodColors = {
-  happy: '#FFD93D',
-  excited: '#FF6B6B',
-  calm: '#4ECDC4',
-  sad: '#74B9FF',
-  anxious: '#FD79A8',
-  angry: '#E17055',
-  neutral: '#95A5A6',
+  happy: '#9BC53D',        // Bright green for happiness
+  excited: '#FFB347',      // Orange for excitement  
+  calm: '#8DB596',         // Sage green for calm
+  sad: '#6B9BD1',          // Blue for sadness
+  anxious: '#E17055',      // Orange-red for anxiety
+  angry: '#E74C3C',        // Red for anger
+  neutral: '#95A5A6',      // Gray for neutral
+  positive: '#8DB596',     // Main green for positive moods
+  negative: '#E17055',     // Orange-red for negative moods
+  skipped: '#8B4513',      // Brown for skipped entries
 };
 
 // Semantic colors
@@ -28,10 +33,11 @@ const semanticColors = {
 
 export const Colors = {
   light: {
-    // Primary colors
-    primary: primaryBlue,
-    primaryDark: primaryBlueDark,
+    // Primary colors (Updated to green theme)
+    primary: primaryGreen,
+    primaryDark: primaryGreenDark,
     secondary: '#F8F9FA',
+    accent: accentGreen,
     
     // Text colors
     text: '#2D3436',
@@ -42,6 +48,7 @@ export const Colors = {
     background: '#FFFFFF',
     backgroundSecondary: '#F8F9FA',
     backgroundTertiary: '#E9ECEF',
+    backgroundGreen: '#F0F5F0',  // Light green background
     
     // Surface colors
     surface: '#FFFFFF',
@@ -56,10 +63,10 @@ export const Colors = {
     cardSecondary: '#F8F9FA',
     
     // Tab colors
-    tint: primaryBlue,
+    tint: primaryGreen,
     icon: '#95A5A6',
     tabIconDefault: '#95A5A6',
-    tabIconSelected: primaryBlue,
+    tabIconSelected: primaryGreen,
     
     // Mood colors
     mood: moodColors,
@@ -68,10 +75,11 @@ export const Colors = {
     semantic: semanticColors,
   },
   dark: {
-    // Primary colors
-    primary: '#5BA3F5',
-    primaryDark: '#4A90E2',
+    // Primary colors (Updated to green theme)
+    primary: '#9BC53D',
+    primaryDark: primaryGreen,
     secondary: '#2D3436',
+    accent: accentGreen,
     
     // Text colors
     text: '#FFFFFF',
@@ -82,6 +90,7 @@ export const Colors = {
     background: '#1A1A1A',
     backgroundSecondary: '#2D3436',
     backgroundTertiary: '#363A3D',
+    backgroundGreen: '#2A3A2A',  // Dark green background
     
     // Surface colors
     surface: '#2D3436',
@@ -96,21 +105,24 @@ export const Colors = {
     cardSecondary: '#363A3D',
     
     // Tab colors
-    tint: '#5BA3F5',
+    tint: '#9BC53D',
     icon: '#95A5A6',
     tabIconDefault: '#95A5A6',
-    tabIconSelected: '#5BA3F5',
+    tabIconSelected: '#9BC53D',
     
-    // Mood colors (slightly adjusted for dark mode)
+    // Mood colors (adjusted for dark mode)
     mood: {
       ...moodColors,
-      happy: '#F1C40F',
-      excited: '#E55656',
-      calm: '#45B7B8',
-      sad: '#6C5CE7',
-      anxious: '#E84393',
-      angry: '#E17055',
+      happy: '#9BC53D',
+      excited: '#FFB347',
+      calm: '#8DB596',
+      sad: '#6B9BD1',
+      anxious: '#E17055',
+      angry: '#E74C3C',
       neutral: '#95A5A6',
+      positive: '#9BC53D',
+      negative: '#E17055',
+      skipped: '#8B4513',
     },
     
     // Semantic colors

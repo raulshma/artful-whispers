@@ -76,11 +76,15 @@ export const Typography = {
     fontSize: FontSizes.base,
     fontWeight: FontWeights.normal,
     lineHeight: LineHeights.base,
-  },
-  bodyLarge: {
+  },  bodyLarge: {
     fontSize: FontSizes.lg,
     fontWeight: FontWeights.normal,
     lineHeight: LineHeights.lg,
+  },
+  bodyMedium: {
+    fontSize: FontSizes.base,
+    fontWeight: FontWeights.medium,
+    lineHeight: LineHeights.base,
   },
   bodySmall: {
     fontSize: FontSizes.sm,
