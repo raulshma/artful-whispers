@@ -78,7 +78,9 @@ export default function MoodStatsCard({ title, subtitle, stats, onPress }: MoodS
           size={24} 
           color={theme.colors.textSecondary} 
         />
-      </View>      <View style={styles.statsContainer}>
+      </View>
+      
+      <View style={styles.statsContainer}>
         {stats.map((stat, index) => renderMoodBar(stat, index))}
       </View>
 

@@ -135,7 +135,8 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
             ]}>
               {displayMood}
               {emotions.length > 0 && ` • ${emotions.slice(0, 2).join(', ')}`}
-            </Text>          </View>
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -145,7 +146,9 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
         { color: theme.colors.text }
       ]}>
         {entry.title || 'Untitled Entry'}
-      </Text>      {/* Complete content */}
+      </Text>
+      
+      {/* Complete content */}
       <View style={styles.contentContainer}>
         {entry.content.split('\n').map((paragraph, index) => {
           if (!paragraph.trim()) return null;
@@ -193,7 +196,8 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
         backgroundColor: theme.colors.card,
         borderColor: theme.colors.border,
       }
-    ]}>      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
+    ]}>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
         {entry.imageUrl ? (
           <ImageBackground
             source={{ uri: entry.imageUrl }}
