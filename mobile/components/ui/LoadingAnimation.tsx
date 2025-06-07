@@ -19,7 +19,8 @@ interface LoadingAnimationProps {
   size?: number;
   color?: string;
   style?: ViewStyle;
-  variant?: 'spinner' | 'dots' | 'pulse' | 'wave';
+  variant?: 'spinner' | 'dots' | 'pulse' | 'wave' | 'skia-ripple' | 'skia-morphing' | 'skia-orbital' | 'skia-breathing';
+  visible?: boolean;
 }
 
 export function LoadingAnimation({
@@ -27,12 +28,35 @@ export function LoadingAnimation({
   color,
   style,
   variant = 'spinner',
+  visible = true,
 }: LoadingAnimationProps) {
   const { theme } = useTheme();
   const animationColor = color || theme.colors.primary;
 
+  // Skia variants
+  if (variant === 'skia-ripple') {
+    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
+    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="ripple" visible={visible} />;
+  }
+
+  if (variant === 'skia-morphing') {
+    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
+    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="morphing" visible={visible} />;
+  }
+
+  if (variant === 'skia-orbital') {
+    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
+    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="orbital" visible={visible} />;
+  }
+
+  if (variant === 'skia-breathing') {
+    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
+    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="breathing" visible={visible} />;
+  }
+
+  // Standard variants
   if (variant === 'spinner') {
-    return <SpinnerAnimation size={size} color={animationColor} style={style} />;
+    return <SpinnerAnimation size={size} color={animationColor} style={style} visible={visible} />;
   }
 
   if (variant === 'dots') {
@@ -47,24 +71,35 @@ export function LoadingAnimation({
     return <WaveAnimation size={size} color={animationColor} style={style} />;
   }
 
-  return <SpinnerAnimation size={size} color={animationColor} style={style} />;
+  return <SpinnerAnimation size={size} color={animationColor} style={style} visible={visible} />;
 }
 
 // Spinner Animation
-function SpinnerAnimation({ size, color, style }: { size: number; color: string; style?: ViewStyle }) {
+function SpinnerAnimation({ size, color, style, visible = true }: { size: number; color: string; style?: ViewStyle; visible?: boolean }) {
   const rotation = useSharedValue(0);
+  const opacity = useSharedValue(visible ? 1 : 0);
+  const scale = useSharedValue(visible ? 1 : 0);
 
   useEffect(() => {
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 1000 }),
-      -1,
-      false
-    );
-  }, []);
+    opacity.value = withTiming(visible ? 1 : 0, { duration: 300 });
+    scale.value = withTiming(visible ? 1 : 0, { duration: 400 });
+
+    if (visible) {
+      rotation.value = withRepeat(
+        withTiming(360, { duration: 1000 }),
+        -1,
+        false
+      );
+    }
+  }, [visible]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotation.value}deg` }],
+      opacity: opacity.value,
+      transform: [
+        { rotate: `${rotation.value}deg` },
+        { scale: scale.value }
+      ],
     };
   });
 

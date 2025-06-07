@@ -18,7 +18,7 @@ import FloatingComposeButton from "@/components/FloatingComposeButton";
 import { useFocusEffect } from "@react-navigation/native";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
-import { Card } from "@/components/ui";
+import { Card, SkiaLoadingAnimation } from "@/components/ui";
 
 export default function JournalScreen() {
   const { user } = useAuth();
@@ -84,7 +84,12 @@ export default function JournalScreen() {
     if (!isFetchingNextPage) return null;
     return (
       <View style={styles.loadingFooter}>
-        <ActivityIndicator size="small" color={theme.colors.primary} />
+        <SkiaLoadingAnimation
+          variant="breathing"
+          size={40}
+          color={theme.colors.primary}
+          visible={true}
+        />
         <Text
           style={[styles.loadingText, { color: theme.colors.textSecondary }]}
         >
@@ -124,7 +129,12 @@ export default function JournalScreen() {
         ]}
       >
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <SkiaLoadingAnimation
+            variant="ripple"
+            size={60}
+            color={theme.colors.primary}
+            visible={true}
+          />
           <Text
             style={[styles.loadingText, { color: theme.colors.textSecondary }]}
           >

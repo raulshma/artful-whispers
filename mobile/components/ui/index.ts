@@ -13,6 +13,7 @@ export {
   SocialInteractionPicker
 } from './SegmentedControl';
 export { LoadingAnimation, TranscribingAnimation } from './LoadingAnimation';
+export { SkiaLoadingAnimation } from './SkiaLoadingAnimation';
 
 // Layout components
 export {
