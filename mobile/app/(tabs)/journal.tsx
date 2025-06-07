@@ -20,6 +20,7 @@ import FloatingComposeButton from "@/components/FloatingComposeButton";
 import NewEntryForm from "@/components/NewEntryForm";
 import { useFocusEffect } from "@react-navigation/native";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
+import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { Card } from "@/components/ui";
 
 export default function JournalScreen() {
@@ -193,44 +194,54 @@ export default function JournalScreen() {
       >
         {/* Today's entry count */}
         {todayEntries.length > 0 && (
-          <View style={styles.todayContainer}>
-            <Card style={styles.todayChip}>              <Text style={[styles.todayText, { color: theme.colors.primary }]}>
-                {todayEntries.length} reflection{todayEntries.length !== 1 ? "s" : ""} today
-              </Text>
-              {todayEntries.length > 1 && (
+          <ShadowFriendlyAnimation index={0} animationType="slideUp">
+            <View style={styles.todayContainer}>
+              <Card style={styles.todayChip}>
                 <Text
-                  style={[
-                    styles.todaySubtext,
-                    { color: theme.colors.textSecondary },
-                  ]}
+                  style={[styles.todayText, { color: theme.colors.primary }]}
                 >
-                  • Multiple moments captured
+                  {todayEntries.length} reflection
+                  {todayEntries.length !== 1 ? "s" : ""} today
                 </Text>
-              )}
-            </Card>
-          </View>
+                {todayEntries.length > 1 && (
+                  <Text
+                    style={[
+                      styles.todaySubtext,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    • Multiple moments captured
+                  </Text>
+                )}
+              </Card>
+            </View>
+          </ShadowFriendlyAnimation>
         )}
 
-        <FlatList
-          data={entries}
-          renderItem={renderEntry}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={
-            entries.length === 0 ? styles.emptyContainer : styles.listContainer
-          }
-          showsVerticalScrollIndicator={false}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={renderFooter}
-          ListEmptyComponent={renderEmptyState}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={theme.colors.primary}
-            />
-          }
-        />
+        <ShadowFriendlyAnimation index={1} animationType="slideUp">
+          <FlatList
+            data={entries}
+            renderItem={renderEntry}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={
+              entries.length === 0
+                ? styles.emptyContainer
+                : styles.listContainer
+            }
+            showsVerticalScrollIndicator={false}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={renderFooter}
+            ListEmptyComponent={renderEmptyState}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={theme.colors.primary}
+              />
+            }
+          />
+        </ShadowFriendlyAnimation>
 
         <FloatingComposeButton
           onPress={() => setShowNewEntry(true)}
