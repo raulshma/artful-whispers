@@ -6,7 +6,7 @@ export function useFavoriteToggle() {
 
   return useMutation({
     mutationFn: async (entryId: number): Promise<DiaryEntry> => {
-      const response = await fetch(`/api/diary-entries/${entryId}/favorite`, {
+const response = await apiRequest(`/api/diary-entries/${entryId}/favorite`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
