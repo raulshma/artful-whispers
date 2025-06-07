@@ -9,6 +9,15 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/contexts/ThemeContext";
+import Animated, { 
+  FadeIn, 
+  FadeOut, 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  withSequence,
+  withDelay 
+} from 'react-native-reanimated';
 import JournalStats from "@/components/JournalStats";
 import MoodStatsCard from "@/components/MoodStatsCard";
 import MoodCalendar from "@/components/MoodCalendar";
@@ -158,11 +167,13 @@ export default function JournalStatsScreen() {
                   visible={refreshing}
                 />
               </View>
-            )}
-
-            {/* Loading State */}
+            )}            {/* Loading State */}
             {(journalLoading || moodLoading || calendarLoading) && (
-              <View style={styles.loadingContainer}>
+              <Animated.View 
+                entering={FadeIn.duration(300)}
+                exiting={FadeOut.duration(300)}
+                style={styles.loadingContainer}
+              >
                 <SkiaLoadingAnimation
                   size={120}
                   color={theme.colors.primary}
@@ -175,10 +186,14 @@ export default function JournalStatsScreen() {
                 <Text style={[styles.loadingSubtext, { color: theme.colors.textTertiary }]}>
                   Analyzing your journal data
                 </Text>
-              </View>
-            )}            {/* Error State */}
+              </Animated.View>
+            )}{/* Error State */}
             {(journalError || moodError || calendarError) && (
-              <View style={styles.errorContainer}>
+              <Animated.View 
+                entering={FadeIn.duration(300)}
+                exiting={FadeOut.duration(300)}
+                style={styles.errorContainer}
+              >
                 <SkiaLoadingAnimation
                   size={50}
                   color={theme.colors.semantic.error}
@@ -188,72 +203,82 @@ export default function JournalStatsScreen() {
                 <Text style={[styles.errorText, { color: theme.colors.semantic.error }]}>
                   Failed to load stats. Pull to refresh.
                 </Text>
-              </View>
+              </Animated.View>
             )}
 
-            {/* Main Journal Stats Card */}
-            {journalStats && (
-              <ShadowFriendlyAnimation index={0} animationType="slideUp">
-                <JournalStats
-                  title="Journal Stats"
-                  subtitle={`Your Journal Stats for ${getPeriodDisplayName(selectedPeriod)}`}
-                  data={journalStats}
-                  onPress={handleJournalStatsPress}
-                />
-              </ShadowFriendlyAnimation>
-            )}
+            {/* Content */}
+            {!journalLoading && !moodLoading && !calendarLoading && (
+              <Animated.View
+                entering={FadeIn.delay(150).duration(400)}
+                style={styles.contentContainer}
+              >
+                {/* Main Journal Stats Card */}
+                {journalStats && (
+                  <ShadowFriendlyAnimation index={0} animationType="slideUp">
+                    <JournalStats
+                      title="Journal Stats"
+                      subtitle={`Your Journal Stats for ${getPeriodDisplayName(selectedPeriod)}`}
+                      data={journalStats}
+                      onPress={handleJournalStatsPress}
+                    />
+                  </ShadowFriendlyAnimation>
+                )}
 
-            {/* Most Frequent Emotion Card */}
-            {moodDistribution && moodDistribution.length > 0 && (
-              <ShadowFriendlyAnimation index={1} animationType="slideUp">
-                <MoodStatsCard
-                  title={moodDistribution[0]?.mood || "Mood Stats"}
-                  subtitle="Most frequent emotion"
-                  stats={moodDistribution}
-                  onPress={handleMoodStatsPress}
-                />
-              </ShadowFriendlyAnimation>
-            )}            {/* Empty state when no mood data */}
-            {moodDistribution && moodDistribution.length === 0 && (
-              <ShadowFriendlyAnimation index={1} animationType="slideUp">
-                <View style={styles.emptyStateContainer}>
-                  <SkiaLoadingAnimation
-                    size={60}
-                    color={theme.colors.textSecondary}
-                    variant="breathing"
-                    visible={true}
-                  />
-                  <Text style={[styles.emptyStateText, { color: theme.colors.textSecondary }]}>
-                    No mood check-ins yet. Start tracking your moods to see statistics.
-                  </Text>
-                </View>
-              </ShadowFriendlyAnimation>
-            )}
+                {/* Most Frequent Emotion Card */}
+                {moodDistribution && moodDistribution.length > 0 && (
+                  <ShadowFriendlyAnimation index={1} animationType="slideUp">
+                    <MoodStatsCard
+                      title={moodDistribution[0]?.mood || "Mood Stats"}
+                      subtitle="Most frequent emotion"
+                      stats={moodDistribution}
+                      onPress={handleMoodStatsPress}
+                    />
+                  </ShadowFriendlyAnimation>
+                )}
 
-            {/* Calendar View */}
-            {calendarData && calendarData.length > 0 ? (
-              <ShadowFriendlyAnimation index={2} animationType="slideUp">
-                <MoodCalendar
-                  title={`${calendarData.filter(day => day.hasEntry).length}/${calendarData.length}`}
-                  subtitle="Journals written this month"
-                  days={calendarData}
-                  currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
-                  onDayPress={handleCalendarDayPress}
-                  onAddPress={handleAddJournalPress}
-                />
-              </ShadowFriendlyAnimation>
-            ) : (
-              /* Fallback calendar view until backend endpoint is fully working */
-              <ShadowFriendlyAnimation index={2} animationType="slideUp">
-                <MoodCalendar
-                  title="0/31"
-                  subtitle="Journals written this month"
-                  days={mockCalendarDays}
-                  currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
-                  onDayPress={handleCalendarDayPress}
-                  onAddPress={handleAddJournalPress}
-                />
-              </ShadowFriendlyAnimation>
+                {/* Empty state when no mood data */}
+                {moodDistribution && moodDistribution.length === 0 && (
+                  <ShadowFriendlyAnimation index={1} animationType="slideUp">
+                    <View style={styles.emptyStateContainer}>
+                      <SkiaLoadingAnimation
+                        size={60}
+                        color={theme.colors.textSecondary}
+                        variant="breathing"
+                        visible={true}
+                      />
+                      <Text style={[styles.emptyStateText, { color: theme.colors.textSecondary }]}>
+                        No mood check-ins yet. Start tracking your moods to see statistics.
+                      </Text>
+                    </View>
+                  </ShadowFriendlyAnimation>
+                )}
+
+                {/* Calendar View */}
+                {calendarData && calendarData.length > 0 ? (
+                  <ShadowFriendlyAnimation index={2} animationType="slideUp">
+                    <MoodCalendar
+                      title={`${calendarData.filter(day => day.hasEntry).length}/${calendarData.length}`}
+                      subtitle="Journals written this month"
+                      days={calendarData}
+                      currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                      onDayPress={handleCalendarDayPress}
+                      onAddPress={handleAddJournalPress}
+                    />
+                  </ShadowFriendlyAnimation>
+                ) : (
+                  /* Fallback calendar view until backend endpoint is fully working */
+                  <ShadowFriendlyAnimation index={2} animationType="slideUp">
+                    <MoodCalendar
+                      title="0/31"
+                      subtitle="Journals written this month"
+                      days={mockCalendarDays}
+                      currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                      onDayPress={handleCalendarDayPress}
+                      onAddPress={handleAddJournalPress}
+                    />
+                  </ShadowFriendlyAnimation>
+                )}
+              </Animated.View>
             )}
           </View>
         </ScrollView>
@@ -283,6 +308,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },  content: {
     paddingBottom: 100, // Space for tab bar
+  },
+  contentContainer: {
+    flex: 1,
   },
   refreshingContainer: {
     alignItems: 'center',

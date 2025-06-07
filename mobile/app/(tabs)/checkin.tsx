@@ -9,6 +9,15 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
+import Animated, { 
+  FadeIn, 
+  FadeOut, 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  withSequence,
+  withDelay 
+} from 'react-native-reanimated';
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
@@ -167,13 +176,15 @@ export default function CheckInScreen() {
         >
           <ScrollView
             style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-          >            <View style={styles.content}>
-              <View style={styles.loadingContainer}>
+            showsVerticalScrollIndicator={false}          >            <View style={styles.content}>
+              <Animated.View 
+                entering={FadeIn.duration(300)}
+                style={styles.loadingContainer}
+              >
                 <SkiaLoadingAnimation
                   size={120}
                   color={theme.colors.primary}
-                  variant="orbital"
+                  variant="morphing"
                   visible={true}
                 />
                 <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
@@ -182,7 +193,7 @@ export default function CheckInScreen() {
                 <Text style={[styles.loadingSubtext, { color: theme.colors.textTertiary }]}>
                   Preparing your mood insights
                 </Text>
-              </View>
+              </Animated.View>
             </View>
           </ScrollView>
         </View>
@@ -214,38 +225,46 @@ export default function CheckInScreen() {
               onRefresh={onRefresh}
               tintColor={theme.colors.primary}
             />
-          }
-        >
+          }        >
           <View style={styles.content}>
             {/* Refreshing indicator */}
             {refreshing && (
-              <View style={styles.refreshingContainer}>
+              <Animated.View 
+                entering={FadeIn.duration(200)}
+                exiting={FadeOut.duration(200)}
+                style={styles.refreshingContainer}
+              >
                 <SkiaLoadingAnimation
                   size={40}
                   color={theme.colors.primary}
                   variant="orbital"
                   visible={refreshing}
                 />
-              </View>
+              </Animated.View>
             )}
 
-            {/* Main Mood Check-in Card */}
-            <ShadowFriendlyAnimation index={0} animationType="slideUp">
-              <MoodCheckInCard
-                title="How are you feeling?"
-                subtitle={latestMood.label}
-                moodIcon={getMoodIcon(latestMood.mood)}
-                moodColor={getMoodColor(latestMood.mood)}
-                onPress={handleCheckInPress}
-              />
-            </ShadowFriendlyAnimation>
+            {/* Main Content */}
+            <Animated.View
+              entering={FadeIn.delay(100).duration(400)}
+              style={styles.contentContainer}
+            >
+              {/* Main Mood Check-in Card */}
+              <ShadowFriendlyAnimation index={0} animationType="slideUp">
+                <MoodCheckInCard
+                  title="How are you feeling?"
+                  subtitle={latestMood.label}
+                  moodIcon={getMoodIcon(latestMood.mood)}
+                  moodColor={getMoodColor(latestMood.mood)}
+                  onPress={handleCheckInPress}
+                />
+              </ShadowFriendlyAnimation>
 
-            {/* Quick Stats Card */}
-            <ShadowFriendlyAnimation index={1} animationType="slideUp">
-              <CheckInQuickStats
-                title="Your Progress"
-                subtitle="Check-in statistics"
-                stats={[
+              {/* Quick Stats Card */}
+              <ShadowFriendlyAnimation index={1} animationType="slideUp">
+                <CheckInQuickStats
+                  title="Your Progress"
+                  subtitle="Check-in statistics"
+                  stats={[
                   {
                     value: streakCount,
                     label: "Day Streak",
@@ -279,9 +298,9 @@ export default function CheckInScreen() {
                 onItemPress={handleCheckInItemPress}
                 loading={false}
                 error={error}
-                onRetry={() => fetchCheckIns()}
-              />
+                onRetry={() => fetchCheckIns()}              />
             </ShadowFriendlyAnimation>
+            </Animated.View>
           </View>
         </ScrollView>
       </View>
@@ -295,9 +314,11 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  content: {
+  },  content: {
     paddingBottom: 100, // Space for tab bar
+  },
+  contentContainer: {
+    flex: 1,
   },
   refreshingContainer: {
     alignItems: 'center',
