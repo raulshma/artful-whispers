@@ -450,6 +450,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sync/recalculate user statistics (protected route)
+  app.post("/api/profile/stats/sync", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Force recalculation of stats
+      const stats = await storage.calculateUserStats(req.user.id);
+
+      res.json({
+        message: "Stats synced successfully",
+        stats,
+      });
+    } catch (error) {
+      console.error('Stats sync error:', error);
+      res.status(500).json({ message: "Failed to sync user statistics" });
+    }
+  });
+
   // Get user settings (protected route)
   app.get("/api/settings", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {

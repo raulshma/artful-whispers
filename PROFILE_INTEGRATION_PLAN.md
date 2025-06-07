@@ -77,3 +77,13 @@
     - Add image upload functionality (client-side).
     - Backend storage for avatars (e.g., using `server/storage.ts` if it's set up for file storage, or a cloud service).
     - Update `UserProfile` schema and routes.
+
+## 7. Journey Stats Sync Feature
+- [x] **Backend Route (POST):** Create a route in `server/routes.ts` for syncing/recalculating user statistics.
+    - Endpoint: `/api/profile/stats/sync`
+    - Logic: Force recalculation of all user stats (check-ins, journal entries, streaks).
+- [x] **API Client:** Add `syncUserStats` function in `mobile/lib/api.ts`.
+- [x] **Mobile Integration:** Add "Sync Stats" button in the Journey section of ProfileScreen.
+    - Show loading state while syncing.
+    - Provide success/error feedback to user.
+    - Update stats display with refreshed data.

@@ -142,6 +142,12 @@ export async function fetchUserStats(): Promise<UserStats> {
   return apiRequest<UserStats>('/api/profile/stats');
 }
 
+export async function syncUserStats(): Promise<{ message: string; stats: UserStats }> {
+  return apiRequest<{ message: string; stats: UserStats }>('/api/profile/stats/sync', {
+    method: 'POST',
+  });
+}
+
 export async function fetchUserSettings(): Promise<UserSettings> {
   return apiRequest<UserSettings>('/api/settings');
 }

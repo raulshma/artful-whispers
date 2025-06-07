@@ -25,6 +25,7 @@ import {
   updateUserSettings,
   exportUserData,
   deleteUserAccount,
+  syncUserStats,
   type UserProfile,
   type UserStats,
   type UserSettings,
@@ -41,6 +42,7 @@ export default function ProfileScreen() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [syncingStats, setSyncingStats] = useState(false);
 
   // Local state for UI
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -96,6 +98,23 @@ export default function ProfileScreen() {
       if (key === 'notificationsEnabled') setNotificationsEnabled(!value);
       if (key === 'reminderEnabled') setReminderEnabled(!value);
       if (key === 'darkModeEnabled') setIsDarkMode(!value);
+    }
+  };
+
+  const handleSyncStats = async () => {
+    try {
+      setSyncingStats(true);
+      const response = await syncUserStats();
+      setStats(response.stats);
+      
+      // Provide haptic feedback
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Success', 'Journey stats have been synced successfully!');
+    } catch (error) {
+      console.error('Failed to sync stats:', error);
+      Alert.alert('Error', 'Failed to sync journey stats. Please try again.');
+    } finally {
+      setSyncingStats(false);
     }
   };
 
@@ -458,6 +477,14 @@ export default function ProfileScreen() {
               >
                 Danger Zone
               </Text>
+              <ListItem
+                title={syncingStats ? "Syncing Journey Stats..." : "Sync Journey Stats"}
+                subtitle="Recalculate all statistics from your data"
+                leftIcon="arrow.clockwise.circle.fill"
+                rightIcon="chevron.right"
+                onPress={handleSyncStats}
+                disabled={syncingStats}
+              />
               <ListItem
                 title="Delete Account"
                 subtitle="Permanently delete your account and all data"
