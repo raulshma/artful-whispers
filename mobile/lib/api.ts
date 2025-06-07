@@ -53,4 +53,45 @@ export async function apiRequest<T = any>(
   return response.json();
 }
 
+// Stats API functions
+export interface JournalStatsData {
+  positive: number;
+  neutral: number;
+  negative: number;
+  skipped: number;
+  total: number;
+}
+
+export interface MoodStat {
+  mood: string;
+  count: number;
+  color: string;
+  icon: string;
+  percentage: number;
+}
+
+export async function fetchJournalSummary(period?: string): Promise<JournalStatsData> {
+  const endpoint = period ? `/api/stats/journal-summary?period=${period}` : '/api/stats/journal-summary';
+  return apiRequest<JournalStatsData>(endpoint);
+}
+
+export async function fetchMoodCheckinDistribution(period?: string): Promise<MoodStat[]> {
+  const endpoint = period ? `/api/stats/mood-checkin-distribution?period=${period}` : '/api/stats/mood-checkin-distribution';
+  return apiRequest<MoodStat[]>(endpoint);
+}
+
+export interface CalendarDay {
+  day: number;
+  mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null;
+  hasEntry: boolean;
+}
+
+export async function fetchCalendarData(year?: number, month?: number): Promise<CalendarDay[]> {
+  const currentDate = new Date();
+  const targetYear = year || currentDate.getFullYear();
+  const targetMonth = month || currentDate.getMonth() + 1;
+  
+  return apiRequest<CalendarDay[]>(`/api/stats/calendar-data?year=${targetYear}&month=${targetMonth}`);
+}
+
 export default apiRequest;

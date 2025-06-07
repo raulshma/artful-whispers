@@ -1,6 +1,6 @@
 import { users, diaryEntries, checkIns, type User, type DiaryEntry, type InsertDiaryEntry, type UpdateUserProfile, type CheckIn, type InsertCheckIn } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, ilike, or, and } from "drizzle-orm";
+import { eq, desc, ilike, or, and, count, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -22,6 +22,11 @@ export interface IStorage {
   createCheckIn(checkIn: InsertCheckIn & { userId: string }): Promise<CheckIn>;
   getCheckIns(userId: string, limit?: number, offset?: number): Promise<CheckIn[]>;
   getCheckIn(id: number): Promise<CheckIn | undefined>;
+  
+  // Stats methods
+  getJournalSummaryStats(userId: string, period?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }>;
+  getMoodCheckinDistribution(userId: string, period?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>>;
+  getCalendarData(userId: string, year: number, month: number): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -183,6 +188,208 @@ export class DatabaseStorage implements IStorage {
   async getCheckIn(id: number): Promise<CheckIn | undefined> {
     const [checkIn] = await db.select().from(checkIns).where(eq(checkIns.id, id));
     return checkIn || undefined;
+  }
+
+  // Stats methods implementation
+  async getJournalSummaryStats(userId: string, period?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }> {
+    let whereCondition = eq(diaryEntries.userId, userId);
+    
+    // Add period filtering if specified
+    if (period) {
+      const now = new Date();
+      let dateThreshold: Date;
+      
+      switch (period) {
+        case 'last30days':
+          dateThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case 'last7days':
+          dateThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'currentMonth':
+          dateThreshold = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        default:
+          dateThreshold = new Date(0); // All time
+      }
+      
+      whereCondition = and(
+        eq(diaryEntries.userId, userId),
+        sql`${diaryEntries.createdAt} >= ${dateThreshold.toISOString()}`
+      )!;
+    }
+
+    // Define mood categories
+    const positiveMoods = ['happy', 'joy', 'excited', 'grateful', 'content', 'optimistic', 'cheerful', 'positive'];
+    const neutralMoods = ['neutral', 'calm', 'okay', 'normal', 'balanced'];
+    const negativeMoods = ['sad', 'angry', 'anxious', 'frustrated', 'depressed', 'worried', 'stressed', 'negative'];
+
+    // Get all entries for the user within the period
+    const entries = await db
+      .select({ mood: diaryEntries.mood })
+      .from(diaryEntries)
+      .where(whereCondition);
+
+    let positive = 0;
+    let neutral = 0;
+    let negative = 0;
+    let skipped = 0;
+
+    entries.forEach(entry => {
+      const mood = entry.mood?.toLowerCase();
+      
+      if (!mood || mood === 'skipped' || mood === '') {
+        skipped++;
+      } else if (positiveMoods.some(pm => mood.includes(pm))) {
+        positive++;
+      } else if (neutralMoods.some(nm => mood.includes(nm))) {
+        neutral++;
+      } else if (negativeMoods.some(nm => mood.includes(nm))) {
+        negative++;
+      } else {
+        // Default unknown moods to neutral
+        neutral++;
+      }
+    });
+
+    const total = entries.length;
+
+    return { positive, neutral, negative, skipped, total };
+  }
+
+  async getMoodCheckinDistribution(userId: string, period?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>> {
+    let whereCondition = eq(checkIns.userId, userId);
+    
+    // Add period filtering if specified
+    if (period) {
+      const now = new Date();
+      let dateThreshold: Date;
+      
+      switch (period) {
+        case 'currentMonth':
+          dateThreshold = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'last7days':
+          dateThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'last30days':
+          dateThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          dateThreshold = new Date(0); // All time
+      }
+      
+      whereCondition = and(
+        eq(checkIns.userId, userId),
+        sql`${checkIns.createdAt} >= ${dateThreshold.toISOString()}`
+      )!;
+    }
+
+    // Get mood distribution from check-ins
+    const moodCounts = await db
+      .select({
+        mood: checkIns.mood,
+        count: count(checkIns.mood).as('count')
+      })
+      .from(checkIns)
+      .where(whereCondition)
+      .groupBy(checkIns.mood)
+      .orderBy(desc(count(checkIns.mood)));
+
+    // Calculate total for percentages
+    const totalCheckIns = moodCounts.reduce((sum, item) => sum + (item.count as number), 0);
+
+    // Map moods to colors and icons
+    const moodMapping: Record<string, { color: string; icon: string }> = {
+      'happy': { color: '#4CAF50', icon: 'happy-outline' },
+      'excited': { color: '#FF9800', icon: 'happy-outline' },
+      'grateful': { color: '#2196F3', icon: 'heart-outline' },
+      'content': { color: '#8BC34A', icon: 'checkmark-circle-outline' },
+      'calm': { color: '#00BCD4', icon: 'leaf-outline' },
+      'neutral': { color: '#FFC107', icon: 'remove-circle-outline' },
+      'okay': { color: '#9E9E9E', icon: 'remove-outline' },
+      'sad': { color: '#F44336', icon: 'sad-outline' },
+      'angry': { color: '#E91E63', icon: 'flame-outline' },
+      'anxious': { color: '#9C27B0', icon: 'alert-circle-outline' },
+      'stressed': { color: '#FF5722', icon: 'warning-outline' },
+      'worried': { color: '#795548', icon: 'help-circle-outline' },
+    };
+
+    return moodCounts.map(item => {
+      const mood = item.mood.toLowerCase();
+      const mapping = moodMapping[mood] || { color: '#757575', icon: 'ellipse-outline' };
+      const percentage = totalCheckIns > 0 ? Math.round(((item.count as number) / totalCheckIns) * 100) : 0;
+
+      return {
+        mood: item.mood,
+        count: item.count as number,
+        color: mapping.color,
+        icon: mapping.icon,
+        percentage
+      };
+    });
+  }
+
+  async getCalendarData(userId: string, year: number, month: number): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>> {
+    // Get the first and last day of the month
+    const firstDay = new Date(year, month - 1, 1);
+    const lastDay = new Date(year, month, 0);
+    const daysInMonth = lastDay.getDate();
+
+    // Get all diary entries for the month
+    const entries = await db
+      .select({
+        date: diaryEntries.date,
+        mood: diaryEntries.mood
+      })
+      .from(diaryEntries)
+      .where(
+        and(
+          eq(diaryEntries.userId, userId),
+          sql`DATE(${diaryEntries.date}) >= ${firstDay.toISOString().split('T')[0]}`,
+          sql`DATE(${diaryEntries.date}) <= ${lastDay.toISOString().split('T')[0]}`
+        )
+      );
+
+    // Create a map of day -> mood for quick lookup
+    const entryMap = new Map<number, string>();
+    entries.forEach(entry => {
+      const day = new Date(entry.date).getDate();
+      entryMap.set(day, entry.mood || '');
+    });
+
+    // Helper function to categorize mood
+    const categorizeMood = (mood: string): 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null => {
+      if (!mood || mood === 'skipped') return 'skipped';
+      
+      const lowerMood = mood.toLowerCase();
+      const positiveMoods = ['happy', 'joy', 'excited', 'grateful', 'content', 'optimistic', 'cheerful', 'positive'];
+      const neutralMoods = ['neutral', 'calm', 'okay', 'normal', 'balanced'];
+      const negativeMoods = ['sad', 'angry', 'anxious', 'frustrated', 'depressed', 'worried', 'stressed', 'negative'];
+
+      if (positiveMoods.some(pm => lowerMood.includes(pm))) return 'happy';
+      if (neutralMoods.some(nm => lowerMood.includes(nm))) return 'neutral';
+      if (negativeMoods.some(nm => lowerMood.includes(nm))) return 'negative';
+      
+      // Default to neutral for unknown moods
+      return 'neutral';
+    };
+
+    // Build calendar data for all days in the month
+    const calendarData = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const moodText = entryMap.get(day);
+      const hasEntry = !!moodText;
+      const mood = hasEntry ? categorizeMood(moodText) : null;
+
+      calendarData.push({
+        day,
+        mood,
+        hasEntry
+      });
+    }
+
+    return calendarData;
   }
 }
 

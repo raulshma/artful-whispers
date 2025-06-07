@@ -322,6 +322,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Get journal summary stats (protected route)
+  app.get(
+    "/api/stats/journal-summary",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const period = req.query.period as string | undefined;
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const stats = await storage.getJournalSummaryStats(req.user.id, period);
+        res.json(stats);
+      } catch (error) {
+        console.error("Journal summary stats error:", error);
+        res.status(500).json({ message: "Failed to fetch journal summary stats" });
+      }
+    }
+  );
+
+  // Get mood check-in distribution (protected route)
+  app.get(
+    "/api/stats/mood-checkin-distribution",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const period = req.query.period as string | undefined;
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const distribution = await storage.getMoodCheckinDistribution(req.user.id, period);
+        res.json(distribution);
+      } catch (error) {
+        console.error("Mood check-in distribution error:", error);
+        res.status(500).json({ message: "Failed to fetch mood check-in distribution" });
+      }
+    }
+  );
+
+  // Get calendar data for a specific month (protected route)
+  app.get(
+    "/api/stats/calendar-data",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const year = parseInt(req.query.year as string) || new Date().getFullYear();
+        const month = parseInt(req.query.month as string) || new Date().getMonth() + 1;
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const calendarData = await storage.getCalendarData(req.user.id, year, month);
+        res.json(calendarData);
+      } catch (error) {
+        console.error("Calendar data error:", error);
+        res.status(500).json({ message: "Failed to fetch calendar data" });
+      }
+    }
+  );
+
   // Generate lofi-style image URL based on mood and emotions
   function generateLofiImageUrl(mood: string, emotions: string[]): string {
     const lofiKeywords = [
