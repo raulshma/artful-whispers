@@ -183,9 +183,7 @@ export default function ProfileScreen() {
                         styles.joinDate,
                         { color: theme.colors.textTertiary },
                       ]}
-                    >
-                      Member since{" "}
-                      {new Date().toLocaleDateString("en-US", {
+                    >                      Member since {new Date().toLocaleDateString("en-US", {
                         month: "long",
                         year: "numeric",
                       })}
@@ -328,9 +326,8 @@ export default function ProfileScreen() {
                 title="Sign Out"
                 variant="secondary"
                 onPress={handleSignOut}
-                style={styles.signOutButton}
-              />{" "}
-            </View>{" "}
+                style={styles.signOutButton}              />
+            </View>
           </View>
         </ScrollView>
       </View>

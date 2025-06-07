@@ -270,7 +270,8 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
             size={64} 
             color={theme.colors.primary} 
           />
-          <Text style={styles.completionTitle}>Check In Completed</Text>          <Text style={styles.completionSubtitle}>
+          <Text style={styles.completionTitle}>Check In Completed</Text>
+          <Text style={styles.completionSubtitle}>
             Thank you for checking in your mood today. Don&apos;t forget to check in daily.
           </Text>
           <TouchableOpacity 

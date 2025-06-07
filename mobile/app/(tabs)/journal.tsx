@@ -194,10 +194,8 @@ export default function JournalScreen() {
         {/* Today's entry count */}
         {todayEntries.length > 0 && (
           <View style={styles.todayContainer}>
-            <Card style={styles.todayChip}>
-              <Text style={[styles.todayText, { color: theme.colors.primary }]}>
-                {todayEntries.length} reflection
-                {todayEntries.length !== 1 ? "s" : ""} today
+            <Card style={styles.todayChip}>              <Text style={[styles.todayText, { color: theme.colors.primary }]}>
+                {todayEntries.length} reflection{todayEntries.length !== 1 ? "s" : ""} today
               </Text>
               {todayEntries.length > 1 && (
                 <Text

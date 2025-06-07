@@ -91,9 +91,9 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
   const moodIcon = getMoodIcon(entry.mood);
   const displayMood = entry.mood || 'Reflective';
   const { theme } = useTheme();
-
   const renderCardContent = () => (
-    <>      {/* Header with mood icon and date */}
+    <>
+      {/* Header with mood icon and date */}
       <View style={styles.header}>
         <View style={styles.moodContainer}>
           <View style={[
@@ -111,11 +111,11 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
           <View style={styles.dateTimeContainer}>
             <Text style={[
               styles.date,
-              { color: theme.colors.textSecondary }
-            ]}>
+              { color: theme.colors.textSecondary }            ]}>
               {formatDate(entry.date)}
             </Text>
-            <View style={styles.timeRow}>              <View style={[
+            <View style={styles.timeRow}>
+              <View style={[
                 styles.timeChip,
                 {
                   backgroundColor: theme.colors.backgroundGreen,
@@ -135,21 +135,21 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
             ]}>
               {displayMood}
               {emotions.length > 0 && ` • ${emotions.slice(0, 2).join(', ')}`}
-            </Text>
-          </View>
+            </Text>          </View>
         </View>
-      </View>      {/* Title */}
+      </View>
+
+      {/* Title */}
       <Text style={[
         styles.title,
         { color: theme.colors.text }
       ]}>
         {entry.title || 'Untitled Entry'}
-      </Text>
-
-      {/* Content excerpt */}
+      </Text>      {/* Content excerpt */}
       <View style={styles.contentContainer}>
-        {entry.content.split('\n').map((paragraph, index) => 
-          paragraph.trim() && (
+        {entry.content.split('\n').map((paragraph, index) => {
+          if (!paragraph.trim()) return null;
+          return (
             <Text
               key={index}
               style={[
@@ -160,8 +160,8 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
             >
               {paragraph}
             </Text>
-          )
-        )}
+          );
+        })}
       </View>
 
       {/* Footer with read time and actions */}

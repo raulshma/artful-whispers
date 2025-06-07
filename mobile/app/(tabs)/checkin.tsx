@@ -199,8 +199,7 @@ export default function CheckInScreen() {
                     2 days ago
                   </Text>
                 </View>
-              </View>
-            </View>{" "}
+              </View>            </View>
           </View>
         </ScrollView>
       </View>

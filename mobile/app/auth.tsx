@@ -253,9 +253,7 @@ export default function AuthScreen() {
             <View style={styles.debugContainer}>
               <Text
                 style={[styles.debugText, { color: theme.colors.textTertiary }]}
-              >
-                Platform: {Platform.OS} | API:{" "}
-                {config.API_BASE_URL.substring(0, 30)}...
+              >                Platform: {Platform.OS} | API: {config.API_BASE_URL.substring(0, 30)}...
               </Text>
             </View>
           )}

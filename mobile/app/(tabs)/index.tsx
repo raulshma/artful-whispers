@@ -126,10 +126,9 @@ export default function JournalStatsScreen() {
               onRefresh={handleRefresh}
               tintColor={theme.colors.primary}
             />
-          }
-        >
-          {" "}
-          <View style={styles.content}>            {/* Main Journal Stats Card */}
+          }        >
+          <View style={styles.content}>
+            {/* Main Journal Stats Card */}
             <ShadowFriendlyAnimation index={0} animationType="slideUp">
               <JournalStats
                 title="Journal Stats"
