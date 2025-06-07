@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -10,18 +10,17 @@ import {
   Modal,
   SafeAreaView,
   TouchableOpacity,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '@/contexts/AuthContext';
-import { useInfiniteDiaryEntries } from '@/hooks/useDiary';
-import { useTheme } from '@/contexts/ThemeContext';
-import DiaryEntryCard from '@/components/DiaryEntryCard';
-import FloatingComposeButton from '@/components/FloatingComposeButton';
-import NewEntryForm from '@/components/NewEntryForm';
-import { useFocusEffect } from '@react-navigation/native';
-import { 
-  Card
-} from '@/components/ui';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/contexts/AuthContext";
+import { useInfiniteDiaryEntries } from "@/hooks/useDiary";
+import { useTheme } from "@/contexts/ThemeContext";
+import DiaryEntryCard from "@/components/DiaryEntryCard";
+import FloatingComposeButton from "@/components/FloatingComposeButton";
+import NewEntryForm from "@/components/NewEntryForm";
+import { useFocusEffect } from "@react-navigation/native";
+import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
+import { Card } from "@/components/ui";
 
 export default function JournalScreen() {
   const { user } = useAuth();
@@ -45,11 +44,11 @@ export default function JournalScreen() {
   const entries = data?.pages.flat() || [];
 
   // Memoized date calculations
-  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
-  
+  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+
   // Memoized today's entries
-  const todayEntries = useMemo(() => 
-    entries.filter(entry => entry.date === today), 
+  const todayEntries = useMemo(
+    () => entries.filter((entry) => entry.date === today),
     [entries, today]
   );
 
@@ -85,7 +84,7 @@ export default function JournalScreen() {
       entry={item}
       onPress={() => {
         // TODO: Navigate to entry detail
-        Alert.alert('Entry', 'Entry detail view coming soon!');
+        Alert.alert("Entry", "Entry detail view coming soon!");
       }}
     />
   );
@@ -95,7 +94,9 @@ export default function JournalScreen() {
     return (
       <View style={styles.loadingFooter}>
         <ActivityIndicator size="small" color={theme.colors.primary} />
-        <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+        <Text
+          style={[styles.loadingText, { color: theme.colors.textSecondary }]}
+        >
           Loading more entries...
         </Text>
       </View>
@@ -108,7 +109,9 @@ export default function JournalScreen() {
         <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
           Welcome to Your Digital Journal
         </Text>
-        <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
+        <Text
+          style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}
+        >
           Capture your thoughts, moments, and reflections throughout the day.
           There's no limit - write as many entries as your heart desires.
         </Text>
@@ -117,18 +120,23 @@ export default function JournalScreen() {
         </Text>
       </Card>
     </View>
-  );  if (isLoading) {
+  );
+  if (isLoading) {
     return (
-      <View style={[
-        styles.container, 
-        { 
-          backgroundColor: theme.colors.background,
-          paddingTop: insets.top 
-        }
-      ]}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: theme.colors.background,
+            paddingTop: insets.top,
+          },
+        ]}
+      >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+          <Text
+            style={[styles.loadingText, { color: theme.colors.textSecondary }]}
+          >
             Loading your entries...
           </Text>
         </View>
@@ -138,22 +146,32 @@ export default function JournalScreen() {
 
   if (isError) {
     return (
-      <View style={[
-        styles.container, 
-        { 
-          backgroundColor: theme.colors.background,
-          paddingTop: insets.top 
-        }
-      ]}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: theme.colors.background,
+            paddingTop: insets.top,
+          },
+        ]}
+      >
         <View style={styles.errorContainer}>
           <Text style={[styles.errorTitle, { color: theme.colors.text }]}>
             Unable to load entries
           </Text>
-          <Text style={[styles.errorSubtitle, { color: theme.colors.textSecondary }]}>
-            {error?.message || 'Something went wrong. Please try again.'}
+          <Text
+            style={[
+              styles.errorSubtitle,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            {error?.message || "Something went wrong. Please try again."}
           </Text>
-          <TouchableOpacity 
-            style={[styles.retryButton, { backgroundColor: theme.colors.primary }]} 
+          <TouchableOpacity
+            style={[
+              styles.retryButton,
+              { backgroundColor: theme.colors.primary },
+            ]}
             onPress={() => refetch()}
           >
             <Text style={styles.retryButtonText}>Retry</Text>
@@ -161,70 +179,85 @@ export default function JournalScreen() {
         </View>
       </View>
     );
-  }  return (
-    <View style={[
-      styles.container, 
-      { 
-        backgroundColor: theme.colors.background,
-        paddingTop: insets.top 
-      }
-    ]}>
-      {/* Today's entry count */}
-      {todayEntries.length > 0 && (
-        <View style={styles.todayContainer}>
-          <Card style={styles.todayChip}>
-            <Text style={[styles.todayText, { color: theme.colors.primary }]}>
-              {todayEntries.length} reflection{todayEntries.length !== 1 ? 's' : ''} today
-            </Text>
-            {todayEntries.length > 1 && (
-              <Text style={[styles.todaySubtext, { color: theme.colors.textSecondary }]}>
-                • Multiple moments captured
-              </Text>
-            )}
-          </Card>
-        </View>
-      )}
-
-      <FlatList
-        data={entries}
-        renderItem={renderEntry}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={entries.length === 0 ? styles.emptyContainer : styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={renderFooter}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={theme.colors.primary}
-          />
-        }
-      />
-
-      <FloatingComposeButton
-        onPress={() => setShowNewEntry(true)}
-        hasEntriesToday={todayEntries.length > 0}
-      />
-
-      <Modal
-        visible={showNewEntry}
-        animationType="slide"
-        presentationStyle="fullScreen"
+  }
+  return (
+    <AnimatedPageWrapper animationType="slideFromRight">
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: theme.colors.background,
+            paddingTop: insets.top,
+          },
+        ]}
       >
-        <SafeAreaView style={[
-          styles.modalContainer,
-          { backgroundColor: theme.colors.background }
-        ]}>
-          <NewEntryForm
-            onCancel={() => setShowNewEntry(false)}
-            onSuccess={handleNewEntrySuccess}
-          />
-        </SafeAreaView>
-      </Modal>
-    </View>
+        {/* Today's entry count */}
+        {todayEntries.length > 0 && (
+          <View style={styles.todayContainer}>
+            <Card style={styles.todayChip}>
+              <Text style={[styles.todayText, { color: theme.colors.primary }]}>
+                {todayEntries.length} reflection
+                {todayEntries.length !== 1 ? "s" : ""} today
+              </Text>
+              {todayEntries.length > 1 && (
+                <Text
+                  style={[
+                    styles.todaySubtext,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  • Multiple moments captured
+                </Text>
+              )}
+            </Card>
+          </View>
+        )}
+
+        <FlatList
+          data={entries}
+          renderItem={renderEntry}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={
+            entries.length === 0 ? styles.emptyContainer : styles.listContainer
+          }
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={theme.colors.primary}
+            />
+          }
+        />
+
+        <FloatingComposeButton
+          onPress={() => setShowNewEntry(true)}
+          hasEntriesToday={todayEntries.length > 0}
+        />
+
+        <Modal
+          visible={showNewEntry}
+          animationType="slide"
+          presentationStyle="fullScreen"
+        >
+          <SafeAreaView
+            style={[
+              styles.modalContainer,
+              { backgroundColor: theme.colors.background },
+            ]}
+          >
+            <NewEntryForm
+              onCancel={() => setShowNewEntry(false)}
+              onSuccess={handleNewEntrySuccess}
+            />
+          </SafeAreaView>
+        </Modal>
+      </View>
+    </AnimatedPageWrapper>
   );
 }
 
@@ -233,20 +266,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   todayContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 16,
   },
   todayChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   todayText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   todaySubtext: {
     fontSize: 12,
@@ -256,42 +289,42 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
   },
   emptyState: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 16,
   },
   emptyStateCard: {
     padding: 32,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 16,
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   emptySubtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
   emptyHint: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     gap: 16,
   },
   loadingFooter: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
   },
   loadingText: {
@@ -299,19 +332,19 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
     gap: 16,
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   errorSubtitle: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
   retryButton: {
@@ -320,9 +353,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   retryButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   modalContainer: {
     flex: 1,

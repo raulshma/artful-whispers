@@ -1,6 +1,6 @@
-import { Stack } from 'expo-router';
-import React from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { Stack } from "expo-router";
+import React from "react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function CheckinLayout() {
   const { theme } = useTheme();
@@ -9,9 +9,9 @@ export default function CheckinLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        presentation: 'modal',
+        presentation: "modal",
         gestureEnabled: true,
-        animation: 'slide_from_right',
+        animation: "slide_from_right",
       }}
     >
       <Stack.Screen name="step1" />

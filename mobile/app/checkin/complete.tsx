@@ -1,21 +1,10 @@
-import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  Alert,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
-import { 
-  Header,
-  Button,
-  Card,
-  LoadingAnimation
-} from '@/components/ui';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import * as Haptics from 'expo-haptics';
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, SafeAreaView, Alert } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Header, Button, Card, LoadingAnimation } from "@/components/ui";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import * as Haptics from "expo-haptics";
 
 export default function CheckinComplete() {
   const { theme } = useTheme();
@@ -31,51 +20,54 @@ export default function CheckinComplete() {
     const checkInData = {
       mood: params.mood,
       moodLabel: params.moodLabel,
-      causes: JSON.parse(params.causes as string || '[]'),
-      activityLevel: parseInt(params.activityLevel as string || '5'),
-      sleepDuration: parseInt(params.sleepDuration as string || '8'),
+      causes: JSON.parse((params.causes as string) || "[]"),
+      activityLevel: parseInt((params.activityLevel as string) || "5"),
+      sleepDuration: parseInt((params.sleepDuration as string) || "8"),
       socialInteraction: params.socialInteraction,
       additionalNotes: params.additionalNotes,
-      companions: JSON.parse(params.companions as string || '[]'),
+      companions: JSON.parse((params.companions as string) || "[]"),
       location: params.location,
       timestamp: new Date().toISOString(),
     };
 
-    console.log('Check-in completed:', checkInData);
+    console.log("Check-in completed:", checkInData);
   }, [params]);
 
   const handleContinue = () => {
     // Navigate back to the main app
-    router.replace('/(tabs)');
+    router.replace("/(tabs)");
   };
 
   const handleViewInsights = () => {
     // Navigate to insights/stats page
-    router.replace('/(tabs)');
+    router.replace("/(tabs)");
     // Could also navigate to a specific insights page
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <Header
         title="Check In Complete"
         rightComponent={
-          <Button
-            title="Done"
-            variant="ghost"
-            onPress={handleContinue}
-          />
+          <Button title="Done" variant="ghost" onPress={handleContinue} />
         }
       />
 
       <View style={styles.content}>
         <Card style={styles.successCard}>
           <View style={styles.successIcon}>
-            <View style={[styles.iconCircle, { backgroundColor: theme.colors.semantic.success + '20' }]}>
-              <IconSymbol 
-                name="checkmark.circle.fill" 
-                size={64} 
-                color={theme.colors.semantic.success} 
+            <View
+              style={[
+                styles.iconCircle,
+                { backgroundColor: theme.colors.semantic.success + "20" },
+              ]}
+            >
+              <IconSymbol
+                name="checkmark.circle.fill"
+                size={64}
+                color={theme.colors.semantic.success}
               />
             </View>
           </View>
@@ -83,9 +75,15 @@ export default function CheckinComplete() {
           <Text style={[styles.successTitle, { color: theme.colors.text }]}>
             Check-in Complete!
           </Text>
-          
-          <Text style={[styles.successSubtitle, { color: theme.colors.textSecondary }]}>
-            Thank you for taking the time to reflect on your day. Your insights help us understand your patterns better.
+
+          <Text
+            style={[
+              styles.successSubtitle,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            Thank you for taking the time to reflect on your day. Your insights
+            help us understand your patterns better.
           </Text>
 
           {/* Summary */}
@@ -93,9 +91,14 @@ export default function CheckinComplete() {
             <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>
               Today's Summary
             </Text>
-            
+
             <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.summaryLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Mood:
               </Text>
               <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
@@ -103,19 +106,31 @@ export default function CheckinComplete() {
               </Text>
             </View>
 
-            {params.location && params.location !== 'Not specified' && (
+            {params.location && params.location !== "Not specified" && (
               <View style={styles.summaryItem}>
-                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.summaryLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Location:
                 </Text>
-                <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+                <Text
+                  style={[styles.summaryValue, { color: theme.colors.text }]}
+                >
                   {params.location}
                 </Text>
               </View>
             )}
 
             <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.summaryLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Activity Level:
               </Text>
               <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
@@ -124,7 +139,12 @@ export default function CheckinComplete() {
             </View>
 
             <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.summaryLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Sleep:
               </Text>
               <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
@@ -138,8 +158,14 @@ export default function CheckinComplete() {
             <Text style={[styles.insightTitle, { color: theme.colors.text }]}>
               💡 Quick Insight
             </Text>
-            <Text style={[styles.insightText, { color: theme.colors.textSecondary }]}>
-              You've been tracking your mood consistently! Keep up the great work.
+            <Text
+              style={[
+                styles.insightText,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              You've been tracking your mood consistently! Keep up the great
+              work.
             </Text>
           </View>
         </Card>
@@ -152,7 +178,7 @@ export default function CheckinComplete() {
             onPress={handleViewInsights}
             style={styles.actionButton}
           />
-          
+
           <Button
             title="Continue to Journal"
             variant="primary"
@@ -164,13 +190,41 @@ export default function CheckinComplete() {
         {/* Progress Indicator */}
         <View style={styles.progressSection}>
           <View style={styles.progressIndicator}>
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.colors.primary }]} />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                styles.progressDotActive,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
           </View>
-          <Text style={[styles.progressText, { color: theme.colors.textTertiary }]}>
+          <Text
+            style={[styles.progressText, { color: theme.colors.textTertiary }]}
+          >
             Complete! 🎉
           </Text>
         </View>
@@ -186,11 +240,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   successCard: {
     padding: 32,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 20,
   },
   successIcon: {
@@ -200,49 +254,49 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   successTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   successSubtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
   summarySection: {
-    width: '100%',
+    width: "100%",
     gap: 12,
     marginTop: 8,
   },
   summaryTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
   },
   summaryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   summaryLabel: {
     fontSize: 14,
   },
   summaryValue: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   insightSection: {
-    width: '100%',
+    width: "100%",
     gap: 8,
     marginTop: 16,
   },
   insightTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   insightText: {
     fontSize: 14,
@@ -253,15 +307,15 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   actionButton: {
-    width: '100%',
+    width: "100%",
   },
   progressSection: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
     marginTop: 24,
   },
   progressIndicator: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   progressDot: {
@@ -274,6 +328,6 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

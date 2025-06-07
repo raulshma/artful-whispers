@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,43 +6,38 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
-import { 
-  Header,
-  Button,
-  Card,
-  Input
-} from '@/components/ui';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import * as Haptics from 'expo-haptics';
+} from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Header, Button, Card, Input } from "@/components/ui";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import * as Haptics from "expo-haptics";
 
 const SUGGESTED_LOCATIONS = [
-  { id: 'home', label: 'Home', icon: 'house.fill' },
-  { id: 'work', label: 'Work', icon: 'building.2.fill' },
-  { id: 'gym', label: 'Gym', icon: 'figure.walk' },
-  { id: 'park', label: 'Park', icon: 'tree.fill' },
-  { id: 'restaurant', label: 'Restaurant', icon: 'fork.knife' },
-  { id: 'cafe', label: 'Café', icon: 'cup.and.saucer.fill' },
-  { id: 'school', label: 'School', icon: 'graduationcap.fill' },
-  { id: 'shopping', label: 'Shopping', icon: 'bag.fill' },
-  { id: 'transport', label: 'Transportation', icon: 'car.fill' },
-  { id: 'outdoors', label: 'Outdoors', icon: 'sun.max.fill' }
+  { id: "home", label: "Home", icon: "house.fill" },
+  { id: "work", label: "Work", icon: "building.2.fill" },
+  { id: "gym", label: "Gym", icon: "figure.walk" },
+  { id: "park", label: "Park", icon: "tree.fill" },
+  { id: "restaurant", label: "Restaurant", icon: "fork.knife" },
+  { id: "cafe", label: "Café", icon: "cup.and.saucer.fill" },
+  { id: "school", label: "School", icon: "graduationcap.fill" },
+  { id: "shopping", label: "Shopping", icon: "bag.fill" },
+  { id: "transport", label: "Transportation", icon: "car.fill" },
+  { id: "outdoors", label: "Outdoors", icon: "sun.max.fill" },
 ];
 
 export default function CheckinStep4() {
   const { theme } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams();
-  
+
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [customLocation, setCustomLocation] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [customLocation, setCustomLocation] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLocationSelect = (locationId: string) => {
     setSelectedLocation(locationId);
-    setCustomLocation('');
+    setCustomLocation("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
@@ -54,48 +49,58 @@ export default function CheckinStep4() {
   };
 
   const handleContinue = () => {
-    const location = selectedLocation 
-      ? SUGGESTED_LOCATIONS.find(l => l.id === selectedLocation)?.label
+    const location = selectedLocation
+      ? SUGGESTED_LOCATIONS.find((l) => l.id === selectedLocation)?.label
       : customLocation;
 
     router.push({
-      pathname: '/checkin/complete' as any,
-      params: { 
+      pathname: "/checkin/complete" as any,
+      params: {
         ...params,
-        location: location || 'Not specified'
-      }
+        location: location || "Not specified",
+      },
     });
   };
 
   const handleSkip = () => {
     router.push({
-      pathname: '/checkin/complete' as any,
-      params: { 
+      pathname: "/checkin/complete" as any,
+      params: {
         ...params,
-        location: 'Not specified'
-      }
+        location: "Not specified",
+      },
     });
   };
 
-  const filteredLocations = SUGGESTED_LOCATIONS.filter(location =>
+  const filteredLocations = SUGGESTED_LOCATIONS.filter((location) =>
     location.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <Header
         title="Check In"
         showBackButton
         onBackPress={() => router.back()}
       />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.content}>
           <View style={styles.questionSection}>
             <Text style={[styles.questionText, { color: theme.colors.text }]}>
               Where are you?
             </Text>
-            <Text style={[styles.questionSubtext, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.questionSubtext,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Help us understand your environment (optional)
             </Text>
           </View>
@@ -106,7 +111,13 @@ export default function CheckinStep4() {
               placeholder="Search locations..."
               value={searchQuery}
               onChangeText={setSearchQuery}
-              leftIcon={<IconSymbol name="magnifyingglass" size={20} color={theme.colors.textSecondary} />}
+              leftIcon={
+                <IconSymbol
+                  name="magnifyingglass"
+                  size={20}
+                  color={theme.colors.textSecondary}
+                />
+              }
             />
           </Card>
 
@@ -122,29 +133,38 @@ export default function CheckinStep4() {
                   style={[
                     styles.locationItem,
                     {
-                      backgroundColor: selectedLocation === location.id 
-                        ? theme.colors.primary + '20' 
-                        : theme.colors.surface,
-                      borderColor: selectedLocation === location.id 
-                        ? theme.colors.primary 
-                        : theme.colors.border,
-                    }
+                      backgroundColor:
+                        selectedLocation === location.id
+                          ? theme.colors.primary + "20"
+                          : theme.colors.surface,
+                      borderColor:
+                        selectedLocation === location.id
+                          ? theme.colors.primary
+                          : theme.colors.border,
+                    },
                   ]}
                   onPress={() => handleLocationSelect(location.id)}
                 >
-                  <IconSymbol 
-                    name={location.icon as any} 
-                    size={24} 
-                    color={selectedLocation === location.id ? theme.colors.primary : theme.colors.textSecondary} 
-                  />
-                  <Text style={[
-                    styles.locationLabel,
-                    { 
-                      color: selectedLocation === location.id 
-                        ? theme.colors.primary 
-                        : theme.colors.text 
+                  <IconSymbol
+                    name={location.icon as any}
+                    size={24}
+                    color={
+                      selectedLocation === location.id
+                        ? theme.colors.primary
+                        : theme.colors.textSecondary
                     }
-                  ]}>
+                  />
+                  <Text
+                    style={[
+                      styles.locationLabel,
+                      {
+                        color:
+                          selectedLocation === location.id
+                            ? theme.colors.primary
+                            : theme.colors.text,
+                      },
+                    ]}
+                  >
                     {location.label}
                   </Text>
                 </TouchableOpacity>
@@ -161,19 +181,30 @@ export default function CheckinStep4() {
               placeholder="Type your location..."
               value={customLocation}
               onChangeText={handleCustomLocationChange}
-              leftIcon={<IconSymbol name="location.fill" size={20} color={theme.colors.textSecondary} />}
+              leftIcon={
+                <IconSymbol
+                  name="location.fill"
+                  size={20}
+                  color={theme.colors.textSecondary}
+                />
+              }
             />
           </Card>
 
           {/* Selected Location Display */}
           {(selectedLocation || customLocation.trim()) && (
             <Card style={styles.selectionCard}>
-              <Text style={[styles.selectionTitle, { color: theme.colors.text }]}>
+              <Text
+                style={[styles.selectionTitle, { color: theme.colors.text }]}
+              >
                 Selected Location:
               </Text>
-              <Text style={[styles.selectionText, { color: theme.colors.primary }]}>
-                {selectedLocation 
-                  ? SUGGESTED_LOCATIONS.find(l => l.id === selectedLocation)?.label
+              <Text
+                style={[styles.selectionText, { color: theme.colors.primary }]}
+              >
+                {selectedLocation
+                  ? SUGGESTED_LOCATIONS.find((l) => l.id === selectedLocation)
+                      ?.label
                   : customLocation}
               </Text>
             </Card>
@@ -199,13 +230,41 @@ export default function CheckinStep4() {
 
         <View style={styles.progressSection}>
           <View style={styles.progressIndicator}>
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                styles.progressDotActive,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.border },
+              ]}
+            />
           </View>
-          <Text style={[styles.progressText, { color: theme.colors.textTertiary }]}>
+          <Text
+            style={[styles.progressText, { color: theme.colors.textTertiary }]}
+          >
             Step 4 of 5
           </Text>
         </View>
@@ -226,18 +285,18 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   questionSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   questionText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
   },
   questionSubtext: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   searchCard: {
     padding: 16,
@@ -249,17 +308,17 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 16,
   },
   locationsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   locationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -268,7 +327,7 @@ const styles = StyleSheet.create({
   },
   locationLabel: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   customCard: {
     padding: 20,
@@ -280,12 +339,12 @@ const styles = StyleSheet.create({
   },
   selectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   selectionText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   footer: {
     padding: 16,
@@ -293,7 +352,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   buttonRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   skipButton: {
@@ -303,11 +362,11 @@ const styles = StyleSheet.create({
     flex: 2,
   },
   progressSection: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
   },
   progressIndicator: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   progressDot: {

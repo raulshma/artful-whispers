@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -7,25 +7,20 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
-  Text
-} from 'react-native';
-import { signIn, signUp } from '@/lib/auth';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { config } from '@/config';
-import {
-  Button,
-  Input,
-  Card,
-  LoadingAnimation
-} from '@/components/ui';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+  Text,
+} from "react-native";
+import { signIn, signUp } from "@/lib/auth";
+import { useRouter } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { config } from "@/config";
+import { Button, Input, Card, LoadingAnimation } from "@/components/ui";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function AuthScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -34,84 +29,94 @@ export default function AuthScreen() {
 
   // Debug effect to log platform and config info
   useEffect(() => {
-    console.log('🐛 Auth Screen Debug Info:');
-    console.log('Platform:', Platform.OS);
-    console.log('API Base URL:', config.API_BASE_URL);
-    console.log('Is Authenticated:', isAuthenticated);
-    console.log('User:', user);
+    console.log("🐛 Auth Screen Debug Info:");
+    console.log("Platform:", Platform.OS);
+    console.log("API Base URL:", config.API_BASE_URL);
+    console.log("Is Authenticated:", isAuthenticated);
+    console.log("User:", user);
   }, [isAuthenticated, user]);
 
   const handleAuth = async () => {
     if (!email || !password || (isSignUp && !name)) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
-    console.log('🔐 Starting authentication process...');
-    console.log('Platform:', Platform.OS);
-    console.log('API URL:', config.API_BASE_URL);
+    console.log("🔐 Starting authentication process...");
+    console.log("Platform:", Platform.OS);
+    console.log("API URL:", config.API_BASE_URL);
 
     setIsLoading(true);
     try {
       if (isSignUp) {
-        console.log('Attempting sign up...');
+        console.log("Attempting sign up...");
         await signUp.email({
           email,
           password,
           name,
         });
-        Alert.alert('Success', 'Account created successfully!');
+        Alert.alert("Success", "Account created successfully!");
         // Don't navigate immediately for sign up, let user sign in
       } else {
-        console.log('Attempting sign in...');
+        console.log("Attempting sign in...");
         const result = await signIn.email({
           email,
           password,
         });
-        console.log('Sign in successful:', JSON.stringify(result, null, 2));
-        
+        console.log("Sign in successful:", JSON.stringify(result, null, 2));
+
         // Check if the result contains error information
         if (result?.error) {
-          console.error('Sign in returned error:', result.error);
-          Alert.alert('Error', result.error.message || 'Sign in failed');
+          console.error("Sign in returned error:", result.error);
+          Alert.alert("Error", result.error.message || "Sign in failed");
           return;
         }
-        
+
         // Add a small delay to allow the server to process the session
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         // Force refresh the auth context to get the updated session
-        console.log('Refreshing auth context...');
+        console.log("Refreshing auth context...");
         const refreshResult = await refreshAuth();
-        console.log('Refresh auth result:', JSON.stringify(refreshResult, null, 2));
-        
+        console.log(
+          "Refresh auth result:",
+          JSON.stringify(refreshResult, null, 2)
+        );
+
         // Additional debugging to check session state with multiple attempts
         for (let i = 0; i < 3; i++) {
-          await new Promise(resolve => setTimeout(resolve, 200));
-          console.log(`Auth refresh attempt ${i + 1}, checking session state...`);
-          const { getSession } = await import('@/lib/auth');
+          await new Promise((resolve) => setTimeout(resolve, 200));
+          console.log(
+            `Auth refresh attempt ${i + 1}, checking session state...`
+          );
+          const { getSession } = await import("@/lib/auth");
           const currentSession = await getSession();
-          console.log(`Current session after refresh (attempt ${i + 1}):`, JSON.stringify(currentSession, null, 2));
-          
+          console.log(
+            `Current session after refresh (attempt ${i + 1}):`,
+            JSON.stringify(currentSession, null, 2)
+          );
+
           if (currentSession?.data?.user) {
-            console.log('✅ Session established successfully');
+            console.log("✅ Session established successfully");
             break;
           }
         }
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
-      Alert.alert('Error', error.message || 'Authentication failed');
+      console.error("Auth error:", error);
+      Alert.alert("Error", error.message || "Authentication failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           style={styles.scrollView}
@@ -121,7 +126,12 @@ export default function AuthScreen() {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              <View style={[styles.logoCircle, { backgroundColor: theme.colors.primary + '20' }]}>
+              <View
+                style={[
+                  styles.logoCircle,
+                  { backgroundColor: theme.colors.primary + "20" },
+                ]}
+              >
                 <IconSymbol
                   name="heart.text.square.fill"
                   size={40}
@@ -131,7 +141,9 @@ export default function AuthScreen() {
               <Text style={[styles.appName, { color: theme.colors.text }]}>
                 Artful Whispers
               </Text>
-              <Text style={[styles.tagline, { color: theme.colors.textSecondary }]}>
+              <Text
+                style={[styles.tagline, { color: theme.colors.textSecondary }]}
+              >
                 Your digital companion for mindful reflection
               </Text>
             </View>
@@ -140,14 +152,18 @@ export default function AuthScreen() {
           {/* Auth Form */}
           <Card style={styles.formCard}>
             <Text style={[styles.formTitle, { color: theme.colors.text }]}>
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
+              {isSignUp ? "Create Account" : "Welcome Back"}
             </Text>
-            
-            <Text style={[styles.formSubtitle, { color: theme.colors.textSecondary }]}>
+
+            <Text
+              style={[
+                styles.formSubtitle,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               {isSignUp
-                ? 'Start your journey of self-discovery'
-                : 'Continue your mindfulness journey'
-              }
+                ? "Start your journey of self-discovery"
+                : "Continue your mindfulness journey"}
             </Text>
 
             <View style={styles.formFields}>
@@ -166,7 +182,7 @@ export default function AuthScreen() {
                   }
                 />
               )}
-              
+
               <Input
                 placeholder="Email"
                 value={email}
@@ -181,7 +197,7 @@ export default function AuthScreen() {
                   />
                 }
               />
-              
+
               <Input
                 placeholder="Password"
                 value={password}
@@ -199,13 +215,20 @@ export default function AuthScreen() {
               {isLoading ? (
                 <View style={styles.loadingContainer}>
                   <LoadingAnimation variant="dots" size={24} />
-                  <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
-                    {isSignUp ? 'Creating your account...' : 'Signing you in...'}
+                  <Text
+                    style={[
+                      styles.loadingText,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    {isSignUp
+                      ? "Creating your account..."
+                      : "Signing you in..."}
                   </Text>
                 </View>
               ) : (
                 <Button
-                  title={isSignUp ? 'Create Account' : 'Sign In'}
+                  title={isSignUp ? "Create Account" : "Sign In"}
                   variant="primary"
                   onPress={handleAuth}
                   style={styles.authButton}
@@ -213,7 +236,11 @@ export default function AuthScreen() {
               )}
 
               <Button
-                title={isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                title={
+                  isSignUp
+                    ? "Already have an account? Sign In"
+                    : "Don't have an account? Sign Up"
+                }
                 variant="link"
                 onPress={() => setIsSignUp(!isSignUp)}
                 style={styles.switchButton}
@@ -224,8 +251,11 @@ export default function AuthScreen() {
           {/* Debug Info (can be removed in production) */}
           {__DEV__ && (
             <View style={styles.debugContainer}>
-              <Text style={[styles.debugText, { color: theme.colors.textTertiary }]}>
-                Platform: {Platform.OS} | API: {config.API_BASE_URL.substring(0, 30)}...
+              <Text
+                style={[styles.debugText, { color: theme.colors.textTertiary }]}
+              >
+                Platform: {Platform.OS} | API:{" "}
+                {config.API_BASE_URL.substring(0, 30)}...
               </Text>
             </View>
           )}
@@ -247,32 +277,32 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 16,
   },
   logoCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   appName: {
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   tagline: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     maxWidth: 280,
   },
   formCard: {
@@ -281,20 +311,20 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
   },
   formSubtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 32,
   },
   formFields: {
     gap: 16,
   },
   loadingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 20,
     gap: 12,
   },
@@ -309,10 +339,10 @@ const styles = StyleSheet.create({
   },
   debugContainer: {
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   debugText: {
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

@@ -1,20 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
+import { useRouter } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
-import { 
   Header,
   Button,
   Card,
   MoodSelector,
-  DEFAULT_MOODS
-} from '@/components/ui';
-import * as Haptics from 'expo-haptics';
+  DEFAULT_MOODS,
+} from "@/components/ui";
+import * as Haptics from "expo-haptics";
 
 export default function CheckinStep1() {
   const { theme } = useTheme();
@@ -30,17 +25,19 @@ export default function CheckinStep1() {
     if (selectedMood) {
       // Store mood in check-in state (would use context or state management in real app)
       router.push({
-        pathname: '/checkin/step2' as any,
+        pathname: "/checkin/step2" as any,
         params: {
           mood: selectedMood.id,
-          moodLabel: selectedMood.label
-        }
+          moodLabel: selectedMood.label,
+        },
       });
     }
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <Header
         title="Check In"
         showBackButton
@@ -52,7 +49,12 @@ export default function CheckinStep1() {
           <Text style={[styles.questionText, { color: theme.colors.text }]}>
             How are you feeling?
           </Text>
-          <Text style={[styles.questionSubtext, { color: theme.colors.textSecondary }]}>
+          <Text
+            style={[
+              styles.questionSubtext,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
             Take a moment to check in with yourself
           </Text>
         </View>
@@ -68,10 +70,17 @@ export default function CheckinStep1() {
 
         {selectedMood && (
           <View style={styles.selectedMoodSection}>
-            <Text style={[styles.selectedMoodText, { color: theme.colors.text }]}>
-              You're feeling: 
+            <Text
+              style={[styles.selectedMoodText, { color: theme.colors.text }]}
+            >
+              You're feeling:
             </Text>
-            <Text style={[styles.selectedMoodLabel, { color: theme.colors.primary }]}>
+            <Text
+              style={[
+                styles.selectedMoodLabel,
+                { color: theme.colors.primary },
+              ]}
+            >
               {selectedMood.label}
             </Text>
           </View>
@@ -89,13 +98,41 @@ export default function CheckinStep1() {
 
         <View style={styles.progressSection}>
           <View style={styles.progressIndicator}>
-            <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
+            <View
+              style={[
+                styles.progressDot,
+                styles.progressDotActive,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.border },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.border },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.border },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.border },
+              ]}
+            />
           </View>
-          <Text style={[styles.progressText, { color: theme.colors.textTertiary }]}>
+          <Text
+            style={[styles.progressText, { color: theme.colors.textTertiary }]}
+          >
             Step 1 of 5
           </Text>
         </View>
@@ -111,29 +148,29 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   questionSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   questionText: {
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
   },
   questionSubtext: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   moodCard: {
     padding: 32,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   selectedMoodSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   selectedMoodText: {
@@ -142,20 +179,20 @@ const styles = StyleSheet.create({
   },
   selectedMoodLabel: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   buttonSection: {
     marginBottom: 24,
   },
   continueButton: {
-    width: '100%',
+    width: "100%",
   },
   progressSection: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
   },
   progressIndicator: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   progressDot: {

@@ -1,44 +1,33 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
-import { 
-  Header,
-  Button,
-  Card,
-  ToggleButton
-} from '@/components/ui';
-import * as Haptics from 'expo-haptics';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Header, Button, Card, ToggleButton } from "@/components/ui";
+import * as Haptics from "expo-haptics";
 
 const COMPANIONS = [
-  { id: 'alone', label: 'Alone' },
-  { id: 'family', label: 'Family' },
-  { id: 'friends', label: 'Friends' },
-  { id: 'colleagues', label: 'Colleagues' },
-  { id: 'partner', label: 'Partner' },
-  { id: 'pets', label: 'Pets' },
-  { id: 'strangers', label: 'Strangers' },
-  { id: 'acquaintances', label: 'Acquaintances' }
+  { id: "alone", label: "Alone" },
+  { id: "family", label: "Family" },
+  { id: "friends", label: "Friends" },
+  { id: "colleagues", label: "Colleagues" },
+  { id: "partner", label: "Partner" },
+  { id: "pets", label: "Pets" },
+  { id: "strangers", label: "Strangers" },
+  { id: "acquaintances", label: "Acquaintances" },
 ];
 
 export default function CheckinStep3() {
   const { theme } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams();
-  
+
   const [selectedCompanions, setSelectedCompanions] = useState<string[]>([]);
 
   const handleCompanionToggle = (companionId: string) => {
-    setSelectedCompanions(prev => {
+    setSelectedCompanions((prev) => {
       const isSelected = prev.includes(companionId);
       if (isSelected) {
-        return prev.filter(c => c !== companionId);
+        return prev.filter((c) => c !== companionId);
       } else {
         return [...prev, companionId];
       }
@@ -48,29 +37,39 @@ export default function CheckinStep3() {
 
   const handleContinue = () => {
     router.push({
-      pathname: '/checkin/step4' as any,
-      params: { 
+      pathname: "/checkin/step4" as any,
+      params: {
         ...params,
-        companions: JSON.stringify(selectedCompanions)
-      }
+        companions: JSON.stringify(selectedCompanions),
+      },
     });
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <Header
         title="Check In"
         showBackButton
         onBackPress={() => router.back()}
       />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.content}>
           <View style={styles.questionSection}>
             <Text style={[styles.questionText, { color: theme.colors.text }]}>
               Who are you currently with?
             </Text>
-            <Text style={[styles.questionSubtext, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.questionSubtext,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Select all that apply
             </Text>
           </View>
@@ -90,13 +89,20 @@ export default function CheckinStep3() {
 
           {selectedCompanions.length > 0 && (
             <Card style={styles.selectionCard}>
-              <Text style={[styles.selectionTitle, { color: theme.colors.text }]}>
+              <Text
+                style={[styles.selectionTitle, { color: theme.colors.text }]}
+              >
                 Selected:
               </Text>
-              <Text style={[styles.selectionText, { color: theme.colors.textSecondary }]}>
-                {selectedCompanions.map(id => 
-                  COMPANIONS.find(c => c.id === id)?.label
-                ).join(', ')}
+              <Text
+                style={[
+                  styles.selectionText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                {selectedCompanions
+                  .map((id) => COMPANIONS.find((c) => c.id === id)?.label)
+                  .join(", ")}
               </Text>
             </Card>
           )}
@@ -113,13 +119,41 @@ export default function CheckinStep3() {
 
         <View style={styles.progressSection}>
           <View style={styles.progressIndicator}>
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.colors.primary }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
-            <View style={[styles.progressDot, { backgroundColor: theme.colors.border }]} />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                styles.progressDotActive,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.border },
+              ]}
+            />
+            <View
+              style={[
+                styles.progressDot,
+                { backgroundColor: theme.colors.border },
+              ]}
+            />
           </View>
-          <Text style={[styles.progressText, { color: theme.colors.textTertiary }]}>
+          <Text
+            style={[styles.progressText, { color: theme.colors.textTertiary }]}
+          >
             Step 3 of 5
           </Text>
         </View>
@@ -140,26 +174,26 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   questionSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   questionText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
   },
   questionSubtext: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   companionsCard: {
     padding: 20,
     marginBottom: 16,
   },
   companionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   selectionCard: {
@@ -168,7 +202,7 @@ const styles = StyleSheet.create({
   },
   selectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   selectionText: {
@@ -181,14 +215,14 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   continueButton: {
-    width: '100%',
+    width: "100%",
   },
   progressSection: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
   },
   progressIndicator: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   progressDot: {

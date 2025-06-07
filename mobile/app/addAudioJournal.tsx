@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -6,25 +6,29 @@ import {
   SafeAreaView,
   Alert,
   Pressable,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { Audio } from 'expo-av';
-import { useTheme } from '@/contexts/ThemeContext';
-import { 
-  Header,
-  Button,
-  Card,
-  LoadingAnimation
-} from '@/components/ui';
-import { AudioWaveform, RecordingIndicator } from '@/components/audio/AudioWaveform';
-import * as Haptics from 'expo-haptics';
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Audio } from "expo-av";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Header, Button, Card, LoadingAnimation } from "@/components/ui";
+import {
+  AudioWaveform,
+  RecordingIndicator,
+} from "@/components/audio/AudioWaveform";
+import * as Haptics from "expo-haptics";
 
-type RecordingState = 'initial' | 'recording' | 'paused' | 'stopped' | 'transcribing';
+type RecordingState =
+  | "initial"
+  | "recording"
+  | "paused"
+  | "stopped"
+  | "transcribing";
 
 export default function AddAudioJournalScreen() {
   const { theme } = useTheme();
   const router = useRouter();
-  const [recordingState, setRecordingState] = useState<RecordingState>('initial');
+  const [recordingState, setRecordingState] =
+    useState<RecordingState>("initial");
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
@@ -42,9 +46,9 @@ export default function AddAudioJournalScreen() {
   const requestPermissions = async () => {
     try {
       const { status } = await Audio.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
+      setHasPermission(status === "granted");
     } catch (error) {
-      console.error('Error requesting audio permissions:', error);
+      console.error("Error requesting audio permissions:", error);
       setHasPermission(false);
     }
   };
@@ -52,7 +56,10 @@ export default function AddAudioJournalScreen() {
   const startRecording = async () => {
     try {
       if (!hasPermission) {
-        Alert.alert('Permission Required', 'Please grant microphone access to record audio.');
+        Alert.alert(
+          "Permission Required",
+          "Please grant microphone access to record audio."
+        );
         return;
       }
 
@@ -66,18 +73,18 @@ export default function AddAudioJournalScreen() {
       );
 
       recordingRef.current = recording;
-      setRecordingState('recording');
+      setRecordingState("recording");
       setRecordingDuration(0);
 
       // Start duration timer
       durationIntervalRef.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
+        setRecordingDuration((prev) => prev + 1);
       }, 1000);
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (error) {
-      console.error('Failed to start recording:', error);
-      Alert.alert('Error', 'Failed to start recording. Please try again.');
+      console.error("Failed to start recording:", error);
+      Alert.alert("Error", "Failed to start recording. Please try again.");
     }
   };
 
@@ -85,14 +92,14 @@ export default function AddAudioJournalScreen() {
     try {
       if (recordingRef.current) {
         await recordingRef.current.pauseAsync();
-        setRecordingState('paused');
+        setRecordingState("paused");
         if (durationIntervalRef.current) {
           clearInterval(durationIntervalRef.current);
         }
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     } catch (error) {
-      console.error('Failed to pause recording:', error);
+      console.error("Failed to pause recording:", error);
     }
   };
 
@@ -100,17 +107,17 @@ export default function AddAudioJournalScreen() {
     try {
       if (recordingRef.current) {
         await recordingRef.current.startAsync();
-        setRecordingState('recording');
-        
+        setRecordingState("recording");
+
         // Resume duration timer
         durationIntervalRef.current = setInterval(() => {
-          setRecordingDuration(prev => prev + 1);
+          setRecordingDuration((prev) => prev + 1);
         }, 1000);
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     } catch (error) {
-      console.error('Failed to resume recording:', error);
+      console.error("Failed to resume recording:", error);
     }
   };
 
@@ -118,8 +125,8 @@ export default function AddAudioJournalScreen() {
     try {
       if (recordingRef.current) {
         await recordingRef.current.stopAndUnloadAsync();
-        setRecordingState('stopped');
-        
+        setRecordingState("stopped");
+
         if (durationIntervalRef.current) {
           clearInterval(durationIntervalRef.current);
         }
@@ -127,7 +134,7 @@ export default function AddAudioJournalScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
     } catch (error) {
-      console.error('Failed to stop recording:', error);
+      console.error("Failed to stop recording:", error);
     }
   };
 
@@ -138,20 +145,20 @@ export default function AddAudioJournalScreen() {
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
     }
-    setRecordingState('initial');
+    setRecordingState("initial");
     setRecordingDuration(0);
     recordingRef.current = null;
   };
 
   const confirmRecording = () => {
-    setRecordingState('transcribing');
-    
+    setRecordingState("transcribing");
+
     // Simulate transcription process
     setTimeout(() => {
       Alert.alert(
-        'Audio Journal Saved!',
-        'Your audio has been transcribed and saved to your journal.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        "Audio Journal Saved!",
+        "Your audio has been transcribed and saved to your journal.",
+        [{ text: "OK", onPress: () => router.back() }]
       );
     }, 3000);
   };
@@ -159,7 +166,7 @@ export default function AddAudioJournalScreen() {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const renderInitialState = () => (
@@ -168,7 +175,9 @@ export default function AddAudioJournalScreen() {
         <Text style={[styles.promptText, { color: theme.colors.text }]}>
           Say anything that's on your mind!
         </Text>
-        <Text style={[styles.promptSubtext, { color: theme.colors.textSecondary }]}>
+        <Text
+          style={[styles.promptSubtext, { color: theme.colors.textSecondary }]}
+        >
           Share your thoughts, feelings, or anything you'd like to reflect on.
           Your audio will be automatically transcribed.
         </Text>
@@ -176,7 +185,10 @@ export default function AddAudioJournalScreen() {
 
       <View style={styles.microphoneSection}>
         <Pressable
-          style={[styles.microphoneButton, { backgroundColor: theme.colors.primary }]}
+          style={[
+            styles.microphoneButton,
+            { backgroundColor: theme.colors.primary },
+          ]}
           onPress={startRecording}
         >
           <Text style={styles.microphoneIcon}>🎤</Text>
@@ -195,7 +207,7 @@ export default function AddAudioJournalScreen() {
   const renderRecordingState = () => (
     <>
       <View style={styles.recordingHeader}>
-        <RecordingIndicator isRecording={recordingState === 'recording'} />
+        <RecordingIndicator isRecording={recordingState === "recording"} />
         <Text style={[styles.durationText, { color: theme.colors.text }]}>
           {formatDuration(recordingDuration)}
         </Text>
@@ -203,7 +215,7 @@ export default function AddAudioJournalScreen() {
 
       <View style={styles.waveformSection}>
         <AudioWaveform
-          isRecording={recordingState === 'recording'}
+          isRecording={recordingState === "recording"}
           width={300}
           height={100}
         />
@@ -217,7 +229,7 @@ export default function AddAudioJournalScreen() {
           style={styles.controlButton}
         />
 
-        {recordingState === 'recording' ? (
+        {recordingState === "recording" ? (
           <Button
             title="Pause"
             variant="secondary"
@@ -241,7 +253,9 @@ export default function AddAudioJournalScreen() {
         />
       </View>
 
-      <Text style={[styles.instructionText, { color: theme.colors.textTertiary }]}>
+      <Text
+        style={[styles.instructionText, { color: theme.colors.textTertiary }]}
+      >
         Speak naturally and clearly for best transcription results
       </Text>
     </>
@@ -253,7 +267,12 @@ export default function AddAudioJournalScreen() {
         <Text style={[styles.stoppedTitle, { color: theme.colors.text }]}>
           Recording Complete
         </Text>
-        <Text style={[styles.stoppedDuration, { color: theme.colors.textSecondary }]}>
+        <Text
+          style={[
+            styles.stoppedDuration,
+            { color: theme.colors.textSecondary },
+          ]}
+        >
           Duration: {formatDuration(recordingDuration)}
         </Text>
       </View>
@@ -263,7 +282,7 @@ export default function AddAudioJournalScreen() {
           title="Re-record"
           variant="secondary"
           onPress={() => {
-            setRecordingState('initial');
+            setRecordingState("initial");
             setRecordingDuration(0);
           }}
           style={styles.controlButton}
@@ -285,25 +304,36 @@ export default function AddAudioJournalScreen() {
       <Text style={[styles.transcribingText, { color: theme.colors.text }]}>
         Transcribing your audio...
       </Text>
-      <Text style={[styles.transcribingSubtext, { color: theme.colors.textSecondary }]}>
+      <Text
+        style={[
+          styles.transcribingSubtext,
+          { color: theme.colors.textSecondary },
+        ]}
+      >
         This may take a few moments
       </Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <Header
         title="Audio Journal"
         showBackButton
         onBackPress={() => {
-          if (recordingState !== 'initial') {
+          if (recordingState !== "initial") {
             Alert.alert(
-              'Discard Recording?',
-              'Are you sure you want to leave? Your recording will be lost.',
+              "Discard Recording?",
+              "Are you sure you want to leave? Your recording will be lost.",
               [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Discard', style: 'destructive', onPress: () => router.back() }
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Discard",
+                  style: "destructive",
+                  onPress: () => router.back(),
+                },
               ]
             );
           } else {
@@ -314,10 +344,11 @@ export default function AddAudioJournalScreen() {
 
       <View style={styles.content}>
         <Card style={styles.mainCard}>
-          {recordingState === 'initial' && renderInitialState()}
-          {(recordingState === 'recording' || recordingState === 'paused') && renderRecordingState()}
-          {recordingState === 'stopped' && renderStoppedState()}
-          {recordingState === 'transcribing' && renderTranscribingState()}
+          {recordingState === "initial" && renderInitialState()}
+          {(recordingState === "recording" || recordingState === "paused") &&
+            renderRecordingState()}
+          {recordingState === "stopped" && renderStoppedState()}
+          {recordingState === "transcribing" && renderTranscribingState()}
         </Card>
       </View>
     </SafeAreaView>
@@ -335,56 +366,56 @@ const styles = StyleSheet.create({
   mainCard: {
     flex: 1,
     padding: 24,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   promptSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 48,
   },
   promptText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 16,
   },
   promptSubtext: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
   microphoneSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 48,
   },
   microphoneButton: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   microphoneIcon: {
     fontSize: 48,
   },
   readyButton: {
-    alignSelf: 'center',
+    alignSelf: "center",
     paddingHorizontal: 48,
   },
   recordingHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   durationText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 16,
   },
   waveformSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   recordingControls: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 24,
   },
@@ -393,32 +424,32 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 14,
-    textAlign: 'center',
-    fontStyle: 'italic',
+    textAlign: "center",
+    fontStyle: "italic",
   },
   stoppedHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 48,
   },
   stoppedTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   stoppedDuration: {
     fontSize: 16,
   },
   stoppedControls: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   transcribingSection: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 16,
   },
   transcribingText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   transcribingSubtext: {
     fontSize: 14,
