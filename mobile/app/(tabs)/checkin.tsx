@@ -4,18 +4,18 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
-import { LoadingAnimation } from "@/components/ui";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { getCheckIns, type CheckInResponse } from "@/services/checkinService";
-import { format, isToday, isYesterday } from "date-fns";
+import MoodCheckInCard from "@/components/MoodCheckInCard";
+import CheckInQuickStats from "@/components/CheckInQuickStats";
+import RecentCheckInsCard from "@/components/RecentCheckInsCard";
 
 export default function CheckInScreen() {
   const { theme } = useTheme();
@@ -25,10 +25,6 @@ export default function CheckInScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleStartCheckIn = () => {
-    router.push("/checkin/step1");
-  };
 
   const fetchCheckIns = async (isRefresh = false) => {
     try {
@@ -102,17 +98,6 @@ export default function CheckInScreen() {
     }
   };
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    if (isToday(date)) {
-      return format(date, 'h:mm a');
-    } else if (isYesterday(date)) {
-      return 'Yesterday';
-    } else {
-      return format(date, 'MMM d');
-    }
-  };
-
   const getStreakCount = () => {
     // Simple streak calculation - could be enhanced
     let streak = 0;
@@ -151,27 +136,53 @@ export default function CheckInScreen() {
     return { mood: latest.mood, label: `Feeling ${latest.mood}` };
   };
 
-  if (loading) {
+  const handleCheckInPress = () => {
+    router.push("/checkin/step1");
+  };
+
+  const handleStatsPress = () => {
+    // Navigate to detailed stats view
+    console.log("Check-in stats pressed");
+  };
+
+  const handleRecentPress = () => {
+    // Navigate to all check-ins view
+    console.log("Recent check-ins pressed");
+  };
+
+  const handleCheckInItemPress = (checkIn: CheckInResponse) => {
+    // Navigate to check-in details
+    console.log("Check-in item pressed:", checkIn.id);
+  };  if (loading) {
     return (
       <AnimatedPageWrapper animationType="fadeIn">
         <View
           style={[
             styles.container,
-            styles.centered,
             {
               backgroundColor: theme.colors.background,
               paddingTop: insets.top,
             },
           ]}
         >
-          <LoadingAnimation />
-          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
-            Loading your check-ins...
-          </Text>
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.content}>
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                  Loading your check-ins...
+                </Text>
+              </View>
+            </View>
+          </ScrollView>
         </View>
       </AnimatedPageWrapper>
     );
   }
+
   const latestMood = getLatestMood();
   const streakCount = getStreakCount();
   const thisMonthCount = getThisMonthCount();
@@ -189,7 +200,6 @@ export default function CheckInScreen() {
       >
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -199,159 +209,61 @@ export default function CheckInScreen() {
             />
           }
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>
-              How are you feeling today?
-            </Text>
-          </View>
+          <View style={styles.content}>
+            {/* Main Mood Check-in Card */}
+            <ShadowFriendlyAnimation index={0} animationType="slideUp">
+              <MoodCheckInCard
+                title="How are you feeling?"
+                subtitle={latestMood.label}
+                moodIcon={getMoodIcon(latestMood.mood)}
+                moodColor={getMoodColor(latestMood.mood)}
+                onPress={handleCheckInPress}
+              />
+            </ShadowFriendlyAnimation>
 
-          {/* Main Mood Check-in Card */}
-          <ShadowFriendlyAnimation index={0} animationType="slideUp">
-            <View
-              style={[styles.moodCard, { backgroundColor: theme.colors.card }]}
-            >
-              <View style={styles.moodFace}>
-                <Ionicons
-                  name={getMoodIcon(latestMood.mood)}
-                  size={80}
-                  color={getMoodColor(latestMood.mood)}
-                />
-              </View>
-
-              <Text
-                style={[styles.moodPrompt, { color: theme.colors.textSecondary }]}
-              >
-                {latestMood.label}
-              </Text>
-
-              <TouchableOpacity
-                style={[
-                  styles.checkInButton,
-                  { backgroundColor: theme.colors.primary },
+            {/* Quick Stats Card */}
+            <ShadowFriendlyAnimation index={1} animationType="slideUp">
+              <CheckInQuickStats
+                title="Your Progress"
+                subtitle="Check-in statistics"
+                stats={[
+                  {
+                    value: streakCount,
+                    label: "Day Streak",
+                    icon: "flame",
+                    color: theme.colors.primary,
+                  },
+                  {
+                    value: thisMonthCount,
+                    label: "This Month",
+                    icon: "calendar",
+                    color: theme.colors.mood?.happy || theme.colors.primary,
+                  },
+                  {
+                    value: checkIns.length,
+                    label: "Total",
+                    icon: "checkmark-circle",
+                    color: theme.colors.mood?.calm || theme.colors.primary,
+                  },
                 ]}
-                onPress={handleStartCheckIn}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.checkInButtonText}>Start Check-in ✓</Text>
-              </TouchableOpacity>
-            </View>
-          </ShadowFriendlyAnimation>
+                onPress={handleStatsPress}
+              />
+            </ShadowFriendlyAnimation>
 
-          {/* Quick Stats */}
-          <ShadowFriendlyAnimation index={1} animationType="slideUp">
-            <View style={styles.statsContainer}>
-              <View
-                style={[styles.statItem, { backgroundColor: theme.colors.card }]}
-              >
-                <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                  {streakCount}
-                </Text>
-                <Text
-                  style={[
-                    styles.statLabel,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
-                  Day Streak
-                </Text>
-              </View>
-
-              <View
-                style={[styles.statItem, { backgroundColor: theme.colors.card }]}
-              >
-                <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                  {thisMonthCount}
-                </Text>
-                <Text
-                  style={[
-                    styles.statLabel,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
-                  This Month
-                </Text>
-              </View>
-            </View>
-          </ShadowFriendlyAnimation>
-
-          {/* Recent Check-ins */}
-          <ShadowFriendlyAnimation index={2} animationType="slideUp">
-            <View
-              style={[styles.recentCard, { backgroundColor: theme.colors.card }]}
-            >
-              <Text style={[styles.recentTitle, { color: theme.colors.text }]}>
-                Recent Check-ins
-              </Text>
-              
-              {error ? (
-                <View style={styles.errorContainer}>
-                  <Text style={[styles.errorText, { color: theme.colors.semantic?.error || '#EF4444' }]}>
-                    {error}
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.retryButton, { borderColor: theme.colors.border }]}
-                    onPress={() => fetchCheckIns()}
-                  >
-                    <Text style={[styles.retryText, { color: theme.colors.primary }]}>
-                      Try Again
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ) : checkIns.length === 0 ? (
-                <View style={styles.emptyContainer}>
-                  <Ionicons
-                    name="help-circle-outline"
-                    size={32}
-                    color={theme.colors.textTertiary}
-                  />
-                  <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-                    No check-ins yet. Start your first check-in above!
-                  </Text>
-                </View>
-              ) : (
-                <View style={styles.recentList}>
-                  {checkIns.slice(0, 5).map((checkIn) => (
-                    <View key={checkIn.id} style={styles.recentItem}>
-                      <Ionicons
-                        name={getMoodIcon(checkIn.mood)}
-                        size={20}
-                        color={getMoodColor(checkIn.mood)}
-                      />
-                      <View style={styles.recentContent}>
-                        <Text
-                          style={[styles.recentMood, { color: theme.colors.text }]}
-                        >
-                          {checkIn.mood.charAt(0).toUpperCase() + checkIn.mood.slice(1)}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.recentTime,
-                            { color: theme.colors.textSecondary },
-                          ]}
-                        >
-                          {formatTimeAgo(checkIn.createdAt)}
-                        </Text>
-                      </View>
-                      {checkIn.moodIntensity && (
-                        <Text
-                          style={[
-                            styles.intensityBadge,
-                            {
-                              color: theme.colors.textSecondary,
-                              backgroundColor: theme.colors.surface
-                            }
-                          ]}
-                        >
-                          {checkIn.moodIntensity}/10
-                        </Text>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-          </ShadowFriendlyAnimation>
+            {/* Recent Check-ins Card */}
+            <ShadowFriendlyAnimation index={2} animationType="slideUp">
+              <RecentCheckInsCard
+                title="Recent Check-ins"
+                subtitle="Your latest mood tracking"
+                checkIns={checkIns}
+                onPress={handleRecentPress}
+                onItemPress={handleCheckInItemPress}
+                loading={false}
+                error={error}
+                onRetry={() => fetchCheckIns()}
+              />
+            </ShadowFriendlyAnimation>
+          </View>
         </ScrollView>
       </View>
     </AnimatedPageWrapper>
@@ -366,140 +278,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 100, // Space for tab bar
   },
-  header: {
-    marginBottom: 32,
-    paddingHorizontal: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  moodCard: {
-    marginBottom: 24,
-    padding: 32,
-    borderRadius: 16,
-    alignItems: "center",
-  },
-  moodFace: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  moodPrompt: {
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  checkInButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 25,
-    minWidth: 200,
-    alignItems: "center",
-  },
-  checkInButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  statsContainer: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 24,
-  },
-  statItem: {
+  loadingContainer: {
     flex: 1,
-    padding: 20,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-  },
-  recentCard: {
-    padding: 20,
-    borderRadius: 16,
-  },
-  recentTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-  recentList: {
-    gap: 12,
-  },
-  recentItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  recentContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  recentMood: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 2,
-  },
-  recentTime: {
-    fontSize: 14,
-  },
-  centered: {
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 32,
+    minHeight: 200,
   },
   loadingText: {
-    fontSize: 16,
     marginTop: 16,
-    textAlign: 'center',
-  },
-  errorContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  errorText: {
     fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  retryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderRadius: 20,
-  },
-  retryText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  emptyText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  intensityBadge: {
-    fontSize: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    fontWeight: '500',
-    overflow: 'hidden',
   },
 });
