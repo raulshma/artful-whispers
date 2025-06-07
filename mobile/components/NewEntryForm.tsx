@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -21,12 +22,24 @@ interface NewEntryFormProps {
   onSuccess?: () => void;
 }
 
+const MOOD_OPTIONS = [
+  { label: 'Happy', value: 'happy', color: '#10B981', icon: '😊' },
+  { label: 'Sad', value: 'sad', color: '#6B7280', icon: '😢' },
+  { label: 'Excited', value: 'excited', color: '#F59E0B', icon: '🎉' },
+  { label: 'Calm', value: 'calm', color: '#3B82F6', icon: '😌' },
+  { label: 'Anxious', value: 'anxious', color: '#EF4444', icon: '😰' },
+  { label: 'Grateful', value: 'grateful', color: '#8B5CF6', icon: '🙏' },
+  { label: 'Angry', value: 'angry', color: '#DC2626', icon: '😠' },
+  { label: 'Peaceful', value: 'peaceful', color: '#059669', icon: '☮️' },
+];
+
 export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps) {
   const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [selectedMood, setSelectedMood] = useState(MOOD_OPTIONS[1]); // Default to 'Sad' as shown in design
+  const [showMoodSelector, setShowMoodSelector] = useState(false);
   const createEntry = useCreateDiaryEntry();
-  const { theme } = useTheme();
-
-  const handleSubmit = async () => {
+  const { theme } = useTheme();  const handleSubmit = async () => {
     if (!content.trim()) {
       Alert.alert('Write Something', 'Please share your thoughts to create a reflection.');
       return;
@@ -39,167 +52,209 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
         date: today,
       });
       
-      Alert.alert('Reflection Saved', 'AI is creating your title and artwork...');
+      Alert.alert('Reflection Saved', 'Your journal entry has been saved successfully!');
       setContent('');
+      setTitle('');
       onSuccess?.();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to save your reflection. Please try again.');
     }
   };
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
+  const getCurrentTime = () => {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+    return `Today, ${timeString}`;
+  };
   return (
     <KeyboardAvoidingView
       style={[
         styles.container,
         {
-          backgroundColor: theme.colors.backgroundSecondary,
+          backgroundColor: theme.colors.background,
         }
       ]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Card Container with Blur Effect */}
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onCancel}
+            disabled={createEntry.isPending}
+          >
+            <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+            Create New Journal
+          </Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
+        {/* Title Input */}
+        <View style={styles.titleSection}>
+          <TextInput
+            style={[
+              styles.titleInput,
+              { 
+                color: theme.colors.text,
+                borderBottomColor: theme.colors.border,
+              }
+            ]}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Enter a title for your journal..."
+            placeholderTextColor={theme.colors.textTertiary}
+            maxLength={100}
+          />
+        </View>
+
+        {/* Mood and Time Row */}
+        <View style={styles.metaRow}>
+          <TouchableOpacity
+            style={[
+              styles.moodSelector,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+              }
+            ]}
+            onPress={() => setShowMoodSelector(true)}
+          >
+            <Text style={[styles.moodText, { color: selectedMood.color }]}>
+              {selectedMood.icon} {selectedMood.label}
+            </Text>
+            <Ionicons name="chevron-down" size={16} color={theme.colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={[
+            styles.timeContainer,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.border,
+            }
+          ]}>
+            <Text style={[styles.timeText, { color: theme.colors.textSecondary }]}>
+              {getCurrentTime()}
+            </Text>
+          </View>
+        </View>
+
+        {/* Content Input */}
         <View style={[
-          styles.card,
+          styles.contentContainer,
           {
             backgroundColor: theme.colors.surface,
             borderColor: theme.colors.border,
           }
         ]}>
-          <BlurView
-            intensity={20}
-            style={styles.blurContent}
-            tint={theme.isDark ? 'dark' : 'light'}
-          >
-            {/* Header with Icon */}
-            <View style={styles.header}>
-              <View style={styles.headerRow}>
-                <View style={[
-                  styles.iconContainer,
-                  {
-                    backgroundColor: theme.colors.backgroundGreen,
-                  }
-                ]}>
-                  <Ionicons 
-                    name="create-outline" 
-                    size={20} 
-                    color={theme.colors.primary} 
-                  />
-                </View>
-                <View style={styles.headerText}>
-                  <Text style={[
-                    styles.title,
-                    { color: theme.colors.text }
-                  ]}>
-                    New Journal Entry
-                  </Text>
-                  <Text style={[
-                    styles.subtitle,
-                    { color: theme.colors.textSecondary }
-                  ]}>
-                    {currentDate} • Capture your thoughts and feelings
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Input Container */}
-            <View style={[
-              styles.inputContainer,
-              {
-                backgroundColor: theme.colors.backgroundTertiary,
-                borderColor: theme.colors.border,
+          <TextInput
+            style={[
+              styles.contentInput,
+              { 
+                color: theme.colors.text,
               }
-            ]}>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  { 
-                    color: theme.colors.text,
-                    backgroundColor: 'transparent',
-                  }
-                ]}
-                value={content}
-                onChangeText={setContent}
-                placeholder="How are you feeling today? What&apos;s on your mind? Take a moment to reflect on your day..."
-                placeholderTextColor={theme.colors.textTertiary}
-                multiline
-                textAlignVertical="top"
-                numberOfLines={12}
-                maxLength={5000}
-              />
-            </View>
-
-            {/* AI Message */}
-            <View style={styles.aiMessage}>
-              <View style={[
-                styles.aiIndicator,
-                {
-                  backgroundColor: theme.colors.accent,
-                }
-              ]} />
-              <Text style={[
-                styles.aiText,
-                { color: theme.colors.textSecondary }
-              ]}>
-                AI will craft a beautiful title and artwork
-              </Text>
-            </View>
-
-            {/* Button Container */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  styles.cancelButton,
-                  {
-                    backgroundColor: 'transparent',
-                    borderColor: theme.colors.border,
-                  }
-                ]}
-                onPress={onCancel}
-                disabled={createEntry.isPending}
-              >
-                <Text style={[
-                  styles.cancelButtonText,
-                  { color: theme.colors.textSecondary }
-                ]}>
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  styles.saveButton,
-                  {
-                    backgroundColor: theme.colors.primary,
-                    opacity: (!content.trim() || createEntry.isPending) ? 0.5 : 1,
-                  }
-                ]}
-                onPress={handleSubmit}
-                disabled={createEntry.isPending || !content.trim()}
-              >
-                {createEntry.isPending ? (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator color="white" size="small" />
-                    <Text style={styles.saveButtonText}>Saving...</Text>
-                  </View>
-                ) : (
-                  <Text style={styles.saveButtonText}>Save Entry</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </BlurView>
+            ]}
+            value={content}
+            onChangeText={setContent}
+            placeholder="Today I had a hard time concentrating. I was very worried about making mistakes, very angry at myself for not being able to focus. The more I tried to push through, the more overwhelmed I felt. It's like my brain just wouldn't cooperate, and that made me feel even more frustrated..."
+            placeholderTextColor={theme.colors.textTertiary}
+            multiline
+            textAlignVertical="top"
+            maxLength={5000}
+          />
         </View>
+
+        {/* Save Button */}
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            {
+              backgroundColor: theme.colors.primary,
+              opacity: (!content.trim() || createEntry.isPending) ? 0.5 : 1,
+            }
+          ]}
+          onPress={handleSubmit}
+          disabled={createEntry.isPending || !content.trim()}
+        >
+          {createEntry.isPending ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color="white" size="small" />
+              <Text style={styles.saveButtonText}>Saving...</Text>
+            </View>
+          ) : (
+            <Text style={styles.saveButtonText}>Save Journal Entry</Text>
+          )}
+        </TouchableOpacity>
       </ScrollView>
+
+      {/* Mood Selector Modal */}
+      <Modal
+        visible={showMoodSelector}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowMoodSelector(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[
+            styles.modalContent,
+            {
+              backgroundColor: theme.colors.surface,
+            }
+          ]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+                How are you feeling?
+              </Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowMoodSelector(false)}
+              >
+                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.moodList}>
+              {MOOD_OPTIONS.map((mood) => (
+                <TouchableOpacity
+                  key={mood.value}
+                  style={[
+                    styles.moodOption,
+                    {
+                      backgroundColor: selectedMood.value === mood.value ? mood.color + '20' : 'transparent',
+                      borderColor: theme.colors.border,
+                    }
+                  ]}
+                  onPress={() => {
+                    setSelectedMood(mood);
+                    setShowMoodSelector(false);
+                  }}
+                >
+                  <Text style={styles.moodIcon}>{mood.icon}</Text>
+                  <Text style={[
+                    styles.moodLabel,
+                    { 
+                      color: selectedMood.value === mood.value ? mood.color : theme.colors.text,
+                      fontWeight: selectedMood.value === mood.value ? '600' : '400',
+                    }
+                  ]}>
+                    {mood.label}
+                  </Text>
+                  {selectedMood.value === mood.value && (
+                    <Ionicons name="checkmark" size={20} color={mood.color} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -207,114 +262,88 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafafa',
   },
   scrollView: {
     flex: 1,
-    padding: 20,
-  },
-  card: {
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    marginBottom: 20,
-  },
-  blurContent: {
-    padding: 24,
   },
   header: {
-    marginBottom: 24,
-  },
-  headerRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  titleSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  titleInput: {
+    fontSize: 24,
+    fontWeight: '600',
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
     gap: 12,
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerText: {
-    flex: 1,
-    gap: 4,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  inputContainer: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    minHeight: 240,
-  },
-  textInput: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlignVertical: 'top',
-    flex: 1,
-    minHeight: 200,
-  },
-  aiMessage: {
+  moodSelector: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
     gap: 8,
-    marginBottom: 24,
   },
-  aiIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  aiText: {
-    fontSize: 12,
+  moodText: {
+    fontSize: 14,
     fontWeight: '500',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  button: {
+  timeContainer: {
     flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  timeText: {
+    fontSize: 14,
+  },
+  contentContainer: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    minHeight: 300,
+  },
+  contentInput: {
+    fontSize: 16,
+    lineHeight: 24,
+    padding: 16,
+    textAlignVertical: 'top',
+    minHeight: 280,
+  },
+  saveButton: {
+    marginHorizontal: 20,
+    marginBottom: 20,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 50,
-  },
-  cancelButton: {
-    borderWidth: 1,
-  },
-  saveButton: {
-    shadowColor: '#8DB596',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
   },
   saveButtonText: {
     fontSize: 16,
@@ -325,5 +354,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  moodList: {
+    padding: 20,
+  },
+  moodOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 8,
+    gap: 12,
+  },
+  moodIcon: {
+    fontSize: 20,
+  },
+  moodLabel: {
+    flex: 1,
+    fontSize: 16,
   },
 });

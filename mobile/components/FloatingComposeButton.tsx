@@ -8,17 +8,21 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useRouter } from 'expo-router';
 
 interface FloatingComposeButtonProps {
-  onPress: () => void;
   hasEntriesToday?: boolean;
 }
 
 export default function FloatingComposeButton({
-  onPress,
   hasEntriesToday = false,
 }: FloatingComposeButtonProps) {
   const { theme } = useTheme();
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push('/addJournal');
+  };
 
   return (
     <View style={styles.container}>
@@ -29,7 +33,7 @@ export default function FloatingComposeButton({
             borderColor: theme.colors.border,
           }
         ]}
-        onPress={onPress}
+        onPress={handlePress}
         activeOpacity={0.8}
       >
         <BlurView

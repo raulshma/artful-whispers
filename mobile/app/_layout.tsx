@@ -28,6 +28,8 @@ function AppWithTheme() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="auth" options={{ headerShown: false }} />
           <Stack.Screen name="checkin" options={{ headerShown: false }} />
+          <Stack.Screen name="addJournal" options={{ headerShown: false }} />
+          <Stack.Screen name="addAudioJournal" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

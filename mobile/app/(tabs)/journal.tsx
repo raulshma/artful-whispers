@@ -7,8 +7,6 @@ import {
   Text,
   RefreshControl,
   Alert,
-  Modal,
-  SafeAreaView,
   TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,7 +15,6 @@ import { useInfiniteDiaryEntries } from "@/hooks/useDiary";
 import { useTheme } from "@/contexts/ThemeContext";
 import DiaryEntryCard from "@/components/DiaryEntryCard";
 import FloatingComposeButton from "@/components/FloatingComposeButton";
-import NewEntryForm from "@/components/NewEntryForm";
 import { useFocusEffect } from "@react-navigation/native";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
@@ -27,7 +24,6 @@ export default function JournalScreen() {
   const { user } = useAuth();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const [showNewEntry, setShowNewEntry] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const {
@@ -68,17 +64,11 @@ export default function JournalScreen() {
       setRefreshing(false);
     }
   }, [refetch]);
-
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const handleNewEntrySuccess = useCallback(() => {
-    setShowNewEntry(false);
-    refetch();
-  }, [refetch]);
 
   const renderEntry = ({ item }: { item: any }) => (
     <DiaryEntryCard
@@ -240,31 +230,11 @@ export default function JournalScreen() {
                 tintColor={theme.colors.primary}
               />
             }
-          />
-        </ShadowFriendlyAnimation>
+          />        </ShadowFriendlyAnimation>
 
         <FloatingComposeButton
-          onPress={() => setShowNewEntry(true)}
           hasEntriesToday={todayEntries.length > 0}
         />
-
-        <Modal
-          visible={showNewEntry}
-          animationType="slide"
-          presentationStyle="fullScreen"
-        >
-          <SafeAreaView
-            style={[
-              styles.modalContainer,
-              { backgroundColor: theme.colors.background },
-            ]}
-          >
-            <NewEntryForm
-              onCancel={() => setShowNewEntry(false)}
-              onSuccess={handleNewEntrySuccess}
-            />
-          </SafeAreaView>
-        </Modal>
       </View>
     </AnimatedPageWrapper>
   );
@@ -360,13 +330,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
-  },
-  retryButtonText: {
+  },  retryButtonText: {
     color: "white",
     fontSize: 14,
     fontWeight: "600",
-  },
-  modalContainer: {
-    flex: 1,
   },
 });
