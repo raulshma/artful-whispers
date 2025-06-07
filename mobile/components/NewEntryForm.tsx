@@ -51,7 +51,9 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  });  return (
+  });
+
+  return (
     <KeyboardAvoidingView
       style={[
         styles.container,
@@ -63,7 +65,8 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Card Container with Blur Effect */}        <View style={[
+        {/* Card Container with Blur Effect */}
+        <View style={[
           styles.card,
           {
             backgroundColor: theme.colors.surface,
@@ -75,7 +78,8 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
             style={styles.blurContent}
             tint={theme.isDark ? 'dark' : 'light'}
           >
-            {/* Header with Icon */}            <View style={styles.header}>
+            {/* Header with Icon */}
+            <View style={styles.header}>
               <View style={styles.headerRow}>
                 <View style={[
                   styles.iconContainer,
@@ -106,7 +110,8 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
               </View>
             </View>
 
-            {/* Input Container */}            <View style={[
+            {/* Input Container */}
+            <View style={[
               styles.inputContainer,
               {
                 backgroundColor: theme.colors.backgroundTertiary,
@@ -132,7 +137,8 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
               />
             </View>
 
-            {/* AI Message */}            <View style={styles.aiMessage}>
+            {/* AI Message */}
+            <View style={styles.aiMessage}>
               <View style={[
                 styles.aiIndicator,
                 {
@@ -147,7 +153,8 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
               </Text>
             </View>
 
-            {/* Button Container */}            <View style={styles.buttonContainer}>
+            {/* Button Container */}
+            <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[
                   styles.button,
@@ -294,7 +301,8 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     borderWidth: 1,
-  },  saveButton: {
+  },
+  saveButton: {
     shadowColor: '#8DB596',
     shadowOffset: {
       width: 0,

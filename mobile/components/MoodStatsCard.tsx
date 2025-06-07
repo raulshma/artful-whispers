@@ -78,13 +78,12 @@ export default function MoodStatsCard({ title, subtitle, stats, onPress }: MoodS
           size={24} 
           color={theme.colors.textSecondary} 
         />
-      </View>
-
-      <View style={styles.statsContainer}>
+      </View>      <View style={styles.statsContainer}>
         {stats.map((stat, index) => renderMoodBar(stat, index))}
       </View>
 
-      {stats.length > 0 && (        <Text style={styles.encouragementText}>
+      {stats.length > 0 && (
+        <Text style={styles.encouragementText}>
           You&apos;ve been reflecting on positive experiences often this month. Keep it up!
         </Text>
       )}

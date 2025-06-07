@@ -147,7 +147,8 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },  content: {
+  },
+  content: {
     paddingBottom: 100, // Space for tab bar
   },
 });
