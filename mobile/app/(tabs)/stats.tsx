@@ -130,7 +130,7 @@ export default function JournalStatsScreen() {
     console.log("Add journal pressed");
   };
   return (
-    <AnimatedPageWrapper animationType="slideUp">
+    <AnimatedPageWrapper animationType="fadeIn">
       <View
         style={[
           styles.container,
