@@ -4,13 +4,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { 
-  Header,
-  HeaderIconButton,
   Button,
   MoodSelector,
   Card
@@ -31,6 +29,7 @@ const MOOD_OPTIONS = [
 export default function CheckInScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [selectedMood, setSelectedMood] = useState<string | undefined>();
 
   const handleMoodSelect = (mood: string) => {
@@ -51,23 +50,8 @@ export default function CheckInScreen() {
       console.log('Quick check-in:', selectedMood);
       // Show success feedback
     }
-  };
-
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header
-        title="How are you feeling?"
-        variant="large"
-        rightComponent={
-          <HeaderIconButton
-            iconName="questionmark.circle"
-            onPress={() => {
-              // Show help/info modal
-            }}
-          />
-        }
-      />
-
+  };  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -159,8 +143,7 @@ export default function CheckInScreen() {
               </View>
             </View>
           </View>
-        </Card>
-      </ScrollView>
+        </Card>      </ScrollView>
     </View>
   );
 }
@@ -171,8 +154,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  content: {
+  },  content: {
     padding: 16,
     paddingBottom: 100,
   },

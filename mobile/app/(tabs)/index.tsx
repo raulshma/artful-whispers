@@ -3,17 +3,15 @@ import {
   View,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
   Text,
   RefreshControl,
   Dimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { 
-  Header, 
-  HeaderNotificationButton,
   StatCard,
   BarChart,
   HorizontalBarChart,
@@ -46,6 +44,7 @@ const mockCalendarData = [
 export default function JournalStatsScreen() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -58,20 +57,13 @@ export default function JournalStatsScreen() {
   const chartWidth = Math.max(120, cardWidth - 20); // Ensure minimum width
 
   const handleRefresh = async () => {
-    setRefreshing(true);
-    // Simulate API call
+    setRefreshing(true);    // Simulate API call
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
-  };
-
-  const handleNotifications = () => {
-    // Handle notifications
-  };
-
-  if (loading) {
+  };  if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
@@ -79,22 +71,8 @@ export default function JournalStatsScreen() {
           </Text>
         </View>
       </View>
-    );
-  }
-
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header
-        title="Journal Stats"
-        variant="large"
-        rightComponent={
-          <HeaderNotificationButton
-            onPress={handleNotifications}
-            hasNotifications={true}
-          />
-        }
-      />
-
+    );  }  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -215,8 +193,7 @@ export default function JournalStatsScreen() {
                 🎯 You're most consistent with journaling in the evening
               </Text>
             </View>
-          </View>
-        </View>
+          </View>        </View>
       </ScrollView>
     </View>
   );
@@ -228,8 +205,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  content: {
+  },  content: {
     padding: 16,
     paddingBottom: 100, // Space for tab bar
   },

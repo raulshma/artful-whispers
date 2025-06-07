@@ -3,17 +3,15 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Alert,
   Switch,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { 
-  Header,
-  HeaderIconButton,
   Button,
   Card,
   ListItem
@@ -26,6 +24,7 @@ export default function ProfileScreen() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [reminderEnabled, setReminderEnabled] = useState(true);
@@ -140,21 +139,9 @@ export default function ProfileScreen() {
       icon: 'doc.text.fill',
       type: 'arrow' as const,
       onPress: () => Alert.alert('Terms of Service', 'Terms of service coming soon!'),
-    },
-  ];
-
+    },  ];
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header
-        title="Profile"
-        rightComponent={
-          <HeaderIconButton
-            iconName="gearshape.fill"
-            onPress={() => Alert.alert('Settings', 'Advanced settings coming soon!')}
-          />
-        }
-      />
-
+    <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {/* User Profile Header */}
@@ -294,10 +281,9 @@ export default function ProfileScreen() {
               onPress={handleSignOut}
               style={styles.signOutButton}
             />
-          </View>
-        </View>
+          </View>        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -307,8 +293,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  content: {
+  },  content: {
     padding: 16,
     paddingBottom: 32,
   },
