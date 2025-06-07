@@ -8,15 +8,11 @@ import {
   vec,
   Shadow,
   Group,
-  Blur,
-  BackdropFilter,
 } from '@shopify/react-native-skia';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
-  interpolateColor,
   useDerivedValue,
 } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -31,21 +27,35 @@ const { width: screenWidth } = Dimensions.get('window');
 const TAB_BAR_WIDTH = screenWidth - 40; // 20px margin on each side
 const TAB_BAR_HEIGHT = 68;
 const BORDER_RADIUS = 24;
+const CONTENT_PADDING_HORIZONTAL = 12; // Padding inside the tab bar where buttons are placed
+const INDICATOR_INTERNAL_PADDING = 24; // Padding for the indicator visuals relative to its slot
 
 export function FloatingTabBar({ children, activeIndex, totalTabs }: FloatingTabBarProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-    const animatedScale = useSharedValue(1);
+  const animatedScale = useSharedValue(1);
   const animatedOpacity = useSharedValue(0.95);
-  const indicatorPosition = useSharedValue(0);
+  const indicatorPosition = useSharedValue(activeIndex); // Initialize with activeIndex
+
+  // Calculate dimensions based on content area
+  const contentAreaWidth = TAB_BAR_WIDTH - (2 * CONTENT_PADDING_HORIZONTAL);
+  const effectiveTabSlotWidth = contentAreaWidth / totalTabs;
+  const indicatorRenderWidth = effectiveTabSlotWidth - INDICATOR_INTERNAL_PADDING;
   
-  // Derived value for indicator position with offset
-  const indicatorX = useDerivedValue(() => indicatorPosition.value + 12);
+  // Derived value for indicator position - centered on the active tab
+  const indicatorX = useDerivedValue(() => {
+    // Calculate the center of the active tab's slot within the content area
+    const activeSlotCenterInContentArea = (indicatorPosition.value + 0.5) * effectiveTabSlotWidth;
+    // Adjust for the tab bar's own content padding to get the absolute center
+    const absoluteActiveSlotCenter = CONTENT_PADDING_HORIZONTAL + activeSlotCenterInContentArea;
+    // Position the indicator by subtracting half its own width from the absolute center
+    return absoluteActiveSlotCenter - (indicatorRenderWidth / 2);
+  });
   
   useEffect(() => {
-    // Animate indicator position based on active tab
+    // Animate indicatorPosition (which represents activeIndex)
     indicatorPosition.value = withSpring(
-      (activeIndex / totalTabs) * TAB_BAR_WIDTH,
+      activeIndex,
       { damping: 20, stiffness: 300 }
     );
     
@@ -54,7 +64,7 @@ export function FloatingTabBar({ children, activeIndex, totalTabs }: FloatingTab
     setTimeout(() => {
       animatedScale.value = withSpring(1, { damping: 15, stiffness: 400 });
     }, 100);
-  }, [activeIndex, totalTabs]);
+  }, [activeIndex, totalTabs, effectiveTabSlotWidth, indicatorRenderWidth, animatedScale, indicatorPosition]); // Added animatedScale and indicatorPosition
 
   const containerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: animatedScale.value }],
@@ -105,11 +115,11 @@ export function FloatingTabBar({ children, activeIndex, totalTabs }: FloatingTab
             {/* Active tab indicator */}
             <Group>
               <RoundedRect
-                x={indicatorX}
-                y={12}
-                width={TAB_BAR_WIDTH / totalTabs - 24}
-                height={TAB_BAR_HEIGHT - 24}
-                r={16}
+                x={indicatorX} // Use the derived value
+                y={12} // Fixed y position
+                width={indicatorRenderWidth} // Use calculated render width
+                height={TAB_BAR_HEIGHT - 24} // Fixed height
+                r={16} // Fixed border radius for indicator
               >
                 <LinearGradient
                   start={vec(0, 0)}
@@ -166,6 +176,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 12,
+    paddingHorizontal: CONTENT_PADDING_HORIZONTAL, // Use the constant
   },
 });
