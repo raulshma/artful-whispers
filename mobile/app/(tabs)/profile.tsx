@@ -420,5 +420,6 @@ const styles = StyleSheet.create({
   },
   signOutButton: {
     width: "100%",
+    marginBottom: 65
   },
 });
