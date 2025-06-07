@@ -49,6 +49,13 @@ export default function TabLayout() {
           },
         }}>
         <Tabs.Screen
+          name="journal"
+          options={{
+            title: 'Journal',
+            tabBarIcon: ({ color }) => <IconSymbol size={24} name="book.fill" color={color} />,
+          }}
+        />
+        <Tabs.Screen
           name="index"
           options={{
             title: 'Stats',
@@ -60,13 +67,6 @@ export default function TabLayout() {
           options={{
             title: 'Check In',
             tabBarIcon: ({ color }) => <IconSymbol size={24} name="plus.circle.fill" color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="journal"
-          options={{
-            title: 'Journal',
-            tabBarIcon: ({ color }) => <IconSymbol size={24} name="book.fill" color={color} />,
           }}
         />
         <Tabs.Screen

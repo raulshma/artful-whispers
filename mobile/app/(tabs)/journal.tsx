@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInfiniteDiaryEntries } from '@/hooks/useDiary';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -19,14 +20,13 @@ import FloatingComposeButton from '@/components/FloatingComposeButton';
 import NewEntryForm from '@/components/NewEntryForm';
 import { useFocusEffect } from '@react-navigation/native';
 import { 
-  Header,
-  HeaderIconButton,
   Card
 } from '@/components/ui';
 
 export default function JournalScreen() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -117,12 +117,15 @@ export default function JournalScreen() {
         </Text>
       </Card>
     </View>
-  );
-
-  if (isLoading) {
+  );  if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Header title="Journal" />
+      <View style={[
+        styles.container, 
+        { 
+          backgroundColor: theme.colors.background,
+          paddingTop: insets.top 
+        }
+      ]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
@@ -135,8 +138,13 @@ export default function JournalScreen() {
 
   if (isError) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Header title="Journal" />
+      <View style={[
+        styles.container, 
+        { 
+          backgroundColor: theme.colors.background,
+          paddingTop: insets.top 
+        }
+      ]}>
         <View style={styles.errorContainer}>
           <Text style={[styles.errorTitle, { color: theme.colors.text }]}>
             Unable to load entries
@@ -153,20 +161,14 @@ export default function JournalScreen() {
         </View>
       </View>
     );
-  }
-
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header
-        title="Journal"
-        rightComponent={
-          <HeaderIconButton
-            iconName="plus"
-            onPress={() => setShowNewEntry(true)}
-          />
-        }
-      />
-
+  }  return (
+    <View style={[
+      styles.container, 
+      { 
+        backgroundColor: theme.colors.background,
+        paddingTop: insets.top 
+      }
+    ]}>
       {/* Today's entry count */}
       {todayEntries.length > 0 && (
         <View style={styles.todayContainer}>
