@@ -88,9 +88,9 @@ export default function FloatingComposeButton({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 95,
     right: 20,
-    zIndex: 30,
+    zIndex: 1100,
   },
   buttonContainer: {
     shadowColor: '#000',
