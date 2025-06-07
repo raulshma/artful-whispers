@@ -6,17 +6,17 @@ import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useTheme();
 
   return (
     <ProtectedRoute>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.textSecondary,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
@@ -24,22 +24,47 @@ export default function TabLayout() {
             ios: {
               // Use a transparent background on iOS to show the blur effect
               position: 'absolute',
+              backgroundColor: theme.colors.surface + 'CC', // Semi-transparent
+              borderTopColor: theme.colors.border,
             },
-            default: {},
+            default: {
+              backgroundColor: theme.colors.surface,
+              borderTopColor: theme.colors.border,
+              borderTopWidth: 1,
+            },
           }),
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '500',
+            fontFamily: 'Inter-Medium',
+          },
         }}>
         <Tabs.Screen
           name="index"
           options={{
+            title: 'Stats',
+            tabBarIcon: ({ color }) => <IconSymbol size={24} name="chart.bar.fill" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="checkin"
+          options={{
+            title: 'Check In',
+            tabBarIcon: ({ color }) => <IconSymbol size={24} name="plus.circle.fill" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="journal"
+          options={{
             title: 'Journal',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
+            tabBarIcon: ({ color }) => <IconSymbol size={24} name="book.fill" color={color} />,
           }}
         />
         <Tabs.Screen
           name="explore"
           options={{
             title: 'Profile',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+            tabBarIcon: ({ color }) => <IconSymbol size={24} name="person.fill" color={color} />,
           }}
         />
       </Tabs>

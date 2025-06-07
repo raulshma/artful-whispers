@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  Text
+} from 'react-native';
 import { signIn, signUp } from '@/lib/auth';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { config } from '@/config';
+import {
+  Button,
+  Input,
+  Card,
+  LoadingAnimation
+} from '@/components/ui';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -15,6 +30,7 @@ export default function AuthScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { refreshAuth, isAuthenticated, user } = useAuth();
+  const { theme } = useTheme();
 
   // Debug effect to log platform and config info
   useEffect(() => {
@@ -72,64 +88,130 @@ export default function AuthScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ThemedView style={styles.content}>
-        <ThemedText type="title" style={styles.title}>
-          {isSignUp ? 'Sign Up' : 'Sign In'}
-        </ThemedText>
-        
-        {/* Debug info */}
-        <ThemedText style={styles.debugText}>
-          Platform: {Platform.OS} | API: {config.API_BASE_URL.substring(0, 25)}...
-        </ThemedText>
-        
-        {isSignUp && (
-          <TextInput
-            style={styles.input}
-            placeholder="Full Name"
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-          />
-        )}
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        
-        <TouchableOpacity 
-          style={[styles.button, isLoading && styles.buttonDisabled]} 
-          onPress={handleAuth}
-          disabled={isLoading}
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          <ThemedText style={styles.buttonText}>
-            {isLoading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
-          </ThemedText>
-        </TouchableOpacity>
-        
-        <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
-          <ThemedText style={styles.switchText}>
-            {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-          </ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-    </KeyboardAvoidingView>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <View style={[styles.logoCircle, { backgroundColor: theme.colors.primary + '20' }]}>
+                <IconSymbol
+                  name="heart.text.square.fill"
+                  size={40}
+                  color={theme.colors.primary}
+                />
+              </View>
+              <Text style={[styles.appName, { color: theme.colors.text }]}>
+                Artful Whispers
+              </Text>
+              <Text style={[styles.tagline, { color: theme.colors.textSecondary }]}>
+                Your digital companion for mindful reflection
+              </Text>
+            </View>
+          </View>
+
+          {/* Auth Form */}
+          <Card style={styles.formCard}>
+            <Text style={[styles.formTitle, { color: theme.colors.text }]}>
+              {isSignUp ? 'Create Account' : 'Welcome Back'}
+            </Text>
+            
+            <Text style={[styles.formSubtitle, { color: theme.colors.textSecondary }]}>
+              {isSignUp
+                ? 'Start your journey of self-discovery'
+                : 'Continue your mindfulness journey'
+              }
+            </Text>
+
+            <View style={styles.formFields}>
+              {isSignUp && (
+                <Input
+                  placeholder="Full Name"
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                  leftIcon={
+                    <IconSymbol
+                      name="person.fill"
+                      size={20}
+                      color={theme.colors.textSecondary}
+                    />
+                  }
+                />
+              )}
+              
+              <Input
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                leftIcon={
+                  <IconSymbol
+                    name="envelope.fill"
+                    size={20}
+                    color={theme.colors.textSecondary}
+                  />
+                }
+              />
+              
+              <Input
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                leftIcon={
+                  <IconSymbol
+                    name="lock.fill"
+                    size={20}
+                    color={theme.colors.textSecondary}
+                  />
+                }
+              />
+
+              {isLoading ? (
+                <View style={styles.loadingContainer}>
+                  <LoadingAnimation variant="dots" size={24} />
+                  <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                    {isSignUp ? 'Creating your account...' : 'Signing you in...'}
+                  </Text>
+                </View>
+              ) : (
+                <Button
+                  title={isSignUp ? 'Create Account' : 'Sign In'}
+                  variant="primary"
+                  onPress={handleAuth}
+                  style={styles.authButton}
+                />
+              )}
+
+              <Button
+                title={isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                variant="link"
+                onPress={() => setIsSignUp(!isSignUp)}
+                style={styles.switchButton}
+              />
+            </View>
+          </Card>
+
+          {/* Debug Info (can be removed in production) */}
+          {__DEV__ && (
+            <View style={styles.debugContainer}>
+              <Text style={[styles.debugText, { color: theme.colors.textTertiary }]}>
+                Platform: {Platform.OS} | API: {config.API_BASE_URL.substring(0, 30)}...
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -137,50 +219,80 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  keyboardView: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
   },
-  title: {
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  appName: {
+    fontSize: 28,
+    fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
+  },
+  tagline: {
+    fontSize: 16,
+    textAlign: 'center',
+    maxWidth: 280,
+  },
+  formCard: {
+    padding: 32,
+    marginBottom: 20,
+  },
+  formTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  formSubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  formFields: {
+    gap: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    padding: 20,
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 16,
+  },
+  authButton: {
+    marginTop: 8,
+  },
+  switchButton: {
+    marginTop: 8,
+  },
+  debugContainer: {
+    padding: 16,
+    alignItems: 'center',
   },
   debugText: {
     fontSize: 12,
     textAlign: 'center',
-    marginBottom: 20,
-    opacity: 0.7,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  switchText: {
-    textAlign: 'center',
-    marginTop: 20,
-    color: '#007AFF',
   },
 });

@@ -1,285 +1,217 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View,
+  ScrollView,
   StyleSheet,
-  FlatList,
+  SafeAreaView,
   ActivityIndicator,
   Text,
   RefreshControl,
-  Alert,
-  Modal,
-  SafeAreaView,
-  StatusBar,
-  TouchableOpacity,
 } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { useInfiniteDiaryEntries } from '@/hooks/useDiary';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import DiaryEntryCard from '@/components/DiaryEntryCard';
-import FloatingComposeButton from '@/components/FloatingComposeButton';
-import NewEntryForm from '@/components/NewEntryForm';
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { BlurView } from 'expo-blur';
+import { useTheme } from '@/contexts/ThemeContext';
+import { 
+  Header, 
+  HeaderNotificationButton,
+  StatCard,
+  BarChart,
+  HorizontalBarChart,
+  CompactCalendar
+} from '@/components/ui';
 
-export default function HomeScreen() {
+// Mock data - replace with actual API calls
+const mockMoodData = [
+  { label: 'Happy', value: 25, color: '#10B981' },
+  { label: 'Calm', value: 20, color: '#06B6D4' },
+  { label: 'Anxious', value: 15, color: '#F59E0B' },
+  { label: 'Sad', value: 10, color: '#EF4444' },
+  { label: 'Angry', value: 5, color: '#DC2626' },
+];
+
+const mockEmotionData = [
+  { label: 'Joy', value: 0.8, percentage: 68, color: '#10B981' },
+  { label: 'Content', value: 0.6, percentage: 45, color: '#06B6D4' },
+  { label: 'Worry', value: 0.4, percentage: 22, color: '#F59E0B' },
+];
+
+const mockCalendarData = [
+  { date: '2024-01-15', mood: 'happy', color: '#10B981' },
+  { date: '2024-01-16', mood: 'calm', color: '#06B6D4' },
+  { date: '2024-01-17', mood: 'anxious', color: '#F59E0B' },
+  { date: '2024-01-18', mood: 'happy', color: '#10B981' },
+  { date: '2024-01-19', mood: 'sad', color: '#EF4444' },
+];
+
+export default function JournalStatsScreen() {
   const { user } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';  const [showNewEntry, setShowNewEntry] = useState(false);
+  const { theme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useInfiniteDiaryEntries(10);
-
-  // Flatten all pages into a single array
-  const entries = data?.pages.flat() || [];
-
-  // Memoized date calculations
-  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
-  
-  // Memoized today's entries
-  const todayEntries = useMemo(() => 
-    entries.filter(entry => entry.date === today), 
-    [entries, today]  );
-
-  // Refresh data when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [refetch])
-  );
-
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    try {
-      await refetch();
-    } finally {
+    // Simulate API call
+    setTimeout(() => {
       setRefreshing(false);
-    }
-  }, [refetch]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const handleNewEntrySuccess = useCallback(() => {
-    setShowNewEntry(false);
-    refetch();
-  }, [refetch]);
-
-  const renderEntry = ({ item }: { item: any }) => (
-    <DiaryEntryCard
-      entry={item}
-      onPress={() => {
-        // TODO: Navigate to entry detail
-        Alert.alert('Entry', 'Entry detail view coming soon!');
-      }}
-    />
-  );
-
-  const renderFooter = () => {
-    if (!isFetchingNextPage) return null;
-    return (
-      <View style={styles.loadingFooter}>
-        <ActivityIndicator size="small" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading more entries...</Text>
-      </View>
-    );
+    }, 1000);
   };
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <BlurView
-        intensity={isDark ? 20 : 30}
-        style={styles.emptyStateBlur}
-        tint={isDark ? 'dark' : 'light'}
-      >
-        <Ionicons 
-          name="journal-outline" 
-          size={64} 
-          color={isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)'} 
-        />
-        <Text style={[
-          styles.emptyTitle,
-          { color: isDark ? '#ffffff' : '#1f2937' }
-        ]}>
-          Welcome to Your Digital Journal
-        </Text>
-        <Text style={[
-          styles.emptySubtitle,
-          { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
-        ]}>
-          Capture your thoughts, moments, and reflections throughout the day.
-          There's no limit - write as many entries as your heart desires.
-        </Text>
-        <Text style={[
-          styles.emptyHint,
-          { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
-        ]}>
-          Tap the + button below to start your first reflection
-        </Text>
-      </BlurView>
-    </View>
-  );
+  const handleNotifications = () => {
+    // Handle notifications
+  };
 
-  if (isLoading) {    return (
-      <View style={[styles.container, { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }]}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+  if (loading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator 
-            size="large" 
-            color={isDark ? '#60a5fa' : '#3b82f6'} 
-          />
-          <Text style={[
-            styles.loadingText,
-            { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
-          ]}>
-            Loading your entries...
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+            Loading your stats...
           </Text>
         </View>
       </View>
     );
   }
 
-  if (isError) {    return (
-      <View style={[styles.container, { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }]}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-        <View style={styles.errorContainer}>
-          <Ionicons 
-            name="alert-circle-outline" 
-            size={48} 
-            color={isDark ? '#ef4444' : '#dc2626'} 
-          />
-          <Text style={[
-            styles.errorTitle,
-            { color: isDark ? '#ffffff' : '#1f2937' }
-          ]}>
-            Unable to load entries
-          </Text>
-          <Text style={[
-            styles.errorSubtitle,
-            { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
-          ]}>
-            {error?.message || 'Something went wrong. Please try again.'}
-          </Text>
-          <TouchableOpacity 
-            style={[
-              styles.retryButton,
-              { backgroundColor: isDark ? '#60a5fa' : '#3b82f6' }
-            ]} 
-            onPress={() => refetch()}
-          >
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      
-      {/* Header with greeting */}
-      <BlurView
-        intensity={isDark ? 30 : 40}
-        style={styles.headerBlur}
-        tint={isDark ? 'dark' : 'light'}
-      >
-        <SafeAreaView>
-          <View style={styles.headerContent}>
-            <Text style={[
-              styles.greeting,
-              { color: isDark ? '#ffffff' : '#1f2937' }
-            ]}>
-              Hello, {user?.name || 'Friend'}!
-            </Text>
-            <Text style={[
-              styles.subtitle,
-              { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
-            ]}>
-              {entries.length > 0
-                ? `${entries.length} reflection${entries.length !== 1 ? 's' : ''} captured`
-                : 'Ready to start journaling?'}
-            </Text>
-          </View>
-        </SafeAreaView>
-      </BlurView>
-
-      {/* Today's entry count */}
-      {todayEntries.length > 0 && (
-        <View style={styles.todayContainer}>
-          <BlurView
-            intensity={isDark ? 20 : 30}
-            style={styles.todayChip}
-            tint={isDark ? 'dark' : 'light'}
-          >
-            <Text style={[
-              styles.todayText,
-              { color: isDark ? '#60a5fa' : '#3b82f6' }
-            ]}>
-              {todayEntries.length} reflection{todayEntries.length !== 1 ? 's' : ''} today
-            </Text>
-            {todayEntries.length > 1 && (
-              <Text style={[
-                styles.todaySubtext,
-                { color: isDark ? 'rgba(96, 165, 250, 0.6)' : 'rgba(59, 130, 246, 0.6)' }
-              ]}>
-                • Multiple moments captured
-              </Text>
-            )}
-          </BlurView>
-        </View>
-      )}
-
-      <FlatList
-        data={entries}
-        renderItem={renderEntry}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={entries.length === 0 ? styles.emptyContainer : styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={renderFooter}
-        ListEmptyComponent={renderEmptyState}        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[isDark ? '#60a5fa' : '#3b82f6']}
-            tintColor={isDark ? '#60a5fa' : '#3b82f6'}
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Header
+        title="Journal Stats"
+        variant="large"
+        rightComponent={
+          <HeaderNotificationButton
+            onPress={handleNotifications}
+            hasNotifications={true}
           />
         }
       />
 
-      <FloatingComposeButton
-        onPress={() => setShowNewEntry(true)}
-        hasEntriesToday={todayEntries.length > 0}
-      />
-
-      <Modal
-        visible={showNewEntry}
-        animationType="slide"
-        presentationStyle="fullScreen"
-      >
-        <SafeAreaView style={[
-          styles.modalContainer,
-          { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }
-        ]}>
-          <NewEntryForm
-            onCancel={() => setShowNewEntry(false)}
-            onSuccess={handleNewEntrySuccess}
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.colors.primary}
           />
-        </SafeAreaView>
-      </Modal>
+        }
+      >
+        <View style={styles.content}>
+          {/* Greeting Section */}
+          <View style={styles.greetingSection}>
+            <Text style={[styles.greeting, { color: theme.colors.text }]}>
+              Good morning, {user?.name || 'Friend'}!
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+              Here's how you've been feeling lately
+            </Text>
+          </View>
+
+          {/* Mood Distribution Chart */}
+          <View style={styles.chartSection}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              Mood Distribution
+            </Text>
+            <Text style={[styles.sectionSubtitle, { color: theme.colors.textSecondary }]}>
+              Last 30 days
+            </Text>
+            <View style={styles.chartContainer}>
+              <BarChart
+                data={mockMoodData}
+                width={350}
+                height={200}
+                showLabels={true}
+                showValues={true}
+              />
+            </View>
+          </View>
+
+          {/* Statistics Cards Row */}
+          <View style={styles.statsRow}>
+            {/* Most Frequent Emotion Card */}
+            <View style={styles.statCard}>
+              <StatCard
+                title="Most frequent emotion"
+                value="Joy"
+                subtitle="68% of entries"
+                trend={{ value: 12, isPositive: true }}
+              />
+              <View style={styles.emotionChart}>
+                <HorizontalBarChart
+                  data={mockEmotionData}
+                  width={140}
+                  height={80}
+                />
+              </View>
+            </View>
+
+            {/* Journals Written Card */}
+            <View style={styles.statCard}>
+              <StatCard
+                title="Journals written"
+                value="24"
+                subtitle="This month"
+                trend={{ value: 8, isPositive: true }}
+              />
+              <View style={styles.calendarContainer}>
+                <CompactCalendar
+                  moodEntries={mockCalendarData}
+                  style={styles.compactCalendar}
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Additional Stats */}
+          <View style={styles.additionalStats}>
+            <StatCard
+              title="Current streak"
+              value="7 days"
+              subtitle="Keep it going!"
+              icon="flame"
+            />
+            
+            <StatCard
+              title="Average mood"
+              value="7.2/10"
+              subtitle="Above your baseline"
+              trend={{ value: 0.5, isPositive: true }}
+              icon="heart"
+            />
+            
+            <StatCard
+              title="Weekly progress"
+              value="85%"
+              subtitle="Goal: 5 entries/week"
+              trend={{ value: 15, isPositive: true }}
+              icon="target"
+            />
+          </View>
+
+          {/* Insights Section */}
+          <View style={styles.insightsSection}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              Insights
+            </Text>
+            <View style={[styles.insightCard, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.insightText, { color: theme.colors.text }]}>
+                💡 You tend to feel happiest on weekends and Wednesdays
+              </Text>
+            </View>
+            <View style={[styles.insightCard, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.insightText, { color: theme.colors.text }]}>
+                📈 Your mood has improved by 15% this month compared to last month
+              </Text>
+            </View>
+            <View style={[styles.insightCard, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.insightText, { color: theme.colors.text }]}>
+                🎯 You're most consistent with journaling in the evening
+              </Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -288,73 +220,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerBlur: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  headerContent: {
-    gap: 4,
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 14,
-  },
-  todayContainer: {
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-  todayChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  todayText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  todaySubtext: {
-    fontSize: 12,
-  },
-  listContainer: {
-    paddingVertical: 8,
-  },
-  emptyContainer: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
   },
-  emptyState: {
-    alignItems: 'center',
-    gap: 16,
-  },
-  emptyStateBlur: {
-    padding: 32,
-    borderRadius: 24,
-    alignItems: 'center',
-    gap: 16,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  emptyHint: {
-    fontSize: 14,
-    textAlign: 'center',
+  content: {
+    padding: 16,
+    paddingBottom: 100, // Space for tab bar
   },
   loadingContainer: {
     flex: 1,
@@ -362,42 +233,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
   },
-  loadingFooter: {
-    padding: 20,
+  loadingText: {
+    fontSize: 16,
+  },
+  greetingSection: {
+    marginBottom: 32,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  chartSection: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  chartContainer: {
     alignItems: 'center',
+    paddingVertical: 16,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  statCard: {
+    flex: 1,
     gap: 8,
   },
-  loadingText: {
+  emotionChart: {
+    marginTop: 8,
+  },
+  calendarContainer: {
+    marginTop: 8,
+  },
+  compactCalendar: {
+    alignSelf: 'center',
+  },
+  additionalStats: {
+    gap: 12,
+    marginBottom: 32,
+  },
+  insightsSection: {
+    marginBottom: 16,
+  },
+  insightCard: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  insightText: {
     fontSize: 14,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-    gap: 16,
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  errorSubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
     lineHeight: 20,
-  },
-  retryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
   },
 });
