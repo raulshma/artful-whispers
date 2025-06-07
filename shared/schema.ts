@@ -1,6 +1,7 @@
-import { pgTable, text, serial, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, boolean, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -70,6 +71,40 @@ export const diaryEntries = pgTable("diary_entries", {
   date: text("date").notNull(), // YYYY-MM-DD format
 });
 
+export const checkIns = pgTable("check_ins", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  mood: text("mood").notNull(),
+  moodCauses: jsonb("mood_causes").$type<string[]>().default([]),
+  moodIntensity: integer("mood_intensity").notNull(),
+  notes: text("notes"),
+  companions: jsonb("companions").$type<string[]>().default([]),
+  location: text("location"),
+  customLocationDetails: text("custom_location_details"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Define relations
+export const usersRelations = relations(users, ({ many }) => ({
+  checkIns: many(checkIns),
+  diaryEntries: many(diaryEntries),
+}));
+
+export const checkInsRelations = relations(checkIns, ({ one }) => ({
+  user: one(users, {
+    fields: [checkIns.userId],
+    references: [users.id],
+  }),
+}));
+
+export const diaryEntriesRelations = relations(diaryEntries, ({ one }) => ({
+  user: one(users, {
+    fields: [diaryEntries.userId],
+    references: [users.id],
+  }),
+}));
+
 export const updateUserProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -85,7 +120,19 @@ export const insertDiaryEntrySchema = createInsertSchema(diaryEntries).pick({
   date: true,
 });
 
+export const insertCheckInSchema = createInsertSchema(checkIns).pick({
+  mood: true,
+  moodCauses: true,
+  moodIntensity: true,
+  notes: true,
+  companions: true,
+  location: true,
+  customLocationDetails: true,
+});
+
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
 export type User = typeof users.$inferSelect;
 export type DiaryEntry = typeof diaryEntries.$inferSelect;
 export type InsertDiaryEntry = z.infer<typeof insertDiaryEntrySchema>;
+export type CheckIn = typeof checkIns.$inferSelect;
+export type InsertCheckIn = z.infer<typeof insertCheckInSchema>;

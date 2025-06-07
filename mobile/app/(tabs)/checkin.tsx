@@ -1,45 +1,180 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import MoodCheckIn from "@/components/MoodCheckIn";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
+import { LoadingAnimation } from "@/components/ui";
+import { getCheckIns, type CheckInResponse } from "@/services/checkinService";
+import { format, isToday, isYesterday } from "date-fns";
 
 export default function CheckInScreen() {
   const { theme } = useTheme();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [showMoodCheckIn, setShowMoodCheckIn] = useState(false);
+  const [checkIns, setCheckIns] = useState<CheckInResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleStartCheckIn = () => {
-    setShowMoodCheckIn(true);
+    router.push("/checkin/step1");
   };
 
-  const handleCheckInComplete = (responses: Record<string, any>) => {
-    console.log("Check-in completed:", responses);
-    setShowMoodCheckIn(false);
-    // Here you would typically save the mood data to your backend
-    // and show a success message
+  const fetchCheckIns = async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
+      const data = await getCheckIns(10, 0);
+      setCheckIns(data);
+    } catch (error) {
+      console.error("Failed to fetch check-ins:", error);
+      setError(error instanceof Error ? error.message : "Failed to load check-ins");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
-  const handleCheckInClose = () => {
-    setShowMoodCheckIn(false);
+  useEffect(() => {
+    fetchCheckIns();
+  }, []);
+
+  const onRefresh = () => {
+    fetchCheckIns(true);
   };
 
-  if (showMoodCheckIn) {
+  const getMoodIcon = (mood: string) => {
+    switch (mood.toLowerCase()) {
+      case 'overjoyed':
+      case 'happy':
+        return 'happy';
+      case 'neutral':
+        return 'remove';
+      case 'sad':
+        return 'sad';
+      case 'depressed':
+        return 'cloud';
+      case 'angry':
+        return 'flash';
+      case 'anxious':
+        return 'alert-circle';
+      case 'calm':
+        return 'leaf';
+      default:
+        return 'ellipse';
+    }
+  };
+
+  const getMoodColor = (mood: string) => {
+    switch (mood.toLowerCase()) {
+      case 'overjoyed':
+      case 'happy':
+        return theme.colors.mood?.happy || theme.colors.primary;
+      case 'neutral':
+        return theme.colors.textSecondary;
+      case 'sad':
+        return theme.colors.mood?.sad || '#6B7280';
+      case 'depressed':
+        return theme.colors.mood?.depressed || '#4B5563';
+      case 'angry':
+        return theme.colors.mood?.angry || '#EF4444';
+      case 'anxious':
+        return theme.colors.mood?.anxious || '#F59E0B';
+      case 'calm':
+        return theme.colors.mood?.calm || '#10B981';
+      default:
+        return theme.colors.textSecondary;
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isToday(date)) {
+      return format(date, 'h:mm a');
+    } else if (isYesterday(date)) {
+      return 'Yesterday';
+    } else {
+      return format(date, 'MMM d');
+    }
+  };
+
+  const getStreakCount = () => {
+    // Simple streak calculation - could be enhanced
+    let streak = 0;
+    const today = new Date();
+    const sortedCheckIns = checkIns
+      .slice()
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    for (const checkIn of sortedCheckIns) {
+      const checkInDate = new Date(checkIn.createdAt);
+      const daysDiff = Math.floor((today.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff === streak) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const getThisMonthCount = () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    return checkIns.filter(checkIn => {
+      const checkInDate = new Date(checkIn.createdAt);
+      return checkInDate >= startOfMonth;
+    }).length;
+  };
+
+  const getLatestMood = () => {
+    if (checkIns.length === 0) return { mood: 'neutral', label: 'Ready to check in' };
+    
+    const latest = checkIns[0];
+    return { mood: latest.mood, label: `Feeling ${latest.mood}` };
+  };
+
+  if (loading) {
     return (
-      <MoodCheckIn
-        onComplete={handleCheckInComplete}
-        onClose={handleCheckInClose}
-      />
+      <AnimatedPageWrapper animationType="scaleIn">
+        <View
+          style={[
+            styles.container,
+            styles.centered,
+            {
+              backgroundColor: theme.colors.backgroundGreen,
+              paddingTop: insets.top,
+            },
+          ]}
+        >
+          <LoadingAnimation />
+          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+            Loading your check-ins...
+          </Text>
+        </View>
+      </AnimatedPageWrapper>
     );
   }
+  const latestMood = getLatestMood();
+  const streakCount = getStreakCount();
+  const thisMonthCount = getThisMonthCount();
+
   return (
     <AnimatedPageWrapper animationType="scaleIn">
       <View
@@ -55,11 +190,18 @@ export default function CheckInScreen() {
           style={styles.scrollView}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.colors.primary}
+            />
+          }
         >
           {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.title, { color: theme.colors.text }]}>
-              How are you feeling this day?
+              How are you feeling today?
             </Text>
           </View>
 
@@ -68,13 +210,17 @@ export default function CheckInScreen() {
             style={[styles.moodCard, { backgroundColor: theme.colors.card }]}
           >
             <View style={styles.moodFace}>
-              <Ionicons name="happy" size={80} color={theme.colors.primary} />
+              <Ionicons
+                name={getMoodIcon(latestMood.mood)}
+                size={80}
+                color={getMoodColor(latestMood.mood)}
+              />
             </View>
 
             <Text
               style={[styles.moodPrompt, { color: theme.colors.textSecondary }]}
             >
-              I'm Feeling Overjoyed
+              {latestMood.label}
             </Text>
 
             <TouchableOpacity
@@ -85,7 +231,7 @@ export default function CheckInScreen() {
               onPress={handleStartCheckIn}
               activeOpacity={0.8}
             >
-              <Text style={styles.checkInButtonText}>Set Mood ✓</Text>
+              <Text style={styles.checkInButtonText}>Start Check-in ✓</Text>
             </TouchableOpacity>
           </View>
 
@@ -95,7 +241,7 @@ export default function CheckInScreen() {
               style={[styles.statItem, { backgroundColor: theme.colors.card }]}
             >
               <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                7
+                {streakCount}
               </Text>
               <Text
                 style={[
@@ -111,7 +257,7 @@ export default function CheckInScreen() {
               style={[styles.statItem, { backgroundColor: theme.colors.card }]}
             >
               <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                24
+                {thisMonthCount}
               </Text>
               <Text
                 style={[
@@ -131,75 +277,73 @@ export default function CheckInScreen() {
             <Text style={[styles.recentTitle, { color: theme.colors.text }]}>
               Recent Check-ins
             </Text>
-            <View style={styles.recentList}>
-              <View style={styles.recentItem}>
-                <Ionicons
-                  name="happy"
-                  size={20}
-                  color={theme.colors.mood.happy}
-                />
-                <View style={styles.recentContent}>
-                  <Text
-                    style={[styles.recentMood, { color: theme.colors.text }]}
-                  >
-                    Happy
+            
+            {error ? (
+              <View style={styles.errorContainer}>
+                <Text style={[styles.errorText, { color: theme.colors.semantic?.error || '#EF4444' }]}>
+                  {error}
+                </Text>
+                <TouchableOpacity
+                  style={[styles.retryButton, { borderColor: theme.colors.border }]}
+                  onPress={() => fetchCheckIns()}
+                >
+                  <Text style={[styles.retryText, { color: theme.colors.primary }]}>
+                    Try Again
                   </Text>
-                  <Text
-                    style={[
-                      styles.recentTime,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    2 hours ago
-                  </Text>
-                </View>
+                </TouchableOpacity>
               </View>
-
-              <View style={styles.recentItem}>
+            ) : checkIns.length === 0 ? (
+              <View style={styles.emptyContainer}>
                 <Ionicons
-                  name="leaf"
-                  size={20}
-                  color={theme.colors.mood.calm}
+                  name="help-circle-outline"
+                  size={32}
+                  color={theme.colors.textTertiary}
                 />
-                <View style={styles.recentContent}>
-                  <Text
-                    style={[styles.recentMood, { color: theme.colors.text }]}
-                  >
-                    Calm
-                  </Text>
-                  <Text
-                    style={[
-                      styles.recentTime,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    Yesterday
-                  </Text>
-                </View>
+                <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+                  No check-ins yet. Start your first check-in above!
+                </Text>
               </View>
-
-              <View style={styles.recentItem}>
-                <Ionicons
-                  name="alert-circle"
-                  size={20}
-                  color={theme.colors.mood.anxious}
-                />
-                <View style={styles.recentContent}>
-                  <Text
-                    style={[styles.recentMood, { color: theme.colors.text }]}
-                  >
-                    Anxious
-                  </Text>
-                  <Text
-                    style={[
-                      styles.recentTime,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    2 days ago
-                  </Text>
-                </View>
-              </View>            </View>
+            ) : (
+              <View style={styles.recentList}>
+                {checkIns.slice(0, 5).map((checkIn) => (
+                  <View key={checkIn.id} style={styles.recentItem}>
+                    <Ionicons
+                      name={getMoodIcon(checkIn.mood)}
+                      size={20}
+                      color={getMoodColor(checkIn.mood)}
+                    />
+                    <View style={styles.recentContent}>
+                      <Text
+                        style={[styles.recentMood, { color: theme.colors.text }]}
+                      >
+                        {checkIn.mood.charAt(0).toUpperCase() + checkIn.mood.slice(1)}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.recentTime,
+                          { color: theme.colors.textSecondary },
+                        ]}
+                      >
+                        {formatTimeAgo(checkIn.createdAt)}
+                      </Text>
+                    </View>
+                    {checkIn.moodIntensity && (
+                      <Text
+                        style={[
+                          styles.intensityBadge,
+                          {
+                            color: theme.colors.textSecondary,
+                            backgroundColor: theme.colors.surface
+                          }
+                        ]}
+                      >
+                        {checkIn.moodIntensity}/10
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         </ScrollView>
       </View>
@@ -305,5 +449,50 @@ const styles = StyleSheet.create({
   },
   recentTime: {
     fontSize: 14,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: 20,
+  },
+  retryText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  intensityBadge: {
+    fontSize: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    fontWeight: '500',
+    overflow: 'hidden',
   },
 });

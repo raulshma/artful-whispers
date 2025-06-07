@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCheckIn } from "@/contexts/CheckInContext";
 import {
   Header,
   Button,
@@ -14,7 +15,10 @@ import * as Haptics from "expo-haptics";
 export default function CheckinStep1() {
   const { theme } = useTheme();
   const router = useRouter();
-  const [selectedMood, setSelectedMood] = useState<any>(null);
+  const { checkInData, updateCheckInData } = useCheckIn();
+  const [selectedMood, setSelectedMood] = useState<any>(
+    checkInData.mood ? DEFAULT_MOODS.find(m => m.id === checkInData.mood) : null
+  );
 
   const handleMoodChange = (mood: any) => {
     setSelectedMood(mood);
@@ -23,14 +27,11 @@ export default function CheckinStep1() {
 
   const handleContinue = () => {
     if (selectedMood) {
-      // Store mood in check-in state (would use context or state management in real app)
-      router.push({
-        pathname: "/checkin/step2" as any,
-        params: {
-          mood: selectedMood.id,
-          moodLabel: selectedMood.label,
-        },
+      updateCheckInData({
+        mood: selectedMood.id,
+        moodLabel: selectedMood.label,
       });
+      router.push("/checkin/step2" as any);
     }
   };
 

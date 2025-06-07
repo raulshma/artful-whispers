@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCheckIn } from "@/contexts/CheckInContext";
 import { Header, Button, Card, ToggleButton } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 
@@ -19,9 +20,11 @@ const COMPANIONS = [
 export default function CheckinStep3() {
   const { theme } = useTheme();
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const { checkInData, updateCheckInData } = useCheckIn();
 
-  const [selectedCompanions, setSelectedCompanions] = useState<string[]>([]);
+  const [selectedCompanions, setSelectedCompanions] = useState<string[]>(
+    checkInData.companions || []
+  );
 
   const handleCompanionToggle = (companionId: string) => {
     setSelectedCompanions((prev) => {
@@ -36,13 +39,10 @@ export default function CheckinStep3() {
   };
 
   const handleContinue = () => {
-    router.push({
-      pathname: "/checkin/step4" as any,
-      params: {
-        ...params,
-        companions: JSON.stringify(selectedCompanions),
-      },
+    updateCheckInData({
+      companions: selectedCompanions,
     });
+    router.push("/checkin/step4" as any);
   };
 
   return (

@@ -5,6 +5,7 @@ import sharp from "sharp";
 import {
   insertDiaryEntrySchema,
   updateUserProfileSchema,
+  insertCheckInSchema,
 } from "@shared/schema";
 import { GoogleGenAI, Modality } from "@google/genai";
 import { put } from "@vercel/blob";
@@ -264,6 +265,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(updatedEntry);
       } catch (error) {
         res.status(400).json({ message: "Failed to toggle favorite" });
+      }
+    }
+  );
+
+  // Create new check-in (protected route)
+  app.post(
+    "/api/check-ins",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const validatedData = insertCheckInSchema.parse(req.body);
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const checkIn = await storage.createCheckIn({
+          ...validatedData,
+          userId: req.user.id,
+        });
+
+        res.status(201).json(checkIn);
+      } catch (error) {
+        console.error("Check-in creation error:", error);
+        res.status(400).json({
+          message: "Invalid check-in data",
+          error: error instanceof Error ? error.message : "Unknown error"
+        });
+      }
+    }
+  );
+
+  // Get check-ins with pagination (protected route)
+  app.get(
+    "/api/check-ins",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const limit = parseInt(req.query.limit as string) || 10;
+        const offset = parseInt(req.query.offset as string) || 0;
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const checkIns = await storage.getCheckIns(
+          req.user.id,
+          limit,
+          offset
+        );
+        res.json(checkIns);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to fetch check-ins" });
       }
     }
   );

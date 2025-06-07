@@ -1,48 +1,153 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, Alert } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCheckIn } from "@/contexts/CheckInContext";
 import { Header, Button, Card, LoadingAnimation } from "@/components/ui";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { createCheckIn } from "@/services/checkinService";
 import * as Haptics from "expo-haptics";
 
 export default function CheckinComplete() {
   const { theme } = useTheme();
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const { checkInData, resetCheckInData, isSubmitting, setIsSubmitting } = useCheckIn();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Simulate saving the check-in data
+  // Submit the check-in data to the backend
   useEffect(() => {
-    // Provide haptic feedback for completion
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const submitCheckIn = async () => {
+      if (isSubmitted || isSubmitting) return;
 
-    // In a real app, this would save the check-in data to the backend
-    const checkInData = {
-      mood: params.mood,
-      moodLabel: params.moodLabel,
-      causes: JSON.parse((params.causes as string) || "[]"),
-      activityLevel: parseInt((params.activityLevel as string) || "5"),
-      sleepDuration: parseInt((params.sleepDuration as string) || "8"),
-      socialInteraction: params.socialInteraction,
-      additionalNotes: params.additionalNotes,
-      companions: JSON.parse((params.companions as string) || "[]"),
-      location: params.location,
-      timestamp: new Date().toISOString(),
+      setIsSubmitting(true);
+      setError(null);
+
+      try {
+        // Prepare the data for submission
+        const submissionData = {
+          mood: checkInData.mood,
+          moodCauses: checkInData.moodCauses,
+          moodIntensity: checkInData.moodIntensity,
+          notes: checkInData.notes || undefined,
+          companions: checkInData.companions,
+          location: checkInData.location || undefined,
+          customLocationDetails: checkInData.customLocationDetails || undefined,
+        };
+
+        console.log("Submitting check-in data:", submissionData);
+
+        await createCheckIn(submissionData);
+        
+        setIsSubmitted(true);
+        // Provide haptic feedback for completion
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        
+        console.log("Check-in submitted successfully");
+      } catch (error) {
+        console.error("Failed to submit check-in:", error);
+        setError(error instanceof Error ? error.message : "Failed to submit check-in");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } finally {
+        setIsSubmitting(false);
+      }
     };
 
-    console.log("Check-in completed:", checkInData);
-  }, [params]);
+    submitCheckIn();
+  }, [checkInData, isSubmitted, isSubmitting, setIsSubmitting]);
 
   const handleContinue = () => {
-    // Navigate back to the main app
+    // Reset the check-in data and navigate back to the main app
+    resetCheckInData();
     router.replace("/(tabs)");
   };
 
   const handleViewInsights = () => {
-    // Navigate to insights/stats page
+    // Reset the check-in data and navigate to insights/stats page
+    resetCheckInData();
     router.replace("/(tabs)");
     // Could also navigate to a specific insights page
   };
+
+  const handleRetry = () => {
+    setError(null);
+    setIsSubmitted(false);
+  };
+
+  // Show loading state while submitting
+  if (isSubmitting) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
+        <Header title="Saving Check-in..." />
+        <View style={styles.loadingContent}>
+          <LoadingAnimation />
+          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+            Saving your check-in...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Show error state if submission failed
+  if (error) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
+        <Header title="Error" />
+        <View style={styles.content}>
+          <Card style={styles.successCard}>
+            <View style={styles.successIcon}>
+              <View
+                style={[
+                  styles.iconCircle,
+                  { backgroundColor: theme.colors.semantic.error + "20" },
+                ]}
+              >
+                <IconSymbol
+                  name="exclamationmark.circle.fill"
+                  size={64}
+                  color={theme.colors.semantic.error}
+                />
+              </View>
+            </View>
+
+            <Text style={[styles.successTitle, { color: theme.colors.text }]}>
+              Submission Failed
+            </Text>
+
+            <Text
+              style={[
+                styles.successSubtitle,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {error}
+            </Text>
+
+            <View style={styles.actionButtons}>
+              <Button
+                title="Try Again"
+                variant="primary"
+                onPress={handleRetry}
+                style={styles.actionButton}
+              />
+              
+              <Button
+                title="Continue Anyway"
+                variant="secondary"
+                onPress={handleContinue}
+                style={styles.actionButton}
+              />
+            </View>
+          </Card>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -102,11 +207,11 @@ export default function CheckinComplete() {
                 Mood:
               </Text>
               <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
-                {params.moodLabel}
+                {checkInData.moodLabel}
               </Text>
             </View>
 
-            {params.location && params.location !== "Not specified" && (
+            {checkInData.location && checkInData.location !== "Not specified" && (
               <View style={styles.summaryItem}>
                 <Text
                   style={[
@@ -119,7 +224,7 @@ export default function CheckinComplete() {
                 <Text
                   style={[styles.summaryValue, { color: theme.colors.text }]}
                 >
-                  {params.location}
+                  {checkInData.location}
                 </Text>
               </View>
             )}
@@ -131,26 +236,30 @@ export default function CheckinComplete() {
                   { color: theme.colors.textSecondary },
                 ]}
               >
-                Activity Level:
+                Mood Intensity:
               </Text>
               <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
-                {params.activityLevel}/10
+                {checkInData.moodIntensity}/10
               </Text>
             </View>
 
-            <View style={styles.summaryItem}>
-              <Text
-                style={[
-                  styles.summaryLabel,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                Sleep:
-              </Text>
-              <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
-                {params.sleepDuration} hours
-              </Text>
-            </View>
+            {checkInData.moodCauses && checkInData.moodCauses.length > 0 && (
+              <View style={styles.summaryItem}>
+                <Text
+                  style={[
+                    styles.summaryLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  Causes:
+                </Text>
+                <Text
+                  style={[styles.summaryValue, { color: theme.colors.text }]}
+                >
+                  {checkInData.moodCauses.join(", ")}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Insights Preview */}
@@ -329,5 +438,15 @@ const styles = StyleSheet.create({
   progressText: {
     fontSize: 12,
     fontWeight: "500",
+  },
+  loadingContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+    textAlign: "center",
   },
 });

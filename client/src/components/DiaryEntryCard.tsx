@@ -89,8 +89,7 @@ function DiaryEntryCard({ entry, onToggleFavorite }: DiaryEntryCardProps) {
                   </p>
                 </div>
                 <p className="font-inter text-xs text-text-blue/60 capitalize mt-1 truncate">
-                  {displayMood}{" "}
-                  {emotions.length > 0 &&
+                  {displayMood} {emotions.length > 0 &&
                     `• ${emotions.slice(0, 2).join(", ")}`}
                 </p>
               </div>
@@ -112,7 +111,7 @@ function DiaryEntryCard({ entry, onToggleFavorite }: DiaryEntryCardProps) {
                     )
                 )}
               </div>
-            </div>{" "}
+            </div>
             <div className="flex items-center justify-between mt-4 sm:mt-6 md:mt-8">
               <button
                 onClick={handleToggleFavorite}
@@ -136,7 +135,7 @@ function DiaryEntryCard({ entry, onToggleFavorite }: DiaryEntryCardProps) {
                 />
               </button>
               <div className="text-xs sm:text-sm text-text-blue/50 font-inter">
-                {getReadTime(entry.content)}{" "}
+                {getReadTime(entry.content)}
               </div>
             </div>
           </div>

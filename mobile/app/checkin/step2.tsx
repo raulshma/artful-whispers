@@ -1,17 +1,14 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput } from "react-native";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCheckIn } from "@/contexts/CheckInContext";
 import {
   Header,
   Button,
   Card,
   ToggleButton,
-  ToggleGroup,
   Slider,
-  NumberPicker,
-  SocialInteractionPicker,
-  TextArea,
 } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 
@@ -33,18 +30,17 @@ const MOOD_CAUSES = [
 export default function CheckinStep2() {
   const { theme } = useTheme();
   const router = useRouter();
-  const { mood, moodLabel } = useLocalSearchParams<{
-    mood: string;
-    moodLabel: string;
-  }>();
+  const { checkInData, updateCheckInData } = useCheckIn();
 
-  const [selectedCauses, setSelectedCauses] = useState<string[]>([]);
-  const [activityLevel, setActivityLevel] = useState(5);
-  const [sleepDuration, setSleepDuration] = useState(8);
-  const [socialInteraction, setSocialInteraction] = useState<
-    "none" | "little" | "some" | "lots"
-  >("some");
-  const [additionalNotes, setAdditionalNotes] = useState("");
+  const [selectedCauses, setSelectedCauses] = useState<string[]>(
+    checkInData.moodCauses || []
+  );
+  const [moodIntensity, setMoodIntensity] = useState(
+    checkInData.moodIntensity || 5
+  );
+  const [additionalNotes, setAdditionalNotes] = useState(
+    checkInData.notes || ""
+  );
 
   const handleCauseToggle = (cause: string) => {
     setSelectedCauses((prev) => {
@@ -59,18 +55,12 @@ export default function CheckinStep2() {
   };
 
   const handleContinue = () => {
-    router.push({
-      pathname: "/checkin/step3" as any,
-      params: {
-        mood,
-        moodLabel,
-        causes: JSON.stringify(selectedCauses),
-        activityLevel: activityLevel.toString(),
-        sleepDuration: sleepDuration.toString(),
-        socialInteraction,
-        additionalNotes,
-      },
+    updateCheckInData({
+      moodCauses: selectedCauses,
+      moodIntensity: moodIntensity,
+      notes: additionalNotes,
     });
+    router.push("/checkin/step3" as any);
   };
 
   return (
@@ -90,7 +80,7 @@ export default function CheckinStep2() {
         <View style={styles.content}>
           <View style={styles.questionSection}>
             <Text style={[styles.questionText, { color: theme.colors.text }]}>
-              Why do you feel {moodLabel?.toLowerCase()}?
+              Why do you feel {checkInData.moodLabel?.toLowerCase()}?
             </Text>
             <Text
               style={[
@@ -119,10 +109,10 @@ export default function CheckinStep2() {
             </View>
           </Card>
 
-          {/* Activity Level */}
+          {/* Mood Intensity */}
           <Card style={styles.sectionCard}>
             <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-              Activity Level
+              Mood Intensity
             </Text>
             <Text
               style={[
@@ -130,64 +120,18 @@ export default function CheckinStep2() {
                 { color: theme.colors.textSecondary },
               ]}
             >
-              How active have you been today? (1-10)
+              How intense is this feeling? (1-10)
             </Text>
             <View style={styles.sliderContainer}>
               <Slider
-                value={activityLevel}
-                onValueChange={setActivityLevel}
+                value={moodIntensity}
+                onValueChange={setMoodIntensity}
                 min={1}
                 max={10}
                 step={1}
                 showValue={true}
               />
             </View>
-          </Card>
-
-          {/* Sleep Duration */}
-          <Card style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-              Sleep Duration
-            </Text>
-            <Text
-              style={[
-                styles.sectionSubtitle,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
-              How many hours did you sleep last night?
-            </Text>
-            <Text
-              style={[
-                styles.placeholderText,
-                { color: theme.colors.textTertiary },
-              ]}
-            >
-              {sleepDuration} hours (Component placeholder)
-            </Text>
-          </Card>
-
-          {/* Social Interaction */}
-          <Card style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-              Social Interaction
-            </Text>
-            <Text
-              style={[
-                styles.sectionSubtitle,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
-              How much did you interact with others today?
-            </Text>
-            <Text
-              style={[
-                styles.placeholderText,
-                { color: theme.colors.textTertiary },
-              ]}
-            >
-              {socialInteraction} (Component placeholder)
-            </Text>
           </Card>
 
           {/* Additional Notes */}
@@ -203,14 +147,23 @@ export default function CheckinStep2() {
             >
               Anything else you'd like to share?
             </Text>
-            <Text
+            <TextInput
               style={[
-                styles.placeholderText,
-                { color: theme.colors.textTertiary },
+                styles.textInput,
+                {
+                  color: theme.colors.text,
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.border,
+                },
               ]}
-            >
-              Notes: {additionalNotes || "None"} (Component placeholder)
-            </Text>
+              placeholder="Optional notes..."
+              placeholderTextColor={theme.colors.textTertiary}
+              value={additionalNotes}
+              onChangeText={setAdditionalNotes}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
           </Card>
         </View>
       </ScrollView>
@@ -349,5 +302,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: "italic",
     marginTop: 8,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginTop: 8,
+    minHeight: 80,
   },
 });

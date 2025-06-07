@@ -7,8 +7,9 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCheckIn } from "@/contexts/CheckInContext";
 import { Header, Button, Card, Input } from "@/components/ui";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import * as Haptics from "expo-haptics";
@@ -29,10 +30,16 @@ const SUGGESTED_LOCATIONS = [
 export default function CheckinStep4() {
   const { theme } = useTheme();
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const { checkInData, updateCheckInData } = useCheckIn();
 
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [customLocation, setCustomLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(
+    checkInData.location && SUGGESTED_LOCATIONS.find(l => l.label === checkInData.location)?.id || null
+  );
+  const [customLocation, setCustomLocation] = useState(
+    checkInData.location && !SUGGESTED_LOCATIONS.find(l => l.label === checkInData.location)
+      ? checkInData.location
+      : ""
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleLocationSelect = (locationId: string) => {
@@ -53,23 +60,19 @@ export default function CheckinStep4() {
       ? SUGGESTED_LOCATIONS.find((l) => l.id === selectedLocation)?.label
       : customLocation;
 
-    router.push({
-      pathname: "/checkin/complete" as any,
-      params: {
-        ...params,
-        location: location || "Not specified",
-      },
+    updateCheckInData({
+      location: location || "Not specified",
+      customLocationDetails: customLocation || undefined,
     });
+    router.push("/checkin/complete" as any);
   };
 
   const handleSkip = () => {
-    router.push({
-      pathname: "/checkin/complete" as any,
-      params: {
-        ...params,
-        location: "Not specified",
-      },
+    updateCheckInData({
+      location: "Not specified",
+      customLocationDetails: undefined,
     });
+    router.push("/checkin/complete" as any);
   };
 
   const filteredLocations = SUGGESTED_LOCATIONS.filter((location) =>

@@ -1,4 +1,4 @@
-import { users, diaryEntries, type User, type DiaryEntry, type InsertDiaryEntry, type UpdateUserProfile } from "@shared/schema";
+import { users, diaryEntries, checkIns, type User, type DiaryEntry, type InsertDiaryEntry, type UpdateUserProfile, type CheckIn, type InsertCheckIn } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, ilike, or, and } from "drizzle-orm";
 
@@ -17,6 +17,11 @@ export interface IStorage {
   searchDiaryEntries(userId: string, query: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
   getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]>;
   toggleFavorite(id: number, userId: string): Promise<DiaryEntry | undefined>;
+  
+  // Check-in methods
+  createCheckIn(checkIn: InsertCheckIn & { userId: string }): Promise<CheckIn>;
+  getCheckIns(userId: string, limit?: number, offset?: number): Promise<CheckIn[]>;
+  getCheckIn(id: number): Promise<CheckIn | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -150,6 +155,34 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedEntry || undefined;
+  }
+
+  // Check-in methods
+  async createCheckIn(insertCheckIn: InsertCheckIn & { userId: string }): Promise<CheckIn> {
+    const [checkIn] = await db
+      .insert(checkIns)
+      .values({
+        ...insertCheckIn,
+        updatedAt: new Date(),
+      })
+      .returning();
+    return checkIn;
+  }
+
+  async getCheckIns(userId: string, limit = 10, offset = 0): Promise<CheckIn[]> {
+    const checkInList = await db
+      .select()
+      .from(checkIns)
+      .where(eq(checkIns.userId, userId))
+      .orderBy(desc(checkIns.createdAt))
+      .limit(limit)
+      .offset(offset);
+    return checkInList;
+  }
+
+  async getCheckIn(id: number): Promise<CheckIn | undefined> {
+    const [checkIn] = await db.select().from(checkIns).where(eq(checkIns.id, id));
+    return checkIn || undefined;
   }
 }
 
