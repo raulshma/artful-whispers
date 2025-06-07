@@ -5,13 +5,13 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
+import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
 import { getCheckIns, type CheckInResponse } from "@/services/checkinService";
 import MoodCheckInCard from "@/components/MoodCheckInCard";
 import CheckInQuickStats from "@/components/CheckInQuickStats";
@@ -168,12 +168,19 @@ export default function CheckInScreen() {
           <ScrollView
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.content}>
+          >            <View style={styles.content}>
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <SkiaLoadingAnimation
+                  size={120}
+                  color={theme.colors.primary}
+                  variant="morphing"
+                  visible={true}
+                />
                 <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
                   Loading your check-ins...
+                </Text>
+                <Text style={[styles.loadingSubtext, { color: theme.colors.textTertiary }]}>
+                  Preparing your mood insights
                 </Text>
               </View>
             </View>
@@ -210,6 +217,18 @@ export default function CheckInScreen() {
           }
         >
           <View style={styles.content}>
+            {/* Refreshing indicator */}
+            {refreshing && (
+              <View style={styles.refreshingContainer}>
+                <SkiaLoadingAnimation
+                  size={40}
+                  color={theme.colors.primary}
+                  variant="orbital"
+                  visible={refreshing}
+                />
+              </View>
+            )}
+
             {/* Main Mood Check-in Card */}
             <ShadowFriendlyAnimation index={0} animationType="slideUp">
               <MoodCheckInCard
@@ -280,6 +299,10 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 100, // Space for tab bar
   },
+  refreshingContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -290,5 +313,9 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+  },
+  loadingSubtext: {
+    marginTop: 8,
+    fontSize: 14,
   },
 });

@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { format, isToday, isYesterday } from 'date-fns';
 import { CheckInResponse } from '@/services/checkinService';
+import { SkiaLoadingAnimation } from '@/components/ui/SkiaLoadingAnimation';
 
 interface RecentCheckInsCardProps {
   title: string;
@@ -146,11 +147,15 @@ export default function RecentCheckInsCard({
           size={24} 
           color={theme.colors.textSecondary} 
         />
-      </View>
-
-      {loading && (
+      </View>      {loading && (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+          <SkiaLoadingAnimation
+            size={60}
+            color={theme.colors.primary}
+            variant="breathing"
+            visible={true}
+          />
+          <Text style={styles.loadingText}>Loading check-ins...</Text>
         </View>
       )}
 
