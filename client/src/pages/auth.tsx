@@ -187,7 +187,6 @@ export default function AuthPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="signin">
-                {" "}
                 <CardHeader className="text-center pb-3 sm:pb-4">
                   <CardTitle className="font-crimson text-lg sm:text-xl text-text-blue">
                     Welcome Back
@@ -201,7 +200,6 @@ export default function AuthPage() {
                     onSubmit={handleSignIn}
                     className="space-y-3 sm:space-y-4"
                   >
-                    {" "}
                     <div className="space-y-1.5 sm:space-y-2">
                       <Label
                         htmlFor="signin-email"
@@ -232,7 +230,6 @@ export default function AuthPage() {
                         Password
                       </Label>
                       <div className="relative">
-                        {" "}
                         <Input
                           id="signin-password"
                           type={showPassword ? "text" : "password"}
@@ -246,7 +243,7 @@ export default function AuthPage() {
                           }
                           className="bg-primary/20 border-none rounded-xl sm:rounded-2xl pr-12 h-12 sm:h-11 text-base"
                           required
-                        />{" "}
+                        />
                         <Button
                           type="button"
                           variant="ghost"
@@ -271,7 +268,7 @@ export default function AuthPage() {
                     </Button>
                   </form>
                 </CardContent>
-              </TabsContent>{" "}
+              </TabsContent>
               <TabsContent value="signup">
                 <CardHeader className="text-center pb-3 sm:pb-4">
                   <CardTitle className="font-crimson text-lg sm:text-xl text-text-blue">
@@ -303,7 +300,7 @@ export default function AuthPage() {
                         }
                         className="bg-primary/20 border-none rounded-xl sm:rounded-2xl h-12 sm:h-11 text-base"
                         required
-                      />{" "}
+                      />
                     </div>
                     <div className="space-y-1.5 sm:space-y-2">
                       <Label
@@ -335,7 +332,6 @@ export default function AuthPage() {
                         Password
                       </Label>
                       <div className="relative">
-                        {" "}
                         <Input
                           id="signup-password"
                           type={showPassword ? "text" : "password"}
@@ -374,7 +370,6 @@ export default function AuthPage() {
                         Confirm Password
                       </Label>
                       <div className="relative">
-                        {" "}
                         <Input
                           id="signup-confirm-password"
                           type={showConfirmPassword ? "text" : "password"}
