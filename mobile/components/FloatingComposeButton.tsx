@@ -6,7 +6,7 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 
@@ -55,17 +55,11 @@ export default function FloatingComposeButton({
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           activeOpacity={1}
-        >
-          <LinearGradient
-            colors={[theme.colors.primary, theme.colors.primaryDark]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientButton}
-          >
+        >          <View style={styles.gradientButton}>
             <Ionicons 
               name="create-outline" 
               size={26} 
-              color="white" 
+              color={theme.colors.text} 
             />
             
             {/* Small indicator for multiple entries */}
@@ -74,11 +68,11 @@ export default function FloatingComposeButton({
                 styles.indicator,
                 {
                   backgroundColor: theme.colors.accent,
-                  borderColor: 'white',
+                  borderColor: theme.colors.text,
                 }
               ]} />
             )}
-          </LinearGradient>
+          </View>
         </TouchableOpacity>
       </Animated.View>
     </View>
