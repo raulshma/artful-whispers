@@ -1,4 +1,21 @@
-import { users, diaryEntries, checkIns, type User, type DiaryEntry, type InsertDiaryEntry, type UpdateUserProfile, type CheckIn, type InsertCheckIn } from "@shared/schema";
+import {
+  users,
+  diaryEntries,
+  checkIns,
+  userProfiles,
+  userStats,
+  userSettings,
+  type User,
+  type DiaryEntry,
+  type InsertDiaryEntry,
+  type UpdateUserProfile,
+  type CheckIn,
+  type InsertCheckIn,
+  type UserProfile,
+  type UserStats,
+  type UserSettings,
+  type UpdateUserSettings
+} from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, ilike, or, and, count, sql } from "drizzle-orm";
 
@@ -7,6 +24,26 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   updateUserProfile(id: string, profile: UpdateUserProfile): Promise<User | undefined>;
   markUserOnboarded(id: string): Promise<User | undefined>;
+  
+  // Profile methods
+  getUserProfile(userId: string): Promise<UserProfile | undefined>;
+  createUserProfile(userId: string, name: string, email: string): Promise<UserProfile>;
+  updateUserProfileData(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | undefined>;
+  
+  // Stats methods
+  getUserStats(userId: string): Promise<UserStats | undefined>;
+  createUserStats(userId: string): Promise<UserStats>;
+  updateUserStats(userId: string, updates: Partial<UserStats>): Promise<UserStats | undefined>;
+  calculateUserStats(userId: string): Promise<UserStats>;
+  
+  // Settings methods
+  getUserSettings(userId: string): Promise<UserSettings | undefined>;
+  createUserSettings(userId: string): Promise<UserSettings>;
+  updateUserSettings(userId: string, updates: UpdateUserSettings): Promise<UserSettings | undefined>;
+  
+  // Account management
+  exportUserData(userId: string): Promise<any>;
+  deleteUserAccount(userId: string): Promise<boolean>;
   
   // Diary entry methods
   getDiaryEntries(userId: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
@@ -23,7 +60,7 @@ export interface IStorage {
   getCheckIns(userId: string, limit?: number, offset?: number): Promise<CheckIn[]>;
   getCheckIn(id: number): Promise<CheckIn | undefined>;
   
-  // Stats methods
+  // Stats methods (existing)
   getJournalSummaryStats(userId: string, period?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }>;
   getMoodCheckinDistribution(userId: string, period?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>>;
   getCalendarData(userId: string, year: number, month: number): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>>;
@@ -390,6 +427,202 @@ export class DatabaseStorage implements IStorage {
     }
 
     return calendarData;
+  }
+
+  // Profile methods
+  async getUserProfile(userId: string): Promise<UserProfile | undefined> {
+    const [profile] = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId));
+    return profile || undefined;
+  }
+
+  async createUserProfile(userId: string, name: string, email: string): Promise<UserProfile> {
+    const [profile] = await db
+      .insert(userProfiles)
+      .values({
+        userId,
+        name,
+        email,
+        joinDate: new Date(),
+      })
+      .returning();
+    return profile;
+  }
+
+  async updateUserProfileData(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | undefined> {
+    const [updatedProfile] = await db
+      .update(userProfiles)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(userProfiles.userId, userId))
+      .returning();
+    return updatedProfile || undefined;
+  }
+
+  // Stats methods
+  async getUserStats(userId: string): Promise<UserStats | undefined> {
+    const [stats] = await db.select().from(userStats).where(eq(userStats.userId, userId));
+    return stats || undefined;
+  }
+
+  async createUserStats(userId: string): Promise<UserStats> {
+    const [stats] = await db
+      .insert(userStats)
+      .values({
+        userId,
+        checkInsCount: 0,
+        journalEntriesCount: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+      })
+      .returning();
+    return stats;
+  }
+
+  async updateUserStats(userId: string, updates: Partial<UserStats>): Promise<UserStats | undefined> {
+    const [updatedStats] = await db
+      .update(userStats)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(userStats.userId, userId))
+      .returning();
+    return updatedStats || undefined;
+  }
+
+  async calculateUserStats(userId: string): Promise<UserStats> {
+    // Get counts
+    const [checkInsResult] = await db
+      .select({ count: count(checkIns.id) })
+      .from(checkIns)
+      .where(eq(checkIns.userId, userId));
+
+    const [entriesResult] = await db
+      .select({ count: count(diaryEntries.id) })
+      .from(diaryEntries)
+      .where(eq(diaryEntries.userId, userId));
+
+    // Calculate streaks (simplified version - daily check-ins)
+    const recentCheckIns = await db
+      .select({ createdAt: checkIns.createdAt })
+      .from(checkIns)
+      .where(eq(checkIns.userId, userId))
+      .orderBy(desc(checkIns.createdAt))
+      .limit(365); // Last year of check-ins
+
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let lastDate: Date | null = null;
+
+    for (const checkIn of recentCheckIns) {
+      const checkInDate = new Date(checkIn.createdAt);
+      const daysDiff = lastDate ? Math.floor((lastDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+      if (lastDate === null || daysDiff === 1) {
+        tempStreak++;
+        if (lastDate === null) currentStreak = tempStreak;
+      } else if (daysDiff === 0) {
+        // Same day, continue
+        continue;
+      } else {
+        // Streak broken
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 1;
+        if (lastDate === null) currentStreak = 0;
+      }
+
+      lastDate = checkInDate;
+    }
+
+    longestStreak = Math.max(longestStreak, tempStreak);
+
+    const stats = {
+      checkInsCount: checkInsResult.count as number,
+      journalEntriesCount: entriesResult.count as number,
+      currentStreak,
+      longestStreak,
+    };
+
+    // Update or create stats
+    const existingStats = await this.getUserStats(userId);
+    if (existingStats) {
+      return await this.updateUserStats(userId, stats) || existingStats;
+    } else {
+      return await this.createUserStats(userId);
+    }
+  }
+
+  // Settings methods
+  async getUserSettings(userId: string): Promise<UserSettings | undefined> {
+    const [settings] = await db.select().from(userSettings).where(eq(userSettings.userId, userId));
+    return settings || undefined;
+  }
+
+  async createUserSettings(userId: string): Promise<UserSettings> {
+    const [settings] = await db
+      .insert(userSettings)
+      .values({
+        userId,
+        notificationsEnabled: true,
+        reminderEnabled: true,
+        darkModeEnabled: false,
+      })
+      .returning();
+    return settings;
+  }
+
+  async updateUserSettings(userId: string, updates: UpdateUserSettings): Promise<UserSettings | undefined> {
+    const [updatedSettings] = await db
+      .update(userSettings)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(userSettings.userId, userId))
+      .returning();
+    return updatedSettings || undefined;
+  }
+
+  // Account management methods
+  async exportUserData(userId: string): Promise<any> {
+    const user = await this.getUser(userId);
+    const profile = await this.getUserProfile(userId);
+    const stats = await this.getUserStats(userId);
+    const settings = await this.getUserSettings(userId);
+    const entries = await this.getDiaryEntries(userId, 1000); // Get all entries
+    const checkIns = await this.getCheckIns(userId, 1000); // Get all check-ins
+
+    return {
+      user,
+      profile,
+      stats,
+      settings,
+      diaryEntries: entries,
+      checkIns,
+      exportedAt: new Date().toISOString(),
+    };
+  }
+
+  async deleteUserAccount(userId: string): Promise<boolean> {
+    try {
+      // Delete all related data (cascade should handle this, but being explicit)
+      await db.delete(userProfiles).where(eq(userProfiles.userId, userId));
+      await db.delete(userStats).where(eq(userStats.userId, userId));
+      await db.delete(userSettings).where(eq(userSettings.userId, userId));
+      await db.delete(diaryEntries).where(eq(diaryEntries.userId, userId));
+      await db.delete(checkIns).where(eq(checkIns.userId, userId));
+      
+      // Finally delete the user
+      await db.delete(users).where(eq(users.id, userId));
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting user account:', error);
+      return false;
+    }
   }
 }
 

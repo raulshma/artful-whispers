@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   ScrollView,
   Alert,
   Switch,
+  Share,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -16,16 +18,86 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import * as Haptics from "expo-haptics";
+import {
+  fetchUserProfile,
+  fetchUserStats,
+  fetchUserSettings,
+  updateUserSettings,
+  exportUserData,
+  deleteUserAccount,
+  type UserProfile,
+  type UserStats,
+  type UserSettings,
+} from "@/lib/api";
 
 export default function ProfileScreen() {
   const { theme, toggleTheme } = useTheme();
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  // State for data
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Local state for UI
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Load data on component mount
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  // Update local state when settings are loaded
+  useEffect(() => {
+    if (settings) {
+      setNotificationsEnabled(settings.notificationsEnabled);
+      setReminderEnabled(settings.reminderEnabled);
+      setIsDarkMode(settings.darkModeEnabled);
+    }
+  }, [settings]);
+
+  const loadProfileData = async () => {
+    try {
+      setLoading(true);
+      const [profileData, statsData, settingsData] = await Promise.all([
+        fetchUserProfile(),
+        fetchUserStats(),
+        fetchUserSettings(),
+      ]);
+      
+      setProfile(profileData);
+      setStats(statsData);
+      setSettings(settingsData);
+    } catch (error) {
+      console.error('Failed to load profile data:', error);
+      Alert.alert('Error', 'Failed to load profile data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSettingValue = async (key: keyof Pick<UserSettings, 'notificationsEnabled' | 'reminderEnabled' | 'darkModeEnabled'>, value: boolean) => {
+    try {
+      const updatedSettings = await updateUserSettings({ [key]: value });
+      setSettings(updatedSettings);
+      
+      // Provide haptic feedback
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.error(`Failed to update ${key}:`, error);
+      Alert.alert('Error', `Failed to update ${key}`);
+      
+      // Revert local state
+      if (key === 'notificationsEnabled') setNotificationsEnabled(!value);
+      if (key === 'reminderEnabled') setReminderEnabled(!value);
+      if (key === 'darkModeEnabled') setIsDarkMode(!value);
+    }
+  };
 
   const handleSignOut = async () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -50,8 +122,39 @@ export default function ProfileScreen() {
     Alert.alert("Edit Profile", "Profile editing coming soon!");
   };
 
-  const handleExportData = () => {
-    Alert.alert("Export Data", "Data export feature coming soon!");
+  const handleExportData = async () => {
+    try {
+      const blob = await exportUserData();
+      
+      if (Platform.OS === 'web') {
+        // For web, create download link
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `user-data-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        // For mobile, use Share API
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            await Share.share({
+              message: reader.result as string,
+              title: 'User Data Export',
+            });
+          } catch (error) {
+            console.error('Share error:', error);
+          }
+        };
+        reader.readAsText(blob);
+      }
+      
+      Alert.alert("Success", "Your data has been exported successfully!");
+    } catch (error) {
+      console.error('Export error:', error);
+      Alert.alert("Error", "Failed to export data");
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -64,11 +167,42 @@ export default function ProfileScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            Alert.alert("Confirm", 'Type "DELETE" to confirm account deletion');
+            Alert.prompt(
+              "Confirm Deletion",
+              'Type "DELETE" to confirm account deletion',
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Delete Account",
+                  style: "destructive",
+                  onPress: async (text) => {
+                    if (text === "DELETE") {
+                      try {
+                        await deleteUserAccount();
+                        await signOut();
+                        Alert.alert("Account Deleted", "Your account has been permanently deleted.");
+                      } catch (error) {
+                        console.error('Delete account error:', error);
+                        Alert.alert("Error", "Failed to delete account");
+                      }
+                    } else {
+                      Alert.alert("Error", "Please type 'DELETE' to confirm");
+                    }
+                  },
+                },
+              ],
+              "plain-text"
+            );
           },
         },
       ]
     );
+  };
+
+  const handleToggleTheme = async (value: boolean) => {
+    setIsDarkMode(value);
+    toggleTheme();
+    await updateSettingValue('darkModeEnabled', value);
   };
 
   const settingsItems = [
@@ -79,7 +213,10 @@ export default function ProfileScreen() {
       icon: "bell.fill",
       type: "switch" as const,
       value: notificationsEnabled,
-      onToggle: setNotificationsEnabled,
+      onToggle: (value: boolean) => {
+        setNotificationsEnabled(value);
+        updateSettingValue('notificationsEnabled', value);
+      },
     },
     {
       id: "reminders",
@@ -88,7 +225,10 @@ export default function ProfileScreen() {
       icon: "clock.fill",
       type: "switch" as const,
       value: reminderEnabled,
-      onToggle: setReminderEnabled,
+      onToggle: (value: boolean) => {
+        setReminderEnabled(value);
+        updateSettingValue('reminderEnabled', value);
+      },
     },
     {
       id: "theme",
@@ -97,7 +237,7 @@ export default function ProfileScreen() {
       icon: "moon.fill",
       type: "switch" as const,
       value: isDarkMode,
-      onToggle: toggleTheme,
+      onToggle: handleToggleTheme,
     },
   ];
 
@@ -168,7 +308,7 @@ export default function ProfileScreen() {
 
                   <View style={styles.profileInfo}>
                     <Text style={[styles.userName, { color: theme.colors.text }]}>
-                      {user?.name || "User"}
+                      {profile?.name || user?.name || "User"}
                     </Text>
                     <Text
                       style={[
@@ -176,17 +316,24 @@ export default function ProfileScreen() {
                         { color: theme.colors.textSecondary },
                       ]}
                     >
-                      {user?.email || "user@example.com"}
+                      {profile?.email || user?.email || "user@example.com"}
                     </Text>
                     <Text
                       style={[
                         styles.joinDate,
                         { color: theme.colors.textTertiary },
                       ]}
-                    >                      Member since {new Date().toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      })}
+                    >
+                      Member since {profile?.joinDate
+                        ? new Date(profile.joinDate).toLocaleDateString("en-US", {
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : new Date().toLocaleDateString("en-US", {
+                            month: "long",
+                            year: "numeric",
+                          })
+                      }
                     </Text>
                   </View>
 
@@ -209,7 +356,7 @@ export default function ProfileScreen() {
                     <Text
                       style={[styles.statNumber, { color: theme.colors.primary }]}
                     >
-                      42
+                      {loading ? "..." : stats?.checkInsCount || 0}
                     </Text>
                     <Text
                       style={[
@@ -224,7 +371,7 @@ export default function ProfileScreen() {
                     <Text
                       style={[styles.statNumber, { color: theme.colors.primary }]}
                     >
-                      18
+                      {loading ? "..." : stats?.journalEntriesCount || 0}
                     </Text>
                     <Text
                       style={[
@@ -239,7 +386,7 @@ export default function ProfileScreen() {
                     <Text
                       style={[styles.statNumber, { color: theme.colors.primary }]}
                     >
-                      7
+                      {loading ? "..." : stats?.currentStreak || 0}
                     </Text>
                     <Text
                       style={[

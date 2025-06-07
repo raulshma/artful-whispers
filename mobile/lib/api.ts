@@ -94,4 +94,81 @@ export async function fetchCalendarData(year?: number, month?: number): Promise<
   return apiRequest<CalendarDay[]>(`/api/stats/calendar-data?year=${targetYear}&month=${targetMonth}`);
 }
 
+// Profile API functions
+export interface UserProfile {
+  id: number;
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  joinDate: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserStats {
+  id: number;
+  userId: string;
+  checkInsCount: number;
+  journalEntriesCount: number;
+  currentStreak: number;
+  longestStreak: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserSettings {
+  id: number;
+  userId: string;
+  notificationsEnabled: boolean;
+  reminderEnabled: boolean;
+  darkModeEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function fetchUserProfile(): Promise<UserProfile> {
+  return apiRequest<UserProfile>('/api/profile');
+}
+
+export async function updateUserProfile(updates: Partial<Pick<UserProfile, 'name' | 'email' | 'avatarUrl'>>): Promise<UserProfile> {
+  return apiRequest<UserProfile>('/api/profile', {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function fetchUserStats(): Promise<UserStats> {
+  return apiRequest<UserStats>('/api/profile/stats');
+}
+
+export async function fetchUserSettings(): Promise<UserSettings> {
+  return apiRequest<UserSettings>('/api/settings');
+}
+
+export async function updateUserSettings(updates: Partial<Pick<UserSettings, 'notificationsEnabled' | 'reminderEnabled' | 'darkModeEnabled'>>): Promise<UserSettings> {
+  return apiRequest<UserSettings>('/api/settings', {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function exportUserData(): Promise<Blob> {
+  const response = await fetch(`${config.API_BASE_URL}/api/account/export`, {
+    credentials: 'include',
+  });
+  
+  if (!response.ok) {
+    throw new ApiError(response.status, 'Failed to export data');
+  }
+  
+  return response.blob();
+}
+
+export async function deleteUserAccount(): Promise<void> {
+  return apiRequest<void>('/api/account', {
+    method: 'DELETE',
+  });
+}
+
 export default apiRequest;

@@ -85,10 +85,69 @@ export const checkIns = pgTable("check_ins", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// User Profile schema for profile-specific operations
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  avatarUrl: text("avatar_url"),
+  joinDate: timestamp("join_date").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User Statistics schema
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  checkInsCount: integer("check_ins_count").default(0).notNull(),
+  journalEntriesCount: integer("journal_entries_count").default(0).notNull(),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User Settings schema
+export const userSettings = pgTable("user_settings", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  notificationsEnabled: boolean("notifications_enabled").default(true).notNull(),
+  reminderEnabled: boolean("reminder_enabled").default(true).notNull(),
+  darkModeEnabled: boolean("dark_mode_enabled").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Define relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   checkIns: many(checkIns),
   diaryEntries: many(diaryEntries),
+  profile: one(userProfiles),
+  stats: one(userStats),
+  settings: one(userSettings),
+}));
+
+export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [userProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userStatsRelations = relations(userStats, ({ one }) => ({
+  user: one(users, {
+    fields: [userStats.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [userSettings.userId],
+    references: [users.id],
+  }),
 }));
 
 export const checkInsRelations = relations(checkIns, ({ one }) => ({
@@ -115,6 +174,19 @@ export const updateUserProfileSchema = z.object({
   languages: z.array(z.string()).optional(),
 });
 
+// Schema for profile operations
+export const userProfileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email"),
+  avatarUrl: z.string().url().optional(),
+});
+
+export const updateUserSettingsSchema = z.object({
+  notificationsEnabled: z.boolean().optional(),
+  reminderEnabled: z.boolean().optional(),
+  darkModeEnabled: z.boolean().optional(),
+});
+
 export const insertDiaryEntrySchema = createInsertSchema(diaryEntries).pick({
   content: true,
   date: true,
@@ -131,6 +203,10 @@ export const insertCheckInSchema = createInsertSchema(checkIns).pick({
 });
 
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type UserStats = typeof userStats.$inferSelect;
+export type UserSettings = typeof userSettings.$inferSelect;
+export type UpdateUserSettings = z.infer<typeof updateUserSettingsSchema>;
 export type User = typeof users.$inferSelect;
 export type DiaryEntry = typeof diaryEntries.$inferSelect;
 export type InsertDiaryEntry = z.infer<typeof insertDiaryEntrySchema>;

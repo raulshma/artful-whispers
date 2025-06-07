@@ -6,6 +6,8 @@ import {
   insertDiaryEntrySchema,
   updateUserProfileSchema,
   insertCheckInSchema,
+  userProfileSchema,
+  updateUserSettingsSchema,
 } from "@shared/schema";
 import { GoogleGenAI, Modality } from "@google/genai";
 import { put } from "@vercel/blob";
@@ -385,6 +387,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  // Profile routes
+  // Get user profile (protected route)
+  app.get("/api/profile", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let profile = await storage.getUserProfile(req.user.id);
+      
+      // Create profile if it doesn't exist
+      if (!profile) {
+        profile = await storage.createUserProfile(req.user.id, req.user.name, req.user.email);
+      }
+
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
+  // Update user profile (protected route)
+  app.put("/api/profile", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const validatedData = userProfileSchema.partial().parse(req.body);
+
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const updatedProfile = await storage.updateUserProfileData(req.user.id, validatedData);
+
+      if (!updatedProfile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+
+      res.json(updatedProfile);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid profile data" });
+    }
+  });
+
+  // Get user statistics (protected route)
+  app.get("/api/profile/stats", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let stats = await storage.getUserStats(req.user.id);
+      
+      // Create or calculate stats if they don't exist
+      if (!stats) {
+        stats = await storage.calculateUserStats(req.user.id);
+      }
+
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user statistics" });
+    }
+  });
+
+  // Get user settings (protected route)
+  app.get("/api/settings", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let settings = await storage.getUserSettings(req.user.id);
+      
+      // Create settings if they don't exist
+      if (!settings) {
+        settings = await storage.createUserSettings(req.user.id);
+      }
+
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user settings" });
+    }
+  });
+
+  // Update user settings (protected route)
+  app.put("/api/settings", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const validatedData = updateUserSettingsSchema.parse(req.body);
+
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const updatedSettings = await storage.updateUserSettings(req.user.id, validatedData);
+
+      if (!updatedSettings) {
+        return res.status(404).json({ message: "Settings not found" });
+      }
+
+      res.json(updatedSettings);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid settings data" });
+    }
+  });
+
+  // Export user data (protected route)
+  app.get("/api/account/export", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const exportData = await storage.exportUserData(req.user.id);
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="user-data-${req.user.id}-${Date.now()}.json"`);
+      res.json(exportData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to export user data" });
+    }
+  });
+
+  // Delete user account (protected route)
+  app.delete("/api/account", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const deleted = await storage.deleteUserAccount(req.user.id);
+
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete account" });
+      }
+
+      // Invalidate session - this should be handled by auth middleware
+      res.json({ message: "Account deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
 
   // Generate lofi-style image URL based on mood and emotions
   function generateLofiImageUrl(mood: string, emotions: string[]): string {
