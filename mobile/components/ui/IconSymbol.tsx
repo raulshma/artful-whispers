@@ -33,6 +33,7 @@ const MAPPING = {
   'gearshape.fill': 'settings',
   'magnifyingglass': 'search',
   'location.fill': 'location-on',
+  'arrow.clockwise.circle.fill': 'refresh',
 } as IconMapping;
 
 /**
