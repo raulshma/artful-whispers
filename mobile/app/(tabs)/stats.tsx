@@ -3,7 +3,6 @@ import {
   View,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
   Text,
   RefreshControl,
 } from "react-native";
@@ -15,6 +14,7 @@ import MoodStatsCard from "@/components/MoodStatsCard";
 import MoodCalendar from "@/components/MoodCalendar";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
+import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
 import { fetchJournalSummary, fetchMoodCheckinDistribution, fetchCalendarData } from "@/lib/api";
 
 // Mock calendar data - will be replaced when calendar integration is implemented
@@ -148,19 +148,43 @@ export default function JournalStatsScreen() {
             />
           }        >
           <View style={styles.content}>
-            {/* Loading State */}
-            {(journalLoading || moodLoading || calendarLoading) && (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
-                  Loading your stats...
-                </Text>
+            {/* Refreshing indicator */}
+            {refreshing && (
+              <View style={styles.refreshingContainer}>
+                <SkiaLoadingAnimation
+                  size={40}
+                  color={theme.colors.primary}
+                  variant="breathing"
+                  visible={refreshing}
+                />
               </View>
             )}
 
-            {/* Error State */}
+            {/* Loading State */}
+            {(journalLoading || moodLoading || calendarLoading) && (
+              <View style={styles.loadingContainer}>
+                <SkiaLoadingAnimation
+                  size={120}
+                  color={theme.colors.primary}
+                  variant="orbital"
+                  visible={true}
+                />
+                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                  Loading your stats...
+                </Text>
+                <Text style={[styles.loadingSubtext, { color: theme.colors.textTertiary }]}>
+                  Analyzing your journal data
+                </Text>
+              </View>
+            )}            {/* Error State */}
             {(journalError || moodError || calendarError) && (
               <View style={styles.errorContainer}>
+                <SkiaLoadingAnimation
+                  size={50}
+                  color={theme.colors.semantic.error}
+                  variant="ripple"
+                  visible={true}
+                />
                 <Text style={[styles.errorText, { color: theme.colors.semantic.error }]}>
                   Failed to load stats. Pull to refresh.
                 </Text>
@@ -189,12 +213,16 @@ export default function JournalStatsScreen() {
                   onPress={handleMoodStatsPress}
                 />
               </ShadowFriendlyAnimation>
-            )}
-
-            {/* Empty state when no mood data */}
+            )}            {/* Empty state when no mood data */}
             {moodDistribution && moodDistribution.length === 0 && (
               <ShadowFriendlyAnimation index={1} animationType="slideUp">
                 <View style={styles.emptyStateContainer}>
+                  <SkiaLoadingAnimation
+                    size={60}
+                    color={theme.colors.textSecondary}
+                    variant="breathing"
+                    visible={true}
+                  />
                   <Text style={[styles.emptyStateText, { color: theme.colors.textSecondary }]}>
                     No mood check-ins yet. Start tracking your moods to see statistics.
                   </Text>
@@ -253,11 +281,13 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  content: {
+  },  content: {
     paddingBottom: 100, // Space for tab bar
   },
-  loadingContainer: {
+  refreshingContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -267,6 +297,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+  },
+  loadingSubtext: {
+    marginTop: 8,
+    fontSize: 14,
   },
   errorContainer: {
     padding: 20,

@@ -173,7 +173,7 @@ export default function CheckInScreen() {
                 <SkiaLoadingAnimation
                   size={120}
                   color={theme.colors.primary}
-                  variant="morphing"
+                  variant="orbital"
                   visible={true}
                 />
                 <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
