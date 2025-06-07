@@ -13,9 +13,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useCreateDiaryEntry } from '@/hooks/useDiary';
-import { useRouter } from 'expo-router';
 
 interface NewEntryFormProps {
   onCancel: () => void;
@@ -24,10 +23,8 @@ interface NewEntryFormProps {
 
 export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps) {
   const [content, setContent] = useState('');
-  const router = useRouter();
   const createEntry = useCreateDiaryEntry();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { theme } = useTheme();
 
   const handleSubmit = async () => {
     if (!content.trim()) {
@@ -54,84 +51,80 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  });
-  return (
+  });  return (
     <KeyboardAvoidingView
       style={[
         styles.container,
         {
-          backgroundColor: isDark ? '#0f172a' : '#fafafa',
+          backgroundColor: theme.colors.backgroundSecondary,
         }
       ]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Card Container with Blur Effect */}
-        <View style={[
+        {/* Card Container with Blur Effect */}        <View style={[
           styles.card,
           {
-            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.95)',
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
           }
         ]}>
           <BlurView
-            intensity={isDark ? 20 : 30}
+            intensity={20}
             style={styles.blurContent}
-            tint={isDark ? 'dark' : 'light'}
+            tint={theme.isDark ? 'dark' : 'light'}
           >
-            {/* Header with Icon */}
-            <View style={styles.header}>
+            {/* Header with Icon */}            <View style={styles.header}>
               <View style={styles.headerRow}>
                 <View style={[
                   styles.iconContainer,
                   {
-                    backgroundColor: isDark ? 'rgba(96, 165, 250, 0.2)' : 'rgba(59, 130, 246, 0.1)',
+                    backgroundColor: theme.colors.backgroundGreen,
                   }
                 ]}>
                   <Ionicons 
                     name="create-outline" 
                     size={20} 
-                    color={isDark ? '#60a5fa' : '#3b82f6'} 
+                    color={theme.colors.primary} 
                   />
                 </View>
                 <View style={styles.headerText}>
                   <Text style={[
                     styles.title,
-                    { color: isDark ? '#ffffff' : '#1f2937' }
+                    { color: theme.colors.text }
                   ]}>
-                    New Reflection
+                    New Journal Entry
                   </Text>
                   <Text style={[
                     styles.subtitle,
-                    { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)' }
+                    { color: theme.colors.textSecondary }
                   ]}>
-                    {currentDate} • You can create multiple reflections each day
+                    {currentDate} • Capture your thoughts and feelings
                   </Text>
                 </View>
               </View>
             </View>
 
-            {/* Input Container */}
-            <View style={[
+            {/* Input Container */}            <View style={[
               styles.inputContainer,
               {
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                backgroundColor: theme.colors.backgroundTertiary,
+                borderColor: theme.colors.border,
               }
             ]}>
               <TextInput
                 style={[
                   styles.textInput,
                   { 
-                    color: isDark ? '#ffffff' : '#1f2937',
+                    color: theme.colors.text,
                     backgroundColor: 'transparent',
                   }
                 ]}
                 value={content}
                 onChangeText={setContent}
-                placeholder="What's on your mind right now? Capture this moment - you can write as many reflections as you'd like throughout the day..."
-                placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)'}
+                placeholder="How are you feeling today? What&apos;s on your mind? Take a moment to reflect on your day..."
+                placeholderTextColor={theme.colors.textTertiary}
                 multiline
                 textAlignVertical="top"
                 numberOfLines={12}
@@ -139,31 +132,29 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
               />
             </View>
 
-            {/* AI Message */}
-            <View style={styles.aiMessage}>
+            {/* AI Message */}            <View style={styles.aiMessage}>
               <View style={[
                 styles.aiIndicator,
                 {
-                  backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
+                  backgroundColor: theme.colors.accent,
                 }
               ]} />
               <Text style={[
                 styles.aiText,
-                { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)' }
+                { color: theme.colors.textSecondary }
               ]}>
                 AI will craft a beautiful title and artwork
               </Text>
             </View>
 
-            {/* Button Container */}
-            <View style={styles.buttonContainer}>
+            {/* Button Container */}            <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[
                   styles.button,
                   styles.cancelButton,
                   {
-                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
-                    borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    backgroundColor: 'transparent',
+                    borderColor: theme.colors.border,
                   }
                 ]}
                 onPress={onCancel}
@@ -171,7 +162,7 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
               >
                 <Text style={[
                   styles.cancelButtonText,
-                  { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)' }
+                  { color: theme.colors.textSecondary }
                 ]}>
                   Cancel
                 </Text>
@@ -182,7 +173,7 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
                   styles.button,
                   styles.saveButton,
                   {
-                    backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
+                    backgroundColor: theme.colors.primary,
                     opacity: (!content.trim() || createEntry.isPending) ? 0.5 : 1,
                   }
                 ]}
@@ -195,7 +186,7 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
                     <Text style={styles.saveButtonText}>Saving...</Text>
                   </View>
                 ) : (
-                  <Text style={styles.saveButtonText}>Save Reflection</Text>
+                  <Text style={styles.saveButtonText}>Save Entry</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -303,9 +294,8 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     borderWidth: 1,
-  },
-  saveButton: {
-    shadowColor: '#3b82f6',
+  },  saveButton: {
+    shadowColor: '#8DB596',
     shadowOffset: {
       width: 0,
       height: 2,

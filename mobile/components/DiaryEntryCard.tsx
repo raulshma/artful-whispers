@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { DiaryEntry } from '@/hooks/useDiary';
 
 interface DiaryEntryCardProps {
@@ -87,47 +87,43 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
       return [];
     }
   };
-
   const emotions = parseEmotions(entry.emotions);
   const moodIcon = getMoodIcon(entry.mood);
   const displayMood = entry.mood || 'Reflective';
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { theme } = useTheme();
 
   const renderCardContent = () => (
-    <>
-      {/* Header with mood icon and date */}
+    <>      {/* Header with mood icon and date */}
       <View style={styles.header}>
         <View style={styles.moodContainer}>
           <View style={[
             styles.moodIconContainer,
             {
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+              backgroundColor: theme.colors.cardSecondary,
             }
           ]}>
             <Ionicons 
               name={moodIcon as any} 
               size={16} 
-              color={isDark ? '#60a5fa' : '#3b82f6'} 
+              color={theme.colors.primary} 
             />
           </View>
           <View style={styles.dateTimeContainer}>
             <Text style={[
               styles.date,
-              { color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }
+              { color: theme.colors.textSecondary }
             ]}>
               {formatDate(entry.date)}
             </Text>
-            <View style={styles.timeRow}>
-              <View style={[
+            <View style={styles.timeRow}>              <View style={[
                 styles.timeChip,
                 {
-                  backgroundColor: isDark ? 'rgba(96, 165, 250, 0.2)' : 'rgba(59, 130, 246, 0.1)',
+                  backgroundColor: theme.colors.backgroundGreen,
                 }
               ]}>
                 <Text style={[
                   styles.time,
-                  { color: isDark ? '#60a5fa' : '#3b82f6' }
+                  { color: theme.colors.primary }
                 ]}>
                   {formatTime(entry.createdAt)}
                 </Text>
@@ -135,19 +131,17 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
             </View>
             <Text style={[
               styles.mood,
-              { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
+              { color: theme.colors.textTertiary }
             ]}>
               {displayMood}
               {emotions.length > 0 && ` • ${emotions.slice(0, 2).join(', ')}`}
             </Text>
           </View>
         </View>
-      </View>
-
-      {/* Title */}
+      </View>      {/* Title */}
       <Text style={[
         styles.title,
-        { color: isDark ? '#ffffff' : '#1f2937' }
+        { color: theme.colors.text }
       ]}>
         {entry.title || 'Untitled Entry'}
       </Text>
@@ -160,7 +154,7 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
               key={index}
               style={[
                 styles.content,
-                { color: isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)' }
+                { color: theme.colors.text }
               ]}
               numberOfLines={paragraph === entry.content.split('\n')[0] ? 3 : 1}
             >
@@ -180,26 +174,25 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
             <Ionicons 
               name={entry.isFavorite ? "heart" : "heart-outline"}
               size={16} 
-              color={entry.isFavorite ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)')} 
+              color={entry.isFavorite ? theme.colors.semantic.error : theme.colors.textSecondary} 
             />
           </TouchableOpacity>
         </View>
         <Text style={[
           styles.readTime,
-          { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }
+          { color: theme.colors.textTertiary }
         ]}>
           {getReadTime(entry.content)}
         </Text>
       </View>
     </>
   );
-
   return (
     <View style={[
       styles.card,
       {
-        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
-        borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+        backgroundColor: theme.colors.card,
+        borderColor: theme.colors.border,
       }
     ]}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
@@ -210,23 +203,23 @@ export default function DiaryEntryCard({ entry, onPress, onToggleFavorite }: Dia
             resizeMode="cover"
           >
             <BlurView
-              intensity={isDark ? 85 : 80}
+              intensity={theme.isDark ? 85 : 80}
               style={styles.imageBlurOverlay}
-              tint={isDark ? 'dark' : 'light'}
+              tint={theme.isDark ? 'dark' : 'light'}
             />
             <BlurView
-              intensity={isDark ? 20 : 30}
+              intensity={theme.isDark ? 20 : 30}
               style={styles.blurContent}
-              tint={isDark ? 'dark' : 'light'}
+              tint={theme.isDark ? 'dark' : 'light'}
             >
               {renderCardContent()}
             </BlurView>
           </ImageBackground>
         ) : (
           <BlurView
-            intensity={isDark ? 20 : 30}
+            intensity={theme.isDark ? 20 : 30}
             style={styles.blurContent}
-            tint={isDark ? 'dark' : 'light'}
+            tint={theme.isDark ? 'dark' : 'light'}
           >
             {renderCardContent()}
           </BlurView>

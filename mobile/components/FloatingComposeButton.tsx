@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface FloatingComposeButtonProps {
   onPress: () => void;
@@ -18,8 +18,7 @@ export default function FloatingComposeButton({
   onPress,
   hasEntriesToday = false,
 }: FloatingComposeButtonProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { theme } = useTheme();
 
   return (
     <View style={styles.container}>
@@ -27,21 +26,21 @@ export default function FloatingComposeButton({
         style={[
           styles.button,
           {
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+            borderColor: theme.colors.border,
           }
         ]}
         onPress={onPress}
         activeOpacity={0.8}
       >
         <BlurView
-          intensity={isDark ? 30 : 20}
+          intensity={theme.isDark ? 30 : 20}
           style={styles.blurButton}
-          tint={isDark ? 'dark' : 'light'}
+          tint={theme.isDark ? 'dark' : 'light'}
         >
           <Ionicons 
             name="add" 
             size={24} 
-            color={isDark ? '#ffffff' : '#333333'} 
+            color={theme.colors.text} 
           />
           
           {/* Small indicator for multiple entries */}
@@ -49,8 +48,8 @@ export default function FloatingComposeButton({
             <View style={[
               styles.indicator,
               {
-                backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
-                borderColor: isDark ? '#0a0b0d' : '#fffef7',
+                backgroundColor: theme.colors.primary,
+                borderColor: theme.colors.background,
               }
             ]} />
           )}
