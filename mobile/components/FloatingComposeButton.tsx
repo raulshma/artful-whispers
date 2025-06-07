@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Text,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 
@@ -19,6 +19,21 @@ export default function FloatingComposeButton({
 }: FloatingComposeButtonProps) {
   const { theme } = useTheme();
   const router = useRouter();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const handlePress = () => {
     router.push('/addJournal');
@@ -26,39 +41,46 @@ export default function FloatingComposeButton({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      <Animated.View
         style={[
-          styles.button,
+          styles.buttonContainer,
           {
-            borderColor: theme.colors.border,
-          }
+            transform: [{ scale: scaleAnim }],
+          },
         ]}
-        onPress={handlePress}
-        activeOpacity={0.8}
       >
-        <BlurView
-          intensity={theme.isDark ? 30 : 20}
-          style={styles.blurButton}
-          tint={theme.isDark ? 'dark' : 'light'}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
         >
-          <Ionicons 
-            name="add" 
-            size={24} 
-            color={theme.colors.text} 
-          />
-          
-          {/* Small indicator for multiple entries */}
-          {hasEntriesToday && (
-            <View style={[
-              styles.indicator,
-              {
-                backgroundColor: theme.colors.primary,
-                borderColor: theme.colors.background,
-              }
-            ]} />
-          )}
-        </BlurView>
-      </TouchableOpacity>
+          <LinearGradient
+            colors={[theme.colors.primary, theme.colors.primaryDark]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradientButton}
+          >
+            <Ionicons 
+              name="create-outline" 
+              size={26} 
+              color="white" 
+            />
+            
+            {/* Small indicator for multiple entries */}
+            {hasEntriesToday && (
+              <View style={[
+                styles.indicator,
+                {
+                  backgroundColor: theme.colors.accent,
+                  borderColor: 'white',
+                }
+              ]} />
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
@@ -70,22 +92,23 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 30,
   },
-  button: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 1,
-    overflow: 'hidden',
+  buttonContainer: {
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 6,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 12,
   },
-  blurButton: {
+  button: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  gradientButton: {
     width: '100%',
     height: '100%',
     justifyContent: 'center',
@@ -94,8 +117,8 @@ const styles = StyleSheet.create({
   },
   indicator: {
     position: 'absolute',
-    top: -2,
-    right: -2,
+    top: 4,
+    right: 4,
     width: 12,
     height: 12,
     borderRadius: 6,
