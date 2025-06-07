@@ -3,8 +3,8 @@ import { View, Dimensions, Platform, Text } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 
 // Conditionally import Skia components only for native platforms
-let Canvas, Rect, SkiaText, useFont, Group, RoundedRect;
-let useSharedValue, withTiming, interpolate, useDerivedValue;
+let Canvas: any, Rect: any, SkiaText: any, useFont: any, Group: any, RoundedRect: any;
+let useSharedValue: any, withTiming: any, interpolate: any, useDerivedValue: any;
 
 if (Platform.OS !== 'web') {
   const SkiaComponents = require('@shopify/react-native-skia');
@@ -105,17 +105,18 @@ export function BarChart({
       </View>
     );
   }
-
   // Native platform - use Skia
   const animationProgress = useSharedValue(0);
   let font = null;
   
   try {
     font = useFont(require('../../assets/fonts/SpaceMono-Regular.ttf'), 12);
-    console.log('BarChart: Native font loaded successfully:', !!font);
-  } catch (error) {
+    console.log('BarChart: Native font loaded successfully:', !!font);  } catch (error) {
     console.log('BarChart: Native font loading failed, skipping text rendering');
   }
+
+  // Check if we should render text (font loaded and native platform)
+  const shouldRenderText = (Platform.OS as string) !== 'web' && font !== null;
 
   useEffect(() => {
     animationProgress.value = withTiming(1, { duration: animationDuration });
@@ -291,17 +292,18 @@ export function HorizontalBarChart({
       </View>
     );
   }
-
   // Native platform - use Skia
   const animationProgress = useSharedValue(0);
   let font = null;
   
   try {
     font = useFont(require('../../assets/fonts/SpaceMono-Regular.ttf'), 11);
-    console.log('HorizontalBarChart: Native font loaded successfully:', !!font);
-  } catch (error) {
+    console.log('HorizontalBarChart: Native font loaded successfully:', !!font);  } catch (error) {
     console.log('HorizontalBarChart: Native font loading failed, skipping text rendering');
   }
+
+  // Check if we should render text (font loaded and native platform)
+  const shouldRenderText = (Platform.OS as string) !== 'web' && font !== null;
 
   useEffect(() => {
     animationProgress.value = withTiming(1, { duration: animationDuration });

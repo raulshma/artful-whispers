@@ -11,13 +11,21 @@ const getLocalIP = (): string => {
   
   // For Android, check if we should use emulator IP or physical device IP
   if (Platform.OS === 'android') {
-    // Use environment variable to override, otherwise default to emulator IP
-    const androidIP = process.env.EXPO_PUBLIC_ANDROID_IP || "10.0.2.2";
-    return `http://${androidIP}:5000`;
+    // First try the environment variable for Android-specific IP
+    if (process.env.EXPO_PUBLIC_ANDROID_IP) {
+      return `http://${process.env.EXPO_PUBLIC_ANDROID_IP}:5000`;
+    }
+    
+    // If no specific Android IP, try to use the same local IP as iOS
+    // This works for physical Android devices on the same network
+    const localIP = process.env.EXPO_PUBLIC_LOCAL_IP || "192.168.1.9";
+    return `http://${localIP}:5000`;
+    
+    // Note: For Android emulator, you would need to set EXPO_PUBLIC_ANDROID_IP=10.0.2.2
   }
   
   // For iOS simulator and physical devices
-  const localIP = process.env.EXPO_PUBLIC_LOCAL_IP || "192.168.1.9";
+  const localIP = process.env.EXPO_PUBLIC_LOCAL_IP || "192.168.1.3";
   return `http://${localIP}:5000`;
 };
 

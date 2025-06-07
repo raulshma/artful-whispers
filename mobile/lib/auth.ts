@@ -34,6 +34,8 @@ const getStorage = () => {
   return AsyncStorage;
 };
 
+console.log('🔧 Creating auth client with baseURL:', config.API_BASE_URL);
+
 export const authClient = createAuthClient({
   baseURL: config.API_BASE_URL,
   storage: getStorage(),

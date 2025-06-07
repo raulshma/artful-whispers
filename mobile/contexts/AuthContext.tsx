@@ -39,8 +39,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
 
   const refreshAuth = async () => {
-    // Use better-auth's built-in refetch to refresh the session
-    await refetch();
+    console.log('🔄 Refreshing auth - starting...');
+    try {
+      // Use better-auth's built-in refetch to refresh the session
+      const result = await refetch();
+      console.log('🔄 Refresh result:', JSON.stringify(result, null, 2));
+      
+      // Additional debugging - check what the raw session looks like
+      const { getSession } = await import('../lib/auth');
+      const rawSession = await getSession();
+      console.log('🔄 Raw session from getSession:', JSON.stringify(rawSession, null, 2));
+      
+      return result;
+    } catch (error) {
+      console.error('🔄 Refresh error:', error);
+      throw error;
+    }
   };
 
   const signOut = async () => {

@@ -68,16 +68,36 @@ export default function AuthScreen() {
           email,
           password,
         });
-        console.log('Sign in successful:', result);
+        console.log('Sign in successful:', JSON.stringify(result, null, 2));
+        
+        // Check if the result contains error information
+        if (result?.error) {
+          console.error('Sign in returned error:', result.error);
+          Alert.alert('Error', result.error.message || 'Sign in failed');
+          return;
+        }
+        
+        // Add a small delay to allow the server to process the session
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Force refresh the auth context to get the updated session
         console.log('Refreshing auth context...');
-        await refreshAuth();
+        const refreshResult = await refreshAuth();
+        console.log('Refresh auth result:', JSON.stringify(refreshResult, null, 2));
         
-        // Small delay to ensure session is updated
-        setTimeout(() => {
-          console.log('Auth refresh completed, context should handle navigation');
-        }, 100);
+        // Additional debugging to check session state with multiple attempts
+        for (let i = 0; i < 3; i++) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+          console.log(`Auth refresh attempt ${i + 1}, checking session state...`);
+          const { getSession } = await import('@/lib/auth');
+          const currentSession = await getSession();
+          console.log(`Current session after refresh (attempt ${i + 1}):`, JSON.stringify(currentSession, null, 2));
+          
+          if (currentSession?.data?.user) {
+            console.log('✅ Session established successfully');
+            break;
+          }
+        }
       }
     } catch (error: any) {
       console.error('Auth error:', error);

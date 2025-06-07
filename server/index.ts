@@ -11,20 +11,34 @@ const allowedOrigins = [
   "http://localhost:5000",
   "http://localhost:8081",
   "http://localhost:19006", // Default Expo web port
+  "http://192.168.1.3:5000", // Mobile app IP (corrected)
+  "http://192.168.1.9:5000", // Alternative mobile IP
+  "http://192.168.1.100:5000", // Alternative mobile IP
+  "http://10.0.2.2:5000", // Android emulator
   "exp://192.168.0.194:8081",
+  "exp://192.168.1.3:8081", // Updated Expo development (corrected)
+  "exp://192.168.1.9:8081", // Alternative Expo development
   "exp://localhost:8081",
 ];
+
 // Add CORS middleware for mobile app support
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   console.log(`🌐 CORS check - Origin: ${origin}, Path: ${req.path}`);
   
-  if (allowedOrigins.includes(origin!)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    console.log(`✅ CORS allowed for origin: ${origin}`);
+  // Allow requests with no origin (like mobile apps) or matching origins
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin || "*");
+    console.log(`✅ CORS allowed for origin: ${origin || 'no-origin'}`);
   } else {
-    console.log(`❌ CORS not allowed for origin: ${origin}`);
-    console.log(`📝 Allowed origins:`, allowedOrigins);
+    // For development, be more permissive with mobile app origins
+    if (origin && (origin.includes('192.168.') || origin.includes('10.0.') || origin.includes('localhost'))) {
+      res.header("Access-Control-Allow-Origin", origin);
+      console.log(`✅ CORS allowed for development origin: ${origin}`);
+    } else {
+      console.log(`❌ CORS not allowed for origin: ${origin}`);
+      console.log(`📝 Allowed origins:`, allowedOrigins);
+    }
   }
 
   res.header(
@@ -33,7 +47,7 @@ app.use((req, res, next) => {
   );
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie, Set-Cookie"
   );
   res.header("Access-Control-Allow-Credentials", "true");
 
@@ -47,6 +61,19 @@ app.use((req, res, next) => {
 
 // Add better-auth API routes
 app.all("/api/auth/*", async (req, res) => {
+  console.log(`🔐 Auth request: ${req.method} ${req.url} from origin: ${req.headers.origin}`);
+  console.log(`🔐 Auth headers:`, {
+    origin: req.headers.origin,
+    cookie: req.headers.cookie,
+    authorization: req.headers.authorization,
+    'content-type': req.headers['content-type'],
+    'user-agent': req.headers['user-agent']
+  });
+  
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log(`🔐 Auth request body:`, req.body);
+  }
+  
   // Convert Express request to Web API Request
   const url = new URL(req.url!, `http://${req.headers.host}`);
   const webRequest = new Request(url, {
@@ -58,16 +85,27 @@ app.all("/api/auth/*", async (req, res) => {
         : undefined,
   });
 
-  const response = await auth.handler(webRequest);
+  try {
+    const response = await auth.handler(webRequest);
+    console.log(`🔐 Auth response: ${response.status} ${response.statusText}`);
+    console.log(`🔐 Auth response headers:`, Object.fromEntries(response.headers.entries()));
 
-  // Convert Web API Response to Express response
-  res.status(response.status);
-  response.headers.forEach((value, key) => {
-    res.setHeader(key, value);
-  });
+    // Convert Web API Response to Express response
+    res.status(response.status);
+    response.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+      if (key.toLowerCase() === 'set-cookie') {
+        console.log(`🍪 Setting cookie:`, value);
+      }
+    });
 
-  const body = await response.text();
-  res.send(body);
+    const body = await response.text();
+    console.log(`🔐 Auth response body:`, body.substring(0, 200) + (body.length > 200 ? '...' : ''));
+    res.send(body);
+  } catch (error) {
+    console.error(`🔐 Auth handler error:`, error);
+    res.status(500).json({ error: 'Internal server error during authentication' });
+  }
 });
 
 app.use((req, res, next) => {
