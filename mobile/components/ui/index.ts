@@ -36,6 +36,13 @@ export {
   ListSeparator
 } from './ListItem';
 
+// Floating Navigation Components
+export { FloatingTabBar } from './FloatingTabBar';
+export { FloatingTabButton } from './FloatingTabButton';
+export { FloatingTabBarComponent } from './FloatingTabBarComponent';
+export { DynamicTabBackground } from './DynamicTabBackground';
+export { TabParticleSystem } from './TabParticleSystem';
+
 // Skia components
 export { BarChart, HorizontalBarChart } from '../skia/BarChart';
 export {
