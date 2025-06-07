@@ -181,7 +181,7 @@ export default function JournalScreen() {
     );
   }
   return (
-    <AnimatedPageWrapper animationType="slideFromRight">
+    <AnimatedPageWrapper animationType="fadeIn">
       <View
         style={[
           styles.container,

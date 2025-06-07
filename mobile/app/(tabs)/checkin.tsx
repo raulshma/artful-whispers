@@ -13,6 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { LoadingAnimation } from "@/components/ui";
+import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { getCheckIns, type CheckInResponse } from "@/services/checkinService";
 import { format, isToday, isYesterday } from "date-fns";
 
@@ -89,7 +90,7 @@ export default function CheckInScreen() {
       case 'sad':
         return theme.colors.mood?.sad || '#6B7280';
       case 'depressed':
-        return theme.colors.mood?.depressed || '#4B5563';
+        return theme.colors.mood?.sad || '#4B5563';
       case 'angry':
         return theme.colors.mood?.angry || '#EF4444';
       case 'anxious':
@@ -152,13 +153,13 @@ export default function CheckInScreen() {
 
   if (loading) {
     return (
-      <AnimatedPageWrapper animationType="scaleIn">
+      <AnimatedPageWrapper animationType="fadeIn">
         <View
           style={[
             styles.container,
             styles.centered,
             {
-              backgroundColor: theme.colors.backgroundGreen,
+              backgroundColor: theme.colors.background,
               paddingTop: insets.top,
             },
           ]}
@@ -176,12 +177,12 @@ export default function CheckInScreen() {
   const thisMonthCount = getThisMonthCount();
 
   return (
-    <AnimatedPageWrapper animationType="scaleIn">
+    <AnimatedPageWrapper animationType="fadeIn">
       <View
         style={[
           styles.container,
           {
-            backgroundColor: theme.colors.backgroundGreen,
+            backgroundColor: theme.colors.background,
             paddingTop: insets.top,
           },
         ]}
@@ -206,145 +207,151 @@ export default function CheckInScreen() {
           </View>
 
           {/* Main Mood Check-in Card */}
-          <View
-            style={[styles.moodCard, { backgroundColor: theme.colors.card }]}
-          >
-            <View style={styles.moodFace}>
-              <Ionicons
-                name={getMoodIcon(latestMood.mood)}
-                size={80}
-                color={getMoodColor(latestMood.mood)}
-              />
+          <ShadowFriendlyAnimation index={0} animationType="slideUp">
+            <View
+              style={[styles.moodCard, { backgroundColor: theme.colors.card }]}
+            >
+              <View style={styles.moodFace}>
+                <Ionicons
+                  name={getMoodIcon(latestMood.mood)}
+                  size={80}
+                  color={getMoodColor(latestMood.mood)}
+                />
+              </View>
+
+              <Text
+                style={[styles.moodPrompt, { color: theme.colors.textSecondary }]}
+              >
+                {latestMood.label}
+              </Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.checkInButton,
+                  { backgroundColor: theme.colors.primary },
+                ]}
+                onPress={handleStartCheckIn}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.checkInButtonText}>Start Check-in ✓</Text>
+              </TouchableOpacity>
             </View>
-
-            <Text
-              style={[styles.moodPrompt, { color: theme.colors.textSecondary }]}
-            >
-              {latestMood.label}
-            </Text>
-
-            <TouchableOpacity
-              style={[
-                styles.checkInButton,
-                { backgroundColor: theme.colors.primary },
-              ]}
-              onPress={handleStartCheckIn}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.checkInButtonText}>Start Check-in ✓</Text>
-            </TouchableOpacity>
-          </View>
+          </ShadowFriendlyAnimation>
 
           {/* Quick Stats */}
-          <View style={styles.statsContainer}>
-            <View
-              style={[styles.statItem, { backgroundColor: theme.colors.card }]}
-            >
-              <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                {streakCount}
-              </Text>
-              <Text
-                style={[
-                  styles.statLabel,
-                  { color: theme.colors.textSecondary },
-                ]}
+          <ShadowFriendlyAnimation index={1} animationType="slideUp">
+            <View style={styles.statsContainer}>
+              <View
+                style={[styles.statItem, { backgroundColor: theme.colors.card }]}
               >
-                Day Streak
-              </Text>
-            </View>
+                <Text style={[styles.statNumber, { color: theme.colors.text }]}>
+                  {streakCount}
+                </Text>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  Day Streak
+                </Text>
+              </View>
 
-            <View
-              style={[styles.statItem, { backgroundColor: theme.colors.card }]}
-            >
-              <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                {thisMonthCount}
-              </Text>
-              <Text
-                style={[
-                  styles.statLabel,
-                  { color: theme.colors.textSecondary },
-                ]}
+              <View
+                style={[styles.statItem, { backgroundColor: theme.colors.card }]}
               >
-                This Month
-              </Text>
+                <Text style={[styles.statNumber, { color: theme.colors.text }]}>
+                  {thisMonthCount}
+                </Text>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  This Month
+                </Text>
+              </View>
             </View>
-          </View>
+          </ShadowFriendlyAnimation>
 
           {/* Recent Check-ins */}
-          <View
-            style={[styles.recentCard, { backgroundColor: theme.colors.card }]}
-          >
-            <Text style={[styles.recentTitle, { color: theme.colors.text }]}>
-              Recent Check-ins
-            </Text>
-            
-            {error ? (
-              <View style={styles.errorContainer}>
-                <Text style={[styles.errorText, { color: theme.colors.semantic?.error || '#EF4444' }]}>
-                  {error}
-                </Text>
-                <TouchableOpacity
-                  style={[styles.retryButton, { borderColor: theme.colors.border }]}
-                  onPress={() => fetchCheckIns()}
-                >
-                  <Text style={[styles.retryText, { color: theme.colors.primary }]}>
-                    Try Again
+          <ShadowFriendlyAnimation index={2} animationType="slideUp">
+            <View
+              style={[styles.recentCard, { backgroundColor: theme.colors.card }]}
+            >
+              <Text style={[styles.recentTitle, { color: theme.colors.text }]}>
+                Recent Check-ins
+              </Text>
+              
+              {error ? (
+                <View style={styles.errorContainer}>
+                  <Text style={[styles.errorText, { color: theme.colors.semantic?.error || '#EF4444' }]}>
+                    {error}
                   </Text>
-                </TouchableOpacity>
-              </View>
-            ) : checkIns.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Ionicons
-                  name="help-circle-outline"
-                  size={32}
-                  color={theme.colors.textTertiary}
-                />
-                <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-                  No check-ins yet. Start your first check-in above!
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.recentList}>
-                {checkIns.slice(0, 5).map((checkIn) => (
-                  <View key={checkIn.id} style={styles.recentItem}>
-                    <Ionicons
-                      name={getMoodIcon(checkIn.mood)}
-                      size={20}
-                      color={getMoodColor(checkIn.mood)}
-                    />
-                    <View style={styles.recentContent}>
-                      <Text
-                        style={[styles.recentMood, { color: theme.colors.text }]}
-                      >
-                        {checkIn.mood.charAt(0).toUpperCase() + checkIn.mood.slice(1)}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.recentTime,
-                          { color: theme.colors.textSecondary },
-                        ]}
-                      >
-                        {formatTimeAgo(checkIn.createdAt)}
-                      </Text>
+                  <TouchableOpacity
+                    style={[styles.retryButton, { borderColor: theme.colors.border }]}
+                    onPress={() => fetchCheckIns()}
+                  >
+                    <Text style={[styles.retryText, { color: theme.colors.primary }]}>
+                      Try Again
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : checkIns.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Ionicons
+                    name="help-circle-outline"
+                    size={32}
+                    color={theme.colors.textTertiary}
+                  />
+                  <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+                    No check-ins yet. Start your first check-in above!
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.recentList}>
+                  {checkIns.slice(0, 5).map((checkIn) => (
+                    <View key={checkIn.id} style={styles.recentItem}>
+                      <Ionicons
+                        name={getMoodIcon(checkIn.mood)}
+                        size={20}
+                        color={getMoodColor(checkIn.mood)}
+                      />
+                      <View style={styles.recentContent}>
+                        <Text
+                          style={[styles.recentMood, { color: theme.colors.text }]}
+                        >
+                          {checkIn.mood.charAt(0).toUpperCase() + checkIn.mood.slice(1)}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.recentTime,
+                            { color: theme.colors.textSecondary },
+                          ]}
+                        >
+                          {formatTimeAgo(checkIn.createdAt)}
+                        </Text>
+                      </View>
+                      {checkIn.moodIntensity && (
+                        <Text
+                          style={[
+                            styles.intensityBadge,
+                            {
+                              color: theme.colors.textSecondary,
+                              backgroundColor: theme.colors.surface
+                            }
+                          ]}
+                        >
+                          {checkIn.moodIntensity}/10
+                        </Text>
+                      )}
                     </View>
-                    {checkIn.moodIntensity && (
-                      <Text
-                        style={[
-                          styles.intensityBadge,
-                          {
-                            color: theme.colors.textSecondary,
-                            backgroundColor: theme.colors.surface
-                          }
-                        ]}
-                      >
-                        {checkIn.moodIntensity}/10
-                      </Text>
-                    )}
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          </ShadowFriendlyAnimation>
         </ScrollView>
       </View>
     </AnimatedPageWrapper>
