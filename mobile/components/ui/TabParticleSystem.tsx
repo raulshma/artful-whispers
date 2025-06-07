@@ -133,7 +133,7 @@ export function TabParticleSystem({
     
     return (
       <Circle
-        key={index}
+        key={`particle-${index}`}
         cx={particleX}
         cy={particleY}
         r={particleScale}

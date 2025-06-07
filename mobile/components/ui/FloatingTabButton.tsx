@@ -144,51 +144,55 @@ export function FloatingTabButton({
   const iconSize = isActive ? 26 : 24;
   return (
     <Animated.View style={[styles.container, containerStyle]}>
-      {/* Particle System */}
-      <TabParticleSystem
-        width={RIPPLE_SIZE}
-        height={RIPPLE_SIZE}
-        trigger={particleTrigger}
-        centerX={RIPPLE_SIZE / 2}
-        centerY={RIPPLE_SIZE / 2}
-        color={activeColor}
-      />
+      {/* Particle System - positioned absolutely behind the button */}
+      <View style={styles.particleContainer}>
+        <TabParticleSystem
+          width={RIPPLE_SIZE}
+          height={RIPPLE_SIZE}
+          trigger={particleTrigger}
+          centerX={RIPPLE_SIZE / 2}
+          centerY={RIPPLE_SIZE / 2}
+          color={activeColor}
+        />
+      </View>
 
-      {/* Skia Canvas for visual effects */}
-      <Canvas style={styles.canvas}>
-        <Group>
-          {/* Ripple effect */}
-          <Circle
-            cx={BUTTON_SIZE / 2}
-            cy={BUTTON_SIZE / 2}
-            r={skiaRippleScale}
-            opacity={skiaRippleOpacity}
-            color={activeColor + '40'}
-          />
-          
-          {/* Glow effect for active tab */}
-          {isActive && (
+      {/* Skia Canvas for visual effects - positioned absolutely behind the button */}
+      <View style={styles.effectsContainer}>
+        <Canvas style={styles.canvas}>
+          <Group>
+            {/* Ripple effect */}
             <Circle
               cx={BUTTON_SIZE / 2}
               cy={BUTTON_SIZE / 2}
-              r={22}
-              opacity={skiaGlowOpacity}
-            >
-              <LinearGradient
-                start={vec(0, 0)}
-                end={vec(BUTTON_SIZE, BUTTON_SIZE)}
-                colors={[
-                  activeColor + '20',
-                  activeColor + '10',
-                  activeColor + '05',
-                ]}
-              />
-            </Circle>
-          )}
-        </Group>
-      </Canvas>
+              r={skiaRippleScale}
+              opacity={skiaRippleOpacity}
+              color={activeColor + '40'}
+            />
+            
+            {/* Glow effect for active tab */}
+            {isActive && (
+              <Circle
+                cx={BUTTON_SIZE / 2}
+                cy={BUTTON_SIZE / 2}
+                r={22}
+                opacity={skiaGlowOpacity}
+              >
+                <LinearGradient
+                  start={vec(0, 0)}
+                  end={vec(BUTTON_SIZE, BUTTON_SIZE)}
+                  colors={[
+                    activeColor + '20',
+                    activeColor + '10',
+                    activeColor + '05',
+                  ]}
+                />
+              </Circle>
+            )}
+          </Group>
+        </Canvas>
+      </View>
 
-      {/* Button content */}
+      {/* Button content - positioned above the effects */}
       <Pressable
         style={styles.button}
         onPressIn={handlePressIn}
@@ -225,12 +229,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  canvas: {
+  particleContainer: {
     position: 'absolute',
     width: RIPPLE_SIZE,
     height: RIPPLE_SIZE,
     top: -8,
     left: -8,
+    zIndex: 1,
+  },
+  effectsContainer: {
+    position: 'absolute',
+    width: RIPPLE_SIZE,
+    height: RIPPLE_SIZE,
+    top: -8,
+    left: -8,
+    zIndex: 2,
+  },
+  canvas: {
+    width: RIPPLE_SIZE,
+    height: RIPPLE_SIZE,
   },
   button: {
     alignItems: 'center',
@@ -238,6 +255,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
     minWidth: BUTTON_SIZE,
+    zIndex: 3,
   },
   buttonContent: {
     alignItems: 'center',

@@ -87,14 +87,17 @@ export function DynamicTabBackground({ activeIndex, totalTabs }: DynamicTabBackg
 
   return (
     <Canvas style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Group>        {/* Subtle background gradient that follows active tab */}        <RoundedRect
+      <Group>
+        {/* Subtle background gradient that follows active tab */}
+        <RoundedRect
           x={0}
           y={0}
           width={screenWidth}
           height={screenHeight}
           r={0}
           opacity={backgroundOpacity}
-        >          <RadialGradient
+        >
+          <RadialGradient
             c={gradientCenterVec}
             r={screenWidth * 0.8}
             colors={[
@@ -104,7 +107,9 @@ export function DynamicTabBackground({ activeIndex, totalTabs }: DynamicTabBackg
               'transparent',
             ]}
           />
-        </RoundedRect>{/* Ambient glow effect */}
+        </RoundedRect>
+
+        {/* Ambient glow effect */}
         <Circle
           cx={gradientCenterX}
           cy={gradientCenterY}
@@ -121,7 +126,9 @@ export function DynamicTabBackground({ activeIndex, totalTabs }: DynamicTabBackg
               'transparent',
             ]}
           />
-        </Circle>        {/* Subtle particles effect */}
+        </Circle>
+
+        {/* Subtle particles effect */}
         {particles.map((particle, i) => (
           <Circle
             key={i}
