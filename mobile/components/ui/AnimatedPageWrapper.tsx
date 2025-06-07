@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -20,7 +20,7 @@ export function AnimatedPageWrapper({
   animationType = 'slideUp',
   delay = 0 
 }: AnimatedPageWrapperProps) {
-  const opacity = useSharedValue(0);
+  const opacity = useSharedValue(1); // Start visible to avoid shadow transitions
   const translateY = useSharedValue(30);
   const translateX = useSharedValue(50);
   const scale = useSharedValue(0.95);
@@ -28,7 +28,7 @@ export function AnimatedPageWrapper({
   useFocusEffect(
     React.useCallback(() => {
       // Reset animation values when page comes into focus
-      opacity.value = 0;
+      opacity.value = 1; // Keep opacity at 1 to prevent shadow fading
       translateY.value = 30;
       translateX.value = 50;
       scale.value = 0.95;
@@ -37,10 +37,12 @@ export function AnimatedPageWrapper({
       const timer = setTimeout(() => {
         switch (animationType) {
           case 'fadeIn':
+            // For fadeIn, we'll use a minimal opacity change
+            opacity.value = 0.85;
             opacity.value = withTiming(1, { duration: 400 });
             break;
           case 'slideUp':
-            opacity.value = withTiming(1, { duration: 400 });
+            // Only animate transform, keep opacity constant
             translateY.value = withSpring(0, { 
               damping: 20, 
               stiffness: 300,
@@ -48,14 +50,14 @@ export function AnimatedPageWrapper({
             });
             break;
           case 'scaleIn':
-            opacity.value = withTiming(1, { duration: 300 });
+            // Only animate scale, keep opacity constant
             scale.value = withSpring(1, { 
               damping: 15, 
               stiffness: 400 
             });
             break;
           case 'slideFromRight':
-            opacity.value = withTiming(1, { duration: 350 });
+            // Only animate transform, keep opacity constant
             translateX.value = withSpring(0, { 
               damping: 18, 
               stiffness: 350 
@@ -66,12 +68,10 @@ export function AnimatedPageWrapper({
 
       return () => {
         clearTimeout(timer);
-        // Reset to invisible when losing focus
-        opacity.value = withTiming(0, { duration: 200 });
+        // Don't reset opacity to prevent shadow flicker
       };
     }, [animationType, delay])
   );
-
   const animatedStyle = useAnimatedStyle(() => {
     let transform = [];
 
@@ -81,11 +81,17 @@ export function AnimatedPageWrapper({
       transform.push({ scale: scale.value });
     } else if (animationType === 'slideFromRight') {
       transform.push({ translateX: translateX.value });
-    }
-
-    return {
+    }    return {
       opacity: opacity.value,
       transform,
+      // Prevent shadow animation artifacts with platform-specific hints
+      ...(Platform.OS === 'ios' && {
+        shouldRasterizeIOS: true,
+        rasterizationScale: 2,
+      }),
+      ...(Platform.OS === 'android' && {
+        renderToHardwareTextureAndroid: true,
+      }),
     };
   });
 

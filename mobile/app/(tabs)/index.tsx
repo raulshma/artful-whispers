@@ -13,7 +13,7 @@ import JournalStats from "@/components/JournalStats";
 import MoodStatsCard from "@/components/MoodStatsCard";
 import MoodCalendar from "@/components/MoodCalendar";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
-import { StaggeredAnimation } from "@/components/ui/StaggeredAnimation";
+import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 
 // Mock data based on the designs
 const mockJournalStats = {
@@ -129,29 +129,28 @@ export default function JournalStatsScreen() {
           }
         >
           {" "}
-          <View style={styles.content}>
-            {/* Main Journal Stats Card */}
-            <StaggeredAnimation index={0} animationType="slideUp">
+          <View style={styles.content}>            {/* Main Journal Stats Card */}
+            <ShadowFriendlyAnimation index={0} animationType="slideUp">
               <JournalStats
                 title="Journal Stats"
                 subtitle="Your Journal Stats for Feb 2025"
                 data={mockJournalStats}
                 onPress={handleJournalStatsPress}
               />
-            </StaggeredAnimation>
+            </ShadowFriendlyAnimation>
 
             {/* Most Frequent Emotion Card */}
-            <StaggeredAnimation index={1} animationType="slideUp">
+            <ShadowFriendlyAnimation index={1} animationType="slideUp">
               <MoodStatsCard
                 title="Happy"
                 subtitle="Most frequent emotion"
                 stats={mockMoodStats}
                 onPress={handleMoodStatsPress}
               />
-            </StaggeredAnimation>
+            </ShadowFriendlyAnimation>
 
             {/* Calendar View */}
-            <StaggeredAnimation index={2} animationType="slideUp">
+            <ShadowFriendlyAnimation index={2} animationType="slideUp">
               <MoodCalendar
                 title="24/31"
                 subtitle="Journals written this month"
@@ -160,7 +159,7 @@ export default function JournalStatsScreen() {
                 onDayPress={handleCalendarDayPress}
                 onAddPress={handleAddJournalPress}
               />
-            </StaggeredAnimation>
+            </ShadowFriendlyAnimation>
           </View>
         </ScrollView>
       </View>

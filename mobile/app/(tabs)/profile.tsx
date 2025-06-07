@@ -14,6 +14,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button, Card, ListItem } from "@/components/ui";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
+import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import * as Haptics from "expo-haptics";
 
 export default function ProfileScreen() {
@@ -147,157 +148,161 @@ export default function ProfileScreen() {
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.content}>
+        >          <View style={styles.content}>
             {/* User Profile Header */}
-            <Card style={styles.profileCard}>
-              <View style={styles.profileHeader}>
-                <View
-                  style={[
-                    styles.avatarContainer,
-                    { backgroundColor: theme.colors.primary + "20" },
-                  ]}
-                >
-                  <IconSymbol
-                    name="person.fill"
-                    size={32}
-                    color={theme.colors.primary}
-                  />
-                </View>
-
-                <View style={styles.profileInfo}>
-                  <Text style={[styles.userName, { color: theme.colors.text }]}>
-                    {user?.name || "User"}
-                  </Text>
-                  <Text
+            <ShadowFriendlyAnimation index={0} animationType="slideUp">
+              <Card style={styles.profileCard}>
+                <View style={styles.profileHeader}>
+                  <View
                     style={[
-                      styles.userEmail,
-                      { color: theme.colors.textSecondary },
+                      styles.avatarContainer,
+                      { backgroundColor: theme.colors.primary + "20" },
                     ]}
                   >
-                    {user?.email || "user@example.com"}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.joinDate,
-                      { color: theme.colors.textTertiary },
-                    ]}
-                  >
-                    Member since{" "}
-                    {new Date().toLocaleDateString("en-US", {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </Text>
-                </View>
-
-                <Button
-                  title="Edit"
-                  variant="secondary"
-                  onPress={handleEditProfile}
-                  style={styles.editButton}
-                />
-              </View>
-            </Card>
-            {/* Stats Overview */}
-            <Card style={styles.statsCard}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                Your Journey
-              </Text>
-              <View style={styles.statsGrid}>
-                <View style={styles.statItem}>
-                  <Text
-                    style={[styles.statNumber, { color: theme.colors.primary }]}
-                  >
-                    42
-                  </Text>
-                  <Text
-                    style={[
-                      styles.statLabel,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    Check-ins
-                  </Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text
-                    style={[styles.statNumber, { color: theme.colors.primary }]}
-                  >
-                    18
-                  </Text>
-                  <Text
-                    style={[
-                      styles.statLabel,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    Journal Entries
-                  </Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text
-                    style={[styles.statNumber, { color: theme.colors.primary }]}
-                  >
-                    7
-                  </Text>
-                  <Text
-                    style={[
-                      styles.statLabel,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    Day Streak
-                  </Text>
-                </View>
-              </View>
-            </Card>
-            {/* Settings */}
-            <Card style={styles.settingsCard}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                Preferences
-              </Text>
-              {settingsItems.map((item) => (
-                <ListItem
-                  key={item.id}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                  leftIcon={item.icon}
-                  rightComponent={
-                    <Switch
-                      value={item.value}
-                      onValueChange={(value) => {
-                        item.onToggle(value);
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }}
-                      trackColor={{
-                        false: theme.colors.border,
-                        true: theme.colors.primary + "80",
-                      }}
-                      thumbColor={
-                        item.value ? theme.colors.primary : theme.colors.surface
-                      }
+                    <IconSymbol
+                      name="person.fill"
+                      size={32}
+                      color={theme.colors.primary}
                     />
-                  }
-                />
-              ))}
-            </Card>
+                  </View>
+
+                  <View style={styles.profileInfo}>
+                    <Text style={[styles.userName, { color: theme.colors.text }]}>
+                      {user?.name || "User"}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.userEmail,
+                        { color: theme.colors.textSecondary },
+                      ]}
+                    >
+                      {user?.email || "user@example.com"}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.joinDate,
+                        { color: theme.colors.textTertiary },
+                      ]}
+                    >
+                      Member since{" "}
+                      {new Date().toLocaleDateString("en-US", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </Text>
+                  </View>
+
+                  <Button
+                    title="Edit"
+                    variant="secondary"
+                    onPress={handleEditProfile}
+                    style={styles.editButton}
+                  />
+                </View>              </Card>
+            </ShadowFriendlyAnimation>
+            {/* Stats Overview */}
+            <ShadowFriendlyAnimation index={1} animationType="slideUp">
+              <Card style={styles.statsCard}>
+                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                  Your Journey
+                </Text>
+                <View style={styles.statsGrid}>
+                  <View style={styles.statItem}>
+                    <Text
+                      style={[styles.statNumber, { color: theme.colors.primary }]}
+                    >
+                      42
+                    </Text>
+                    <Text
+                      style={[
+                        styles.statLabel,
+                        { color: theme.colors.textSecondary },
+                      ]}
+                    >
+                      Check-ins
+                    </Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text
+                      style={[styles.statNumber, { color: theme.colors.primary }]}
+                    >
+                      18
+                    </Text>
+                    <Text
+                      style={[
+                        styles.statLabel,
+                        { color: theme.colors.textSecondary },
+                      ]}
+                    >
+                      Journal Entries
+                    </Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text
+                      style={[styles.statNumber, { color: theme.colors.primary }]}
+                    >
+                      7
+                    </Text>
+                    <Text
+                      style={[
+                        styles.statLabel,
+                        { color: theme.colors.textSecondary },
+                      ]}
+                    >
+                      Day Streak
+                    </Text>
+                  </View>
+                </View>              </Card>
+            </ShadowFriendlyAnimation>
+            {/* Settings */}
+            <ShadowFriendlyAnimation index={2} animationType="slideUp">
+              <Card style={styles.settingsCard}>
+                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                  Preferences
+                </Text>
+                {settingsItems.map((item) => (
+                  <ListItem
+                    key={item.id}
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    leftIcon={item.icon}
+                    rightComponent={
+                      <Switch
+                        value={item.value}
+                        onValueChange={(value) => {
+                          item.onToggle(value);
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }}
+                        trackColor={{
+                          false: theme.colors.border,
+                          true: theme.colors.primary + "80",
+                        }}
+                        thumbColor={
+                          item.value ? theme.colors.primary : theme.colors.surface
+                        }
+                      />
+                    }
+                  />
+                ))}              </Card>
+            </ShadowFriendlyAnimation>
             {/* Account */}
-            <Card style={styles.accountCard}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                Account
-              </Text>
-              {accountItems.map((item) => (
-                <ListItem
-                  key={item.id}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                  leftIcon={item.icon}
-                  rightIcon="chevron.right"
-                  onPress={item.onPress}
-                />
-              ))}
-            </Card>
+            <ShadowFriendlyAnimation index={3} animationType="slideUp">
+              <Card style={styles.accountCard}>
+                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                  Account
+                </Text>
+                {accountItems.map((item) => (
+                  <ListItem
+                    key={item.id}
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    leftIcon={item.icon}
+                    rightIcon="chevron.right"
+                    onPress={item.onPress}
+                  />
+                ))}
+              </Card>
+            </ShadowFriendlyAnimation>
             {/* Danger Zone */}
             <Card style={styles.dangerCard}>
               <Text

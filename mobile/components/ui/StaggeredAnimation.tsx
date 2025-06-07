@@ -24,51 +24,51 @@ export function StaggeredAnimation({
   delay = 0,
   duration = 400 
 }: StaggeredAnimationProps) {
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(30);
-  const scale = useSharedValue(0.9);
+  const opacity = useSharedValue(1); // Start visible to avoid shadow transitions
+  const translateY = useSharedValue(20); // Reduce initial offset
+  const scale = useSharedValue(0.95);
 
   useFocusEffect(
     React.useCallback(() => {
-      // Reset animation values
-      opacity.value = 0;
-      translateY.value = 30;
-      scale.value = 0.9;
+      // Reset animation values with minimal opacity change
+      opacity.value = 1;
+      translateY.value = 20; // Smaller initial offset
+      scale.value = 0.95;
 
       // Calculate staggered delay
-      const staggerDelay = delay + (index * 100);
+      const staggerDelay = delay + (index * 80); // Slightly faster stagger
 
       // Start animations with staggered timing
       if (animationType === 'slideUp') {
-        opacity.value = withDelay(staggerDelay, withTiming(1, { duration }));
+        // Only animate transform to avoid shadow issues
         translateY.value = withDelay(
           staggerDelay, 
           withSpring(0, { 
-            damping: 15, 
-            stiffness: 300,
-            mass: 0.8 
+            damping: 18, 
+            stiffness: 350,
+            mass: 0.7 
           })
         );
       } else if (animationType === 'fadeIn') {
-        opacity.value = withDelay(staggerDelay, withTiming(1, { duration }));
+        // Minimal opacity animation
+        opacity.value = 0.9;
+        opacity.value = withDelay(staggerDelay, withTiming(1, { duration: duration * 0.6 }));
       } else if (animationType === 'scaleIn') {
-        opacity.value = withDelay(staggerDelay, withTiming(1, { duration: duration * 0.8 }));
+        // Only animate scale
         scale.value = withDelay(
           staggerDelay, 
           withSpring(1, { 
-            damping: 12, 
-            stiffness: 400 
+            damping: 15, 
+            stiffness: 450 
           })
         );
       }
 
       return () => {
-        // Reset to invisible when losing focus
-        opacity.value = withTiming(0, { duration: 200 });
+        // Don't reset opacity to prevent shadow flicker
       };
     }, [index, animationType, delay, duration])
   );
-
   const animatedStyle = useAnimatedStyle(() => {
     let transform = [];
 
@@ -81,6 +81,9 @@ export function StaggeredAnimation({
     return {
       opacity: opacity.value,
       transform,
+      // Prevent shadow animation artifacts
+      shouldRasterizeIOS: true,
+      renderToHardwareTextureAndroid: true,
     };
   });
 
