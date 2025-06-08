@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import React, { useEffect } from "react";
+import { View, StyleSheet, Platform } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
   runOnJS,
-} from 'react-native-reanimated';
-import { useTheme } from '@/contexts/ThemeContext';
-import * as Haptics from 'expo-haptics';
+} from "react-native-reanimated";
+import { useTheme } from "@/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
 
 interface AnimatedTabIndicatorProps {
   activeIndex: number;
@@ -16,10 +16,10 @@ interface AnimatedTabIndicatorProps {
   totalTabs: number;
 }
 
-export function AnimatedTabIndicator({ 
-  activeIndex, 
-  tabWidth, 
-  totalTabs 
+export function AnimatedTabIndicator({
+  activeIndex,
+  tabWidth,
+  totalTabs,
 }: AnimatedTabIndicatorProps) {
   const { theme } = useTheme();
   const translateX = useSharedValue(0);
@@ -27,14 +27,14 @@ export function AnimatedTabIndicator({
   const opacity = useSharedValue(0.8);
 
   const triggerHaptics = () => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
 
   useEffect(() => {
     const targetX = activeIndex * tabWidth;
-    
+
     // Animate position with spring physics
     translateX.value = withSpring(targetX, {
       damping: 20,
@@ -58,10 +58,7 @@ export function AnimatedTabIndicator({
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [
-        { translateX: translateX.value },
-        { scale: scale.value },
-      ],
+      transform: [{ translateX: translateX.value }, { scale: scale.value }],
       opacity: opacity.value,
     };
   });
@@ -82,11 +79,11 @@ export function AnimatedTabIndicator({
 
 const styles = StyleSheet.create({
   indicator: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     height: 3,
     borderRadius: 1.5,
-    alignSelf: 'center',
-    marginLeft: '20%', // Center the indicator
+    alignSelf: "center",
+    marginLeft: "20%", // Center the indicator
   },
 });

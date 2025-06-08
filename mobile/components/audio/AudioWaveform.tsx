@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text as RNText,
@@ -6,8 +6,8 @@ import {
   StyleSheet,
   Dimensions,
   ViewStyle,
-} from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface AudioWaveformProps {
   isRecording?: boolean;
@@ -22,7 +22,7 @@ interface AudioWaveformProps {
 export function AudioWaveform({
   isRecording = false,
   audioData = [],
-  width = Dimensions.get('window').width - 40,
+  width = Dimensions.get("window").width - 40,
   height = 80,
   color,
   barCount = 20,
@@ -117,15 +117,15 @@ export function AudioWaveform({
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   waveformContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    height: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    height: "100%",
   },
   bar: {
     borderRadius: 2,
@@ -177,7 +177,7 @@ export function RecordingIndicator({
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -192,17 +192,24 @@ export function RecordingIndicator({
         ]}
       />
       <View style={recordingStyles.textContainer}>
-        <RNText style={[
-          theme.typography.label,
-          { color: theme.colors.text, marginLeft: theme.spacing.sm }
-        ]}>
-          {isRecording ? 'Recording' : 'Ready'}
+        <RNText
+          style={[
+            theme.typography.label,
+            { color: theme.colors.text, marginLeft: theme.spacing.sm },
+          ]}
+        >
+          {isRecording ? "Recording" : "Ready"}
         </RNText>
         {duration > 0 && (
-          <RNText style={[
-            theme.typography.captionSmall,
-            { color: theme.colors.textSecondary, marginLeft: theme.spacing.sm }
-          ]}>
+          <RNText
+            style={[
+              theme.typography.captionSmall,
+              {
+                color: theme.colors.textSecondary,
+                marginLeft: theme.spacing.sm,
+              },
+            ]}
+          >
             {formatDuration(duration)}
           </RNText>
         )}
@@ -213,8 +220,8 @@ export function RecordingIndicator({
 
 const recordingStyles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
   },
   indicator: {
@@ -223,7 +230,7 @@ const recordingStyles = StyleSheet.create({
     borderRadius: 6,
   },
   textContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

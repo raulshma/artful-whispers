@@ -33,10 +33,13 @@ export default function CheckinStep4() {
   const { checkInData, updateCheckInData } = useCheckIn();
 
   const [selectedLocation, setSelectedLocation] = useState<string | null>(
-    checkInData.location && SUGGESTED_LOCATIONS.find(l => l.label === checkInData.location)?.id || null
+    (checkInData.location &&
+      SUGGESTED_LOCATIONS.find((l) => l.label === checkInData.location)?.id) ||
+      null
   );
   const [customLocation, setCustomLocation] = useState(
-    checkInData.location && !SUGGESTED_LOCATIONS.find(l => l.label === checkInData.location)
+    checkInData.location &&
+      !SUGGESTED_LOCATIONS.find((l) => l.label === checkInData.location)
       ? checkInData.location
       : ""
   );

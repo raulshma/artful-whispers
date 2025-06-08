@@ -1,17 +1,17 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface CalendarDay {
   day: number;
-  mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null;
+  mood: "happy" | "neutral" | "sad" | "negative" | "skipped" | null;
   hasEntry: boolean;
 }
 
@@ -25,89 +25,87 @@ interface MoodCalendarProps {
   onPress?: () => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const cardWidth = width - 40;
 
-const DAYS_OF_WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const DAYS_OF_WEEK = ["M", "T", "W", "T", "F", "S", "S"];
 
-export default function MoodCalendar({ 
-  title, 
-  subtitle, 
-  days, 
-  currentMonth, 
-  onDayPress, 
+export default function MoodCalendar({
+  title,
+  subtitle,
+  days,
+  currentMonth,
+  onDayPress,
   onAddPress,
-  onPress
+  onPress,
 }: MoodCalendarProps) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  const getMoodColor = (mood: CalendarDay['mood']) => {
+  const getMoodColor = (mood: CalendarDay["mood"]) => {
     if (!mood) return theme.colors.border;
-    
+
     switch (mood) {
-      case 'happy':
+      case "happy":
         return theme.colors.mood.happy;
-      case 'neutral':
+      case "neutral":
         return theme.colors.mood.neutral;
-      case 'sad':
+      case "sad":
         return theme.colors.mood.sad;
-      case 'negative':
+      case "negative":
         return theme.colors.mood.negative;
-      case 'skipped':
+      case "skipped":
         return theme.colors.mood.skipped;
       default:
         return theme.colors.border;
     }
   };
 
-  const getMoodIcon = (mood: CalendarDay['mood']) => {
-    if (!mood) return 'ellipse-outline';
-    
+  const getMoodIcon = (mood: CalendarDay["mood"]) => {
+    if (!mood) return "ellipse-outline";
+
     switch (mood) {
-      case 'happy':
-        return 'happy';
-      case 'neutral':
-        return 'remove';
-      case 'sad':
-        return 'sad';
-      case 'negative':
-        return 'sad';
-      case 'skipped':
-        return 'close';
+      case "happy":
+        return "happy";
+      case "neutral":
+        return "remove";
+      case "sad":
+        return "sad";
+      case "negative":
+        return "sad";
+      case "skipped":
+        return "close";
       default:
-        return 'ellipse-outline';
+        return "ellipse-outline";
     }
   };
 
   const renderCalendarDay = (day: CalendarDay, index: number) => {
     const moodColor = getMoodColor(day.mood);
     const moodIcon = getMoodIcon(day.mood);
-    
+
     return (
       <TouchableOpacity
         key={index}
         style={[
           styles.calendarDay,
-          day.hasEntry && { backgroundColor: moodColor + '20' }
+          day.hasEntry && { backgroundColor: moodColor + "20" },
         ]}
         onPress={() => onDayPress?.(day.day)}
         activeOpacity={0.7}
       >
         {day.hasEntry ? (
-          <Ionicons 
-            name={moodIcon as any} 
-            size={20} 
-            color={moodColor}
-          />
+          <Ionicons name={moodIcon as any} size={20} color={moodColor} />
         ) : (
-          <View style={[styles.emptyDay, { borderColor: theme.colors.border }]} />
+          <View
+            style={[styles.emptyDay, { borderColor: theme.colors.border }]}
+          />
         )}
       </TouchableOpacity>
     );
   };
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.container}
       onPress={onPress}
       activeOpacity={0.8}
@@ -117,16 +115,12 @@ export default function MoodCalendar({
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.addButton}
           onPress={onAddPress}
           activeOpacity={0.7}
         >
-          <Ionicons 
-            name="add" 
-            size={24} 
-            color={theme.colors.primary} 
-          />
+          <Ionicons name="add" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -168,86 +162,87 @@ export default function MoodCalendar({
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.xl,
-    padding: theme.spacing.lg,
-    marginVertical: theme.spacing.sm,
-    marginHorizontal: theme.spacing.md,
-    ...theme.shadows.md,
-    width: cardWidth,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing.lg,
-  },
-  title: {
-    ...theme.typography.h4,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  subtitle: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.textSecondary,
-  },
-  addButton: {
-    width: 32,
-    height: 32,
-    borderRadius: theme.borderRadius.full,
-    backgroundColor: theme.colors.backgroundSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarContainer: {
-    marginBottom: theme.spacing.md,
-  },
-  weekHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.xs,
-  },
-  weekDay: {
-    ...theme.typography.caption,
-    color: theme.colors.textSecondary,
-    fontWeight: '600',
-    textAlign: 'center',
-    width: 32,
-  },
-  calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    gap: theme.spacing.xs,
-  },
-  calendarDay: {
-    width: 32,
-    height: 32,
-    borderRadius: theme.borderRadius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: theme.spacing.xs,
-  },
-  emptyDay: {
-    width: 20,
-    height: 20,
-    borderRadius: theme.borderRadius.full,
-    borderWidth: 1,
-  },
-  legend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    paddingTop: theme.spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  legendItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.borderRadius.xl,
+      padding: theme.spacing.lg,
+      marginVertical: theme.spacing.sm,
+      marginHorizontal: theme.spacing.md,
+      ...theme.shadows.md,
+      width: cardWidth,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: theme.spacing.lg,
+    },
+    title: {
+      ...theme.typography.h4,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    subtitle: {
+      ...theme.typography.bodySmall,
+      color: theme.colors.textSecondary,
+    },
+    addButton: {
+      width: 32,
+      height: 32,
+      borderRadius: theme.borderRadius.full,
+      backgroundColor: theme.colors.backgroundSecondary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    calendarContainer: {
+      marginBottom: theme.spacing.md,
+    },
+    weekHeader: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      marginBottom: theme.spacing.sm,
+      paddingHorizontal: theme.spacing.xs,
+    },
+    weekDay: {
+      ...theme.typography.caption,
+      color: theme.colors.textSecondary,
+      fontWeight: "600",
+      textAlign: "center",
+      width: 32,
+    },
+    calendarGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-around",
+      gap: theme.spacing.xs,
+    },
+    calendarDay: {
+      width: 32,
+      height: 32,
+      borderRadius: theme.borderRadius.sm,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: theme.spacing.xs,
+    },
+    emptyDay: {
+      width: 20,
+      height: 20,
+      borderRadius: theme.borderRadius.full,
+      borderWidth: 1,
+    },
+    legend: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: theme.spacing.md,
+      paddingTop: theme.spacing.sm,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    legendItem: {
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });

@@ -1,21 +1,21 @@
-import React, { useEffect } from 'react';
-import { View, Platform } from 'react-native';
+import React, { useEffect } from "react";
+import { View, Platform } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSpring,
   withDelay,
-} from 'react-native-reanimated';
-import { useFocusEffect } from '@react-navigation/native';
+} from "react-native-reanimated";
+import { useFocusEffect } from "@react-navigation/native";
 
 /**
  * ShadowFriendlyAnimation - A specialized animation wrapper for elements with shadows
- * 
- * This component provides smooth animations without animating opacity or other properties 
+ *
+ * This component provides smooth animations without animating opacity or other properties
  * that cause shadow flickering or visual artifacts. Perfect for Card components and other
  * shadowed elements that need to animate smoothly during tab transitions.
- * 
+ *
  * Features:
  * - Transform-only animations (translateY, scale) to avoid shadow artifacts
  * - Reduced movement distance and scale changes for subtle, polished effects
@@ -26,17 +26,17 @@ import { useFocusEffect } from '@react-navigation/native';
 interface ShadowFriendlyAnimationProps {
   children: React.ReactNode;
   index: number;
-  animationType?: 'slideUp' | 'scaleIn';
+  animationType?: "slideUp" | "scaleIn";
   delay?: number;
   duration?: number;
 }
 
-export function ShadowFriendlyAnimation({ 
-  children, 
-  index, 
-  animationType = 'slideUp',
+export function ShadowFriendlyAnimation({
+  children,
+  index,
+  animationType = "slideUp",
   delay = 0,
-  duration = 400 
+  duration = 400,
 }: ShadowFriendlyAnimationProps) {
   const translateY = useSharedValue(15); // Smaller movement to reduce shadow artifacts
   const scale = useSharedValue(0.98); // Minimal scale change
@@ -48,25 +48,25 @@ export function ShadowFriendlyAnimation({
       scale.value = 0.98;
 
       // Calculate staggered delay
-      const staggerDelay = delay + (index * 60);
+      const staggerDelay = delay + index * 60;
 
       // Start animations with staggered timing
-      if (animationType === 'slideUp') {
+      if (animationType === "slideUp") {
         translateY.value = withDelay(
-          staggerDelay, 
-          withSpring(0, { 
-            damping: 20, 
+          staggerDelay,
+          withSpring(0, {
+            damping: 20,
             stiffness: 400,
-            mass: 0.6 
+            mass: 0.6,
           })
         );
-      } else if (animationType === 'scaleIn') {
+      } else if (animationType === "scaleIn") {
         scale.value = withDelay(
-          staggerDelay, 
-          withSpring(1, { 
-            damping: 18, 
+          staggerDelay,
+          withSpring(1, {
+            damping: 18,
             stiffness: 450,
-            mass: 0.6 
+            mass: 0.6,
           })
         );
       }
@@ -79,9 +79,9 @@ export function ShadowFriendlyAnimation({
   const animatedStyle = useAnimatedStyle(() => {
     let transform = [];
 
-    if (animationType === 'slideUp') {
+    if (animationType === "slideUp") {
       transform.push({ translateY: translateY.value });
-    } else if (animationType === 'scaleIn') {
+    } else if (animationType === "scaleIn") {
       transform.push({ scale: scale.value });
     }
 
@@ -89,19 +89,15 @@ export function ShadowFriendlyAnimation({
       transform,
       // No opacity changes to prevent shadow animations
       // Add rasterization hints for better shadow performance
-      ...(Platform.OS === 'ios' && {
+      ...(Platform.OS === "ios" && {
         shouldRasterizeIOS: true,
         rasterizationScale: 2,
       }),
-      ...(Platform.OS === 'android' && {
+      ...(Platform.OS === "android" && {
         renderToHardwareTextureAndroid: true,
       }),
     };
   });
 
-  return (
-    <Animated.View style={animatedStyle}>
-      {children}
-    </Animated.View>
-  );
+  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 }

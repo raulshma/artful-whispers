@@ -1,10 +1,5 @@
-import React, { useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  ViewStyle,
-  Dimensions,
-} from 'react-native';
+import React, { useEffect } from "react";
+import { View, StyleSheet, ViewStyle, Dimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,14 +7,22 @@ import Animated, {
   withTiming,
   withSequence,
   interpolate,
-} from 'react-native-reanimated';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native-reanimated";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface LoadingAnimationProps {
   size?: number;
   color?: string;
   style?: ViewStyle;
-  variant?: 'spinner' | 'dots' | 'pulse' | 'wave' | 'skia-ripple' | 'skia-morphing' | 'skia-orbital' | 'skia-breathing';
+  variant?:
+    | "spinner"
+    | "dots"
+    | "pulse"
+    | "wave"
+    | "skia-ripple"
+    | "skia-morphing"
+    | "skia-orbital"
+    | "skia-breathing";
   visible?: boolean;
 }
 
@@ -27,55 +30,111 @@ export function LoadingAnimation({
   size = 40,
   color,
   style,
-  variant = 'spinner',
+  variant = "spinner",
   visible = true,
 }: LoadingAnimationProps) {
   const { theme } = useTheme();
   const animationColor = color || theme.colors.primary;
 
   // Skia variants
-  if (variant === 'skia-ripple') {
-    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
-    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="ripple" visible={visible} />;
+  if (variant === "skia-ripple") {
+    const { SkiaLoadingAnimation } = require("./SkiaLoadingAnimation");
+    return (
+      <SkiaLoadingAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        variant="ripple"
+        visible={visible}
+      />
+    );
   }
 
-  if (variant === 'skia-morphing') {
-    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
-    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="morphing" visible={visible} />;
+  if (variant === "skia-morphing") {
+    const { SkiaLoadingAnimation } = require("./SkiaLoadingAnimation");
+    return (
+      <SkiaLoadingAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        variant="morphing"
+        visible={visible}
+      />
+    );
   }
 
-  if (variant === 'skia-orbital') {
-    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
-    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="orbital" visible={visible} />;
+  if (variant === "skia-orbital") {
+    const { SkiaLoadingAnimation } = require("./SkiaLoadingAnimation");
+    return (
+      <SkiaLoadingAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        variant="orbital"
+        visible={visible}
+      />
+    );
   }
 
-  if (variant === 'skia-breathing') {
-    const { SkiaLoadingAnimation } = require('./SkiaLoadingAnimation');
-    return <SkiaLoadingAnimation size={size} color={animationColor} style={style} variant="breathing" visible={visible} />;
+  if (variant === "skia-breathing") {
+    const { SkiaLoadingAnimation } = require("./SkiaLoadingAnimation");
+    return (
+      <SkiaLoadingAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        variant="breathing"
+        visible={visible}
+      />
+    );
   }
 
   // Standard variants
-  if (variant === 'spinner') {
-    return <SpinnerAnimation size={size} color={animationColor} style={style} visible={visible} />;
+  if (variant === "spinner") {
+    return (
+      <SpinnerAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        visible={visible}
+      />
+    );
   }
 
-  if (variant === 'dots') {
+  if (variant === "dots") {
     return <DotsAnimation size={size} color={animationColor} style={style} />;
   }
 
-  if (variant === 'pulse') {
+  if (variant === "pulse") {
     return <PulseAnimation size={size} color={animationColor} style={style} />;
   }
 
-  if (variant === 'wave') {
+  if (variant === "wave") {
     return <WaveAnimation size={size} color={animationColor} style={style} />;
   }
 
-  return <SpinnerAnimation size={size} color={animationColor} style={style} visible={visible} />;
+  return (
+    <SpinnerAnimation
+      size={size}
+      color={animationColor}
+      style={style}
+      visible={visible}
+    />
+  );
 }
 
 // Spinner Animation
-function SpinnerAnimation({ size, color, style, visible = true }: { size: number; color: string; style?: ViewStyle; visible?: boolean }) {
+function SpinnerAnimation({
+  size,
+  color,
+  style,
+  visible = true,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
+  visible?: boolean;
+}) {
   const rotation = useSharedValue(0);
   const opacity = useSharedValue(visible ? 1 : 0);
   const scale = useSharedValue(visible ? 1 : 0);
@@ -96,10 +155,7 @@ function SpinnerAnimation({ size, color, style, visible = true }: { size: number
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: opacity.value,
-      transform: [
-        { rotate: `${rotation.value}deg` },
-        { scale: scale.value }
-      ],
+      transform: [{ rotate: `${rotation.value}deg` }, { scale: scale.value }],
     };
   });
 
@@ -112,7 +168,7 @@ function SpinnerAnimation({ size, color, style, visible = true }: { size: number
             height: size,
             borderRadius: size / 2,
             borderWidth: 3,
-            borderColor: 'transparent',
+            borderColor: "transparent",
             borderTopColor: color,
           },
           animatedStyle,
@@ -123,7 +179,15 @@ function SpinnerAnimation({ size, color, style, visible = true }: { size: number
 }
 
 // Dots Animation
-function DotsAnimation({ size, color, style }: { size: number; color: string; style?: ViewStyle }) {
+function DotsAnimation({
+  size,
+  color,
+  style,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
+}) {
   const dot1 = useSharedValue(0.3);
   const dot2 = useSharedValue(0.3);
   const dot3 = useSharedValue(0.3);
@@ -133,10 +197,7 @@ function DotsAnimation({ size, color, style }: { size: number; color: string; st
     const delay = 200;
 
     dot1.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration }),
-        withTiming(0.3, { duration })
-      ),
+      withSequence(withTiming(1, { duration }), withTiming(0.3, { duration })),
       -1,
       false
     );
@@ -182,7 +243,16 @@ function DotsAnimation({ size, color, style }: { size: number; color: string; st
   const dotSize = size / 4;
 
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }, style]}>
+    <View
+      style={[
+        {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        style,
+      ]}
+    >
       <Animated.View
         style={[
           {
@@ -224,7 +294,15 @@ function DotsAnimation({ size, color, style }: { size: number; color: string; st
 }
 
 // Pulse Animation
-function PulseAnimation({ size, color, style }: { size: number; color: string; style?: ViewStyle }) {
+function PulseAnimation({
+  size,
+  color,
+  style,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
+}) {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
@@ -271,7 +349,15 @@ function PulseAnimation({ size, color, style }: { size: number; color: string; s
 }
 
 // Wave Animation
-function WaveAnimation({ size, color, style }: { size: number; color: string; style?: ViewStyle }) {
+function WaveAnimation({
+  size,
+  color,
+  style,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
+}) {
   const wave1 = useSharedValue(0);
   const wave2 = useSharedValue(0);
   const wave3 = useSharedValue(0);
@@ -279,48 +365,58 @@ function WaveAnimation({ size, color, style }: { size: number; color: string; st
   useEffect(() => {
     const duration = 1500;
 
-    wave1.value = withRepeat(
-      withTiming(1, { duration }),
-      -1,
-      false
-    );
+    wave1.value = withRepeat(withTiming(1, { duration }), -1, false);
 
     setTimeout(() => {
-      wave2.value = withRepeat(
-        withTiming(1, { duration }),
-        -1,
-        false
-      );
+      wave2.value = withRepeat(withTiming(1, { duration }), -1, false);
     }, 200);
 
     setTimeout(() => {
-      wave3.value = withRepeat(
-        withTiming(1, { duration }),
-        -1,
-        false
-      );
+      wave3.value = withRepeat(withTiming(1, { duration }), -1, false);
     }, 400);
   }, []);
 
   const wave1Style = useAnimatedStyle(() => {
-    const height = interpolate(wave1.value, [0, 0.5, 1], [size * 0.2, size, size * 0.2]);
+    const height = interpolate(
+      wave1.value,
+      [0, 0.5, 1],
+      [size * 0.2, size, size * 0.2]
+    );
     return { height };
   });
 
   const wave2Style = useAnimatedStyle(() => {
-    const height = interpolate(wave2.value, [0, 0.5, 1], [size * 0.2, size, size * 0.2]);
+    const height = interpolate(
+      wave2.value,
+      [0, 0.5, 1],
+      [size * 0.2, size, size * 0.2]
+    );
     return { height };
   });
 
   const wave3Style = useAnimatedStyle(() => {
-    const height = interpolate(wave3.value, [0, 0.5, 1], [size * 0.2, size, size * 0.2]);
+    const height = interpolate(
+      wave3.value,
+      [0, 0.5, 1],
+      [size * 0.2, size, size * 0.2]
+    );
     return { height };
   });
 
   const barWidth = size / 6;
 
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: size }, style]}>
+    <View
+      style={[
+        {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          height: size,
+        },
+        style,
+      ]}
+    >
       <Animated.View
         style={[
           {
@@ -374,8 +470,8 @@ export function TranscribingAnimation({ style }: { style?: ViewStyle }) {
 
 const styles = StyleSheet.create({
   transcribingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 20,
   },
 });

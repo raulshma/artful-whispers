@@ -11,7 +11,8 @@ import * as Haptics from "expo-haptics";
 export default function CheckinComplete() {
   const { theme } = useTheme();
   const router = useRouter();
-  const { checkInData, resetCheckInData, isSubmitting, setIsSubmitting } = useCheckIn();
+  const { checkInData, resetCheckInData, isSubmitting, setIsSubmitting } =
+    useCheckIn();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,15 +39,17 @@ export default function CheckinComplete() {
         console.log("Submitting check-in data:", submissionData);
 
         await createCheckIn(submissionData);
-        
+
         setIsSubmitted(true);
         // Provide haptic feedback for completion
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        
+
         console.log("Check-in submitted successfully");
       } catch (error) {
         console.error("Failed to submit check-in:", error);
-        setError(error instanceof Error ? error.message : "Failed to submit check-in");
+        setError(
+          error instanceof Error ? error.message : "Failed to submit check-in"
+        );
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } finally {
         setIsSubmitting(false);
@@ -135,7 +138,7 @@ export default function CheckinComplete() {
                 onPress={handleRetry}
                 style={styles.actionButton}
               />
-              
+
               <Button
                 title="Continue Anyway"
                 variant="secondary"
@@ -211,23 +214,24 @@ export default function CheckinComplete() {
               </Text>
             </View>
 
-            {checkInData.location && checkInData.location !== "Not specified" && (
-              <View style={styles.summaryItem}>
-                <Text
-                  style={[
-                    styles.summaryLabel,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
-                  Location:
-                </Text>
-                <Text
-                  style={[styles.summaryValue, { color: theme.colors.text }]}
-                >
-                  {checkInData.location}
-                </Text>
-              </View>
-            )}
+            {checkInData.location &&
+              checkInData.location !== "Not specified" && (
+                <View style={styles.summaryItem}>
+                  <Text
+                    style={[
+                      styles.summaryLabel,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    Location:
+                  </Text>
+                  <Text
+                    style={[styles.summaryValue, { color: theme.colors.text }]}
+                  >
+                    {checkInData.location}
+                  </Text>
+                </View>
+              )}
 
             <View style={styles.summaryItem}>
               <Text

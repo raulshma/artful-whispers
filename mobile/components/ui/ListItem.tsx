@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -6,10 +6,10 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
-} from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
-import { IconSymbol } from './IconSymbol';
-import * as Haptics from 'expo-haptics';
+} from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import { IconSymbol } from "./IconSymbol";
+import * as Haptics from "expo-haptics";
 
 interface ListItemProps {
   title: string;
@@ -23,7 +23,7 @@ interface ListItemProps {
   style?: ViewStyle;
   titleStyle?: TextStyle;
   subtitleStyle?: TextStyle;
-  variant?: 'default' | 'compact' | 'detailed';
+  variant?: "default" | "compact" | "detailed";
   disabled?: boolean;
   selected?: boolean;
   hapticFeedback?: boolean;
@@ -41,7 +41,7 @@ export function ListItem({
   style,
   titleStyle,
   subtitleStyle,
-  variant = 'default',
+  variant = "default",
   disabled = false,
   selected = false,
   hapticFeedback = true,
@@ -50,7 +50,7 @@ export function ListItem({
 
   const handlePress = () => {
     if (disabled || !onPress) return;
-    
+
     if (hapticFeedback) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -59,9 +59,9 @@ export function ListItem({
 
   const getContainerStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: selected ? theme.colors.primary + '10' : 'transparent',
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: selected ? theme.colors.primary + "10" : "transparent",
       opacity: disabled ? 0.5 : 1,
     };
 
@@ -99,7 +99,7 @@ export function ListItem({
     return {
       ...variantStyles[variant],
       color: selected ? theme.colors.primary : theme.colors.text,
-      fontWeight: selected ? '600' : '400',
+      fontWeight: selected ? "600" : "400",
     };
   };
 
@@ -134,7 +134,7 @@ export function ListItem({
         <View style={styles.leftContent}>
           <IconSymbol
             name={leftIcon}
-            size={variant === 'compact' ? 20 : 24}
+            size={variant === "compact" ? 20 : 24}
             color={selected ? theme.colors.primary : theme.colors.textSecondary}
           />
         </View>
@@ -154,7 +154,7 @@ export function ListItem({
         <View style={styles.rightContent}>
           <IconSymbol
             name={rightIcon}
-            size={variant === 'compact' ? 16 : 20}
+            size={variant === "compact" ? 16 : 20}
             color={theme.colors.textTertiary}
           />
         </View>
@@ -167,25 +167,25 @@ export function ListItem({
   const content = (
     <View style={[getContainerStyle(), style]}>
       {renderLeftContent()}
-      
+
       <View style={styles.textContent}>
         <Text style={[getTitleStyle(), titleStyle]} numberOfLines={1}>
           {title}
         </Text>
-        
+
         {subtitle && (
           <Text style={[getSubtitleStyle(), subtitleStyle]} numberOfLines={1}>
             {subtitle}
           </Text>
         )}
-        
-        {description && variant === 'detailed' && (
+
+        {description && variant === "detailed" && (
           <Text style={getDescriptionStyle()} numberOfLines={2}>
             {description}
           </Text>
         )}
       </View>
-      
+
       {renderRightContent()}
     </View>
   );
@@ -209,7 +209,7 @@ export function LocationListItem({
   onPress,
   selected,
   ...props
-}: Omit<ListItemProps, 'leftIcon' | 'rightComponent'> & {
+}: Omit<ListItemProps, "leftIcon" | "rightComponent"> & {
   distance?: string;
 }) {
   return (
@@ -219,9 +219,7 @@ export function LocationListItem({
       leftIcon="location"
       rightComponent={
         distance ? (
-          <Text style={{ fontSize: 12, color: '#666' }}>
-            {distance}
-          </Text>
+          <Text style={{ fontSize: 12, color: "#666" }}>{distance}</Text>
         ) : undefined
       }
       onPress={onPress}
@@ -238,7 +236,7 @@ export function SettingsListItem({
   onPress,
   showChevron = true,
   ...props
-}: Omit<ListItemProps, 'rightIcon'> & {
+}: Omit<ListItemProps, "rightIcon"> & {
   showChevron?: boolean;
 }) {
   return (
@@ -259,9 +257,9 @@ export function SelectableListItem({
   selected,
   onPress,
   ...props
-}: Omit<ListItemProps, 'rightComponent'>) {
+}: Omit<ListItemProps, "rightComponent">) {
   const { theme } = useTheme();
-  
+
   return (
     <ListItem
       title={title}
@@ -301,10 +299,15 @@ export function ListSectionHeader({
   style?: ViewStyle;
 }) {
   const { theme } = useTheme();
-  
+
   return (
     <View style={[styles.sectionHeader, style]}>
-      <Text style={[styles.sectionHeaderText, { color: theme.colors.textSecondary }]}>
+      <Text
+        style={[
+          styles.sectionHeaderText,
+          { color: theme.colors.textSecondary },
+        ]}
+      >
         {title.toUpperCase()}
       </Text>
     </View>
@@ -320,7 +323,7 @@ export function ListSeparator({
   inset?: boolean;
 }) {
   const { theme } = useTheme();
-  
+
   return (
     <View
       style={[
@@ -352,7 +355,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   separator: {

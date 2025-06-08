@@ -1,11 +1,11 @@
 import { createAuthClient } from "better-auth/react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
-import { config } from '@/config';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
+import { config } from "@/config";
 
 // Create a storage adapter that works on both web and mobile
 const getStorage = () => {
-  if (Platform.OS === 'web') {
+  if (Platform.OS === "web") {
     // For web, create a localStorage adapter that matches AsyncStorage interface
     return {
       getItem: async (key: string) => {
@@ -34,17 +34,11 @@ const getStorage = () => {
   return AsyncStorage;
 };
 
-console.log('🔧 Creating auth client with baseURL:', config.API_BASE_URL);
+console.log("🔧 Creating auth client with baseURL:", config.API_BASE_URL);
 
 export const authClient = createAuthClient({
   baseURL: config.API_BASE_URL,
   storage: getStorage(),
 });
 
-export const { 
-  signIn, 
-  signUp, 
-  signOut, 
-  useSession, 
-  getSession 
-} = authClient;
+export const { signIn, signUp, signOut, useSession, getSession } = authClient;

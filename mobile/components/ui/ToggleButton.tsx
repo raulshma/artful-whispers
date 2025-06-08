@@ -1,20 +1,20 @@
-import React from 'react';
+import React from "react";
 import {
   TouchableOpacity,
   Text,
   View,
   ViewStyle,
   TextStyle,
-} from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
-import * as Haptics from 'expo-haptics';
+} from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
 
 interface ToggleButtonProps {
   title: string;
   selected?: boolean;
   onPress: () => void;
-  variant?: 'default' | 'chip' | 'pill';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "default" | "chip" | "pill";
+  size?: "small" | "medium" | "large";
   icon?: React.ReactNode;
   disabled?: boolean;
   style?: ViewStyle;
@@ -26,8 +26,8 @@ export function ToggleButton({
   title,
   selected = false,
   onPress,
-  variant = 'default',
-  size = 'medium',
+  variant = "default",
+  size = "medium",
   icon,
   disabled = false,
   style,
@@ -38,7 +38,7 @@ export function ToggleButton({
 
   const handlePress = () => {
     if (disabled) return;
-    
+
     if (hapticFeedback) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -47,9 +47,9 @@ export function ToggleButton({
 
   const getButtonStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
       borderWidth: 1,
     };
 
@@ -92,7 +92,7 @@ export function ToggleButton({
           borderColor: theme.colors.primary,
         }
       : {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderColor: theme.colors.border,
         };
 
@@ -114,8 +114,8 @@ export function ToggleButton({
 
     return {
       ...sizeStyles[size],
-      color: selected ? '#FFFFFF' : theme.colors.text,
-      fontWeight: selected ? '600' : '400',
+      color: selected ? "#FFFFFF" : theme.colors.text,
+      fontWeight: selected ? "600" : "400",
     };
   };
 
@@ -131,11 +131,7 @@ export function ToggleButton({
           {icon}
         </View>
       )}
-      {title && (
-        <Text style={[getTextStyle(), textStyle]}>
-          {title}
-        </Text>
-      )}
+      {title && <Text style={[getTextStyle(), textStyle]}>{title}</Text>}
     </TouchableOpacity>
   );
 }
@@ -150,8 +146,8 @@ interface ToggleGroupProps {
   selectedIds: string[];
   onSelectionChange: (selectedIds: string[]) => void;
   multiSelect?: boolean;
-  variant?: 'default' | 'chip' | 'pill';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "default" | "chip" | "pill";
+  size?: "small" | "medium" | "large";
   style?: ViewStyle;
   buttonStyle?: ViewStyle;
   maxSelections?: number;
@@ -162,8 +158,8 @@ export function ToggleGroup({
   selectedIds,
   onSelectionChange,
   multiSelect = true,
-  variant = 'chip',
-  size = 'medium',
+  variant = "chip",
+  size = "medium",
   style,
   buttonStyle,
   maxSelections,
@@ -176,7 +172,7 @@ export function ToggleGroup({
     if (multiSelect) {
       if (selectedIds.includes(id)) {
         // Remove from selection
-        newSelectedIds = selectedIds.filter(selectedId => selectedId !== id);
+        newSelectedIds = selectedIds.filter((selectedId) => selectedId !== id);
       } else {
         // Add to selection (check max limit)
         if (maxSelections && selectedIds.length >= maxSelections) {
@@ -193,14 +189,16 @@ export function ToggleGroup({
   };
 
   return (
-    <View style={[
-      {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: theme.spacing.sm,
-      },
-      style
-    ]}>
+    <View
+      style={[
+        {
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: theme.spacing.sm,
+        },
+        style,
+      ]}
+    >
       {options.map((option) => (
         <ToggleButton
           key={option.id}

@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -13,9 +8,9 @@ import Animated, {
   withSpring,
   interpolate,
   runOnJS,
-} from 'react-native-reanimated';
-import { useTheme } from '@/contexts/ThemeContext';
-import * as Haptics from 'expo-haptics';
+} from "react-native-reanimated";
+import { useTheme } from "@/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
 
 interface SliderProps {
   min?: number;
@@ -53,9 +48,7 @@ export function Slider({
   const { theme } = useTheme();
   const [currentValue, setCurrentValue] = useState(value);
 
-  const translateX = useSharedValue(
-    ((value - min) / (max - min)) * width
-  );
+  const translateX = useSharedValue(((value - min) / (max - min)) * width);
 
   const triggerHaptic = () => {
     if (!disabled) {
@@ -65,10 +58,10 @@ export function Slider({
 
   const updateValue = (newValue: number) => {
     if (disabled) return;
-    
+
     const clampedValue = Math.max(min, Math.min(max, newValue));
     const steppedValue = Math.round(clampedValue / step) * step;
-    
+
     if (steppedValue !== currentValue) {
       setCurrentValue(steppedValue);
       onValueChange(steppedValue);
@@ -82,18 +75,18 @@ export function Slider({
     },
     onActive: (event, context) => {
       if (disabled) return;
-      
+
       const newX = context.startX + event.translationX;
       const clampedX = Math.max(0, Math.min(width, newX));
       translateX.value = clampedX;
-      
+
       const percentage = clampedX / width;
       const newValue = min + percentage * (max - min);
       runOnJS(updateValue)(newValue);
     },
     onEnd: () => {
       if (disabled) return;
-      
+
       const targetValue = ((currentValue - min) / (max - min)) * width;
       translateX.value = withSpring(targetValue);
     },
@@ -115,75 +108,87 @@ export function Slider({
   const getActiveTrackColor = () => activeTrackColor || theme.colors.primary;
   const getThumbColor = () => thumbColor || theme.colors.primary;
 
-  const displayValue = formatValue ? formatValue(currentValue) : currentValue.toString();
+  const displayValue = formatValue
+    ? formatValue(currentValue)
+    : currentValue.toString();
 
   return (
     <View style={[styles.container, style]}>
       {label && (
         <View style={styles.labelContainer}>
-          <Text style={[
-            theme.typography.label,
-            { color: theme.colors.textSecondary }
-          ]}>
+          <Text
+            style={[
+              theme.typography.label,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
             {label}
           </Text>
           {showValue && (
-            <Text style={[
-              theme.typography.label,
-              { color: theme.colors.text }
-            ]}>
+            <Text
+              style={[theme.typography.label, { color: theme.colors.text }]}
+            >
               {displayValue}
             </Text>
           )}
         </View>
       )}
-      
+
       <View style={[styles.sliderContainer, { width: width + 24 }]}>
         <PanGestureHandler onGestureEvent={gestureHandler} enabled={!disabled}>
           <Animated.View style={[styles.slider, { width }]}>
             {/* Track Background */}
-            <View style={[
-              styles.track,
-              { backgroundColor: getTrackColor() }
-            ]} />
-            
+            <View
+              style={[styles.track, { backgroundColor: getTrackColor() }]}
+            />
+
             {/* Track Fill */}
-            <Animated.View style={[
-              styles.trackFill,
-              { backgroundColor: getActiveTrackColor() },
-              trackFillStyle,
-            ]} />
-            
+            <Animated.View
+              style={[
+                styles.trackFill,
+                { backgroundColor: getActiveTrackColor() },
+                trackFillStyle,
+              ]}
+            />
+
             {/* Thumb */}
-            <Animated.View style={[
-              styles.thumb,
-              {
-                backgroundColor: getThumbColor(),
-                opacity: disabled ? 0.5 : 1,
-              },
-              thumbStyle,
-            ]}>
-              <View style={[
-                styles.thumbInner,
-                { backgroundColor: theme.colors.surface }
-              ]} />
+            <Animated.View
+              style={[
+                styles.thumb,
+                {
+                  backgroundColor: getThumbColor(),
+                  opacity: disabled ? 0.5 : 1,
+                },
+                thumbStyle,
+              ]}
+            >
+              <View
+                style={[
+                  styles.thumbInner,
+                  { backgroundColor: theme.colors.surface },
+                ]}
+              />
             </Animated.View>
           </Animated.View>
         </PanGestureHandler>
       </View>
-      
+
       {/* Min/Max Labels */}
       <View style={[styles.labelsContainer, { width }]}>
-        <Text style={[
-          theme.typography.captionSmall,
-          { color: theme.colors.textTertiary }
-        ]}>
+        <Text
+          style={[
+            theme.typography.captionSmall,
+            { color: theme.colors.textTertiary },
+          ]}
+        >
           {formatValue ? formatValue(min) : min}
         </Text>
-        <Text style={[
-          theme.typography.captionSmall,
-          { color: theme.colors.textTertiary }
-        ]}>
+        <Text
+          style={[
+            theme.typography.captionSmall,
+            { color: theme.colors.textTertiary },
+          ]}
+        >
           {formatValue ? formatValue(max) : max}
         </Text>
       </View>
@@ -196,9 +201,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   labelContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   sliderContainer: {
@@ -207,27 +212,27 @@ const styles = StyleSheet.create({
   },
   slider: {
     height: 40,
-    justifyContent: 'center',
-    position: 'relative',
+    justifyContent: "center",
+    position: "relative",
   },
   track: {
     height: 4,
     borderRadius: 2,
-    position: 'absolute',
-    width: '100%',
+    position: "absolute",
+    width: "100%",
   },
   trackFill: {
     height: 4,
     borderRadius: 2,
-    position: 'absolute',
+    position: "absolute",
   },
   thumb: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -239,8 +244,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   labelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 12,
   },
 });

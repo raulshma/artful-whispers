@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
-import { ThemedView } from './ThemedView';
+import React, { useEffect } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "expo-router";
+import { ThemedView } from "./ThemedView";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,8 +15,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     // Only redirect if we're not loading and not authenticated
     if (!isLoading && !isAuthenticated) {
-      console.log('ProtectedRoute: Redirecting to auth');
-      router.replace('/auth');
+      console.log("ProtectedRoute: Redirecting to auth");
+      router.replace("/auth");
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -43,7 +43,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

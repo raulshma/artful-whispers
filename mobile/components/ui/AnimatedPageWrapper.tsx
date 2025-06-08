@@ -1,24 +1,24 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import React, { useEffect } from "react";
+import { View, StyleSheet, Platform } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
   runOnJS,
-} from 'react-native-reanimated';
-import { useFocusEffect } from '@react-navigation/native';
+} from "react-native-reanimated";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface AnimatedPageWrapperProps {
   children: React.ReactNode;
-  animationType?: 'fadeIn' | 'slideUp' | 'scaleIn' | 'slideFromRight';
+  animationType?: "fadeIn" | "slideUp" | "scaleIn" | "slideFromRight";
   delay?: number;
 }
 
-export function AnimatedPageWrapper({ 
-  children, 
-  animationType = 'slideUp',
-  delay = 0 
+export function AnimatedPageWrapper({
+  children,
+  animationType = "slideUp",
+  delay = 0,
 }: AnimatedPageWrapperProps) {
   const opacity = useSharedValue(1); // Start visible to avoid shadow transitions
   const translateY = useSharedValue(30);
@@ -36,31 +36,31 @@ export function AnimatedPageWrapper({
       // Start animations with delay
       const timer = setTimeout(() => {
         switch (animationType) {
-          case 'fadeIn':
+          case "fadeIn":
             // For fadeIn, we'll use a minimal opacity change
             opacity.value = 0.85;
             opacity.value = withTiming(1, { duration: 400 });
             break;
-          case 'slideUp':
+          case "slideUp":
             // Only animate transform, keep opacity constant
-            translateY.value = withSpring(0, { 
-              damping: 20, 
+            translateY.value = withSpring(0, {
+              damping: 20,
               stiffness: 300,
-              mass: 0.8
+              mass: 0.8,
             });
             break;
-          case 'scaleIn':
+          case "scaleIn":
             // Only animate scale, keep opacity constant
-            scale.value = withSpring(1, { 
-              damping: 15, 
-              stiffness: 400 
+            scale.value = withSpring(1, {
+              damping: 15,
+              stiffness: 400,
             });
             break;
-          case 'slideFromRight':
+          case "slideFromRight":
             // Only animate transform, keep opacity constant
-            translateX.value = withSpring(0, { 
-              damping: 18, 
-              stiffness: 350 
+            translateX.value = withSpring(0, {
+              damping: 18,
+              stiffness: 350,
             });
             break;
         }
@@ -75,21 +75,22 @@ export function AnimatedPageWrapper({
   const animatedStyle = useAnimatedStyle(() => {
     let transform = [];
 
-    if (animationType === 'slideUp') {
+    if (animationType === "slideUp") {
       transform.push({ translateY: translateY.value });
-    } else if (animationType === 'scaleIn') {
+    } else if (animationType === "scaleIn") {
       transform.push({ scale: scale.value });
-    } else if (animationType === 'slideFromRight') {
+    } else if (animationType === "slideFromRight") {
       transform.push({ translateX: translateX.value });
-    }    return {
+    }
+    return {
       opacity: opacity.value,
       transform,
       // Prevent shadow animation artifacts with platform-specific hints
-      ...(Platform.OS === 'ios' && {
+      ...(Platform.OS === "ios" && {
         shouldRasterizeIOS: true,
         rasterizationScale: 2,
       }),
-      ...(Platform.OS === 'android' && {
+      ...(Platform.OS === "android" && {
         renderToHardwareTextureAndroid: true,
       }),
     };

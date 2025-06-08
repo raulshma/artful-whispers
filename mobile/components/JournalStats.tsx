@@ -1,13 +1,13 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface JournalStatsData {
   positive: number;
@@ -24,26 +24,31 @@ interface JournalStatsProps {
   onPress?: () => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const cardWidth = width - 40;
 
-export default function JournalStats({ title, subtitle, data, onPress }: JournalStatsProps) {
+export default function JournalStats({
+  title,
+  subtitle,
+  data,
+  onPress,
+}: JournalStatsProps) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
   const renderStatBar = (
-    count: number, 
-    color: string, 
-    icon: string, 
+    count: number,
+    color: string,
+    icon: string,
     label: string,
     isMain: boolean = false
   ) => {
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
-          styles.statBar, 
+          styles.statBar,
           { backgroundColor: color },
-          isMain && styles.mainStatBar
+          isMain && styles.mainStatBar,
         ]}
         activeOpacity={0.8}
       >
@@ -56,10 +61,10 @@ export default function JournalStats({ title, subtitle, data, onPress }: Journal
           </Text>
         </View>
         <View style={styles.statIconContainer}>
-          <Ionicons 
-            name={icon as any} 
-            size={isMain ? 32 : 24} 
-            color={isMain ? '#FFFFFF' : '#FFFFFF'} 
+          <Ionicons
+            name={icon as any}
+            size={isMain ? 32 : 24}
+            color={isMain ? "#FFFFFF" : "#FFFFFF"}
           />
         </View>
       </TouchableOpacity>
@@ -67,8 +72,8 @@ export default function JournalStats({ title, subtitle, data, onPress }: Journal
   };
 
   return (
-    <TouchableOpacity 
-      style={styles.container} 
+    <TouchableOpacity
+      style={styles.container}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -77,10 +82,10 @@ export default function JournalStats({ title, subtitle, data, onPress }: Journal
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
-        <Ionicons 
-          name="print-outline" 
-          size={24} 
-          color={theme.colors.textSecondary} 
+        <Ionicons
+          name="print-outline"
+          size={24}
+          color={theme.colors.textSecondary}
         />
       </View>
 
@@ -88,10 +93,10 @@ export default function JournalStats({ title, subtitle, data, onPress }: Journal
         {/* Main positive stat - takes up more space */}
         <View style={styles.mainStatContainer}>
           {renderStatBar(
-            data.positive, 
-            theme.colors.mood.positive, 
-            'happy-outline', 
-            'Positive',
+            data.positive,
+            theme.colors.mood.positive,
+            "happy-outline",
+            "Positive",
             true
           )}
         </View>
@@ -100,18 +105,18 @@ export default function JournalStats({ title, subtitle, data, onPress }: Journal
         <View style={styles.secondaryStatsRow}>
           <View style={styles.secondaryStatContainer}>
             {renderStatBar(
-              data.neutral, 
-              theme.colors.mood.neutral, 
-              'remove-outline', 
-              'Neutral'
+              data.neutral,
+              theme.colors.mood.neutral,
+              "remove-outline",
+              "Neutral"
             )}
           </View>
           <View style={styles.secondaryStatContainer}>
             {renderStatBar(
-              data.negative, 
-              theme.colors.mood.negative, 
-              'sad-outline', 
-              'Negative'
+              data.negative,
+              theme.colors.mood.negative,
+              "sad-outline",
+              "Negative"
             )}
           </View>
         </View>
@@ -119,10 +124,10 @@ export default function JournalStats({ title, subtitle, data, onPress }: Journal
         {/* Skipped stat */}
         <View style={styles.skippedStatContainer}>
           {renderStatBar(
-            data.skipped, 
-            theme.colors.mood.skipped, 
-            'close-outline', 
-            'Skipped'
+            data.skipped,
+            theme.colors.mood.skipped,
+            "close-outline",
+            "Skipped"
           )}
         </View>
       </View>
@@ -138,89 +143,90 @@ export default function JournalStats({ title, subtitle, data, onPress }: Journal
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.xl,
-    padding: theme.spacing.lg,
-    marginVertical: theme.spacing.sm,
-    marginHorizontal: theme.spacing.md,
-    ...theme.shadows.md,
-    width: cardWidth,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing.lg,
-  },
-  title: {
-    ...theme.typography.h3,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  subtitle: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.textSecondary,
-  },
-  statsGrid: {
-    marginBottom: theme.spacing.md,
-  },
-  mainStatContainer: {
-    marginBottom: theme.spacing.md,
-  },
-  secondaryStatsRow: {
-    flexDirection: 'row',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-  },
-  secondaryStatContainer: {
-    flex: 1,
-  },
-  skippedStatContainer: {
-    // Takes full width like main stat
-  },
-  statBar: {
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 60,
-  },
-  mainStatBar: {
-    minHeight: 80,
-    padding: theme.spacing.lg,
-  },
-  statContent: {
-    flex: 1,
-  },
-  statNumber: {
-    ...theme.typography.h4,
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  mainStatNumber: {
-    ...theme.typography.h2,
-  },
-  statLabel: {
-    ...theme.typography.bodySmall,
-    color: '#FFFFFF',
-    opacity: 0.9,
-  },
-  mainStatLabel: {
-    ...theme.typography.body,
-  },
-  statIconContainer: {
-    marginLeft: theme.spacing.sm,
-  },
-  moodIndicators: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
-    paddingTop: theme.spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.borderRadius.xl,
+      padding: theme.spacing.lg,
+      marginVertical: theme.spacing.sm,
+      marginHorizontal: theme.spacing.md,
+      ...theme.shadows.md,
+      width: cardWidth,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: theme.spacing.lg,
+    },
+    title: {
+      ...theme.typography.h3,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    subtitle: {
+      ...theme.typography.bodySmall,
+      color: theme.colors.textSecondary,
+    },
+    statsGrid: {
+      marginBottom: theme.spacing.md,
+    },
+    mainStatContainer: {
+      marginBottom: theme.spacing.md,
+    },
+    secondaryStatsRow: {
+      flexDirection: "row",
+      gap: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+    },
+    secondaryStatContainer: {
+      flex: 1,
+    },
+    skippedStatContainer: {
+      // Takes full width like main stat
+    },
+    statBar: {
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing.md,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      minHeight: 60,
+    },
+    mainStatBar: {
+      minHeight: 80,
+      padding: theme.spacing.lg,
+    },
+    statContent: {
+      flex: 1,
+    },
+    statNumber: {
+      ...theme.typography.h4,
+      color: "#FFFFFF",
+      fontWeight: "bold",
+    },
+    mainStatNumber: {
+      ...theme.typography.h2,
+    },
+    statLabel: {
+      ...theme.typography.bodySmall,
+      color: "#FFFFFF",
+      opacity: 0.9,
+    },
+    mainStatLabel: {
+      ...theme.typography.body,
+    },
+    statIconContainer: {
+      marginLeft: theme.spacing.sm,
+    },
+    moodIndicators: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: theme.spacing.sm,
+      paddingTop: theme.spacing.sm,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+  });

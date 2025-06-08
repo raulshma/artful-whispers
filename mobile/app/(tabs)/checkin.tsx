@@ -9,15 +9,15 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
-import Animated, { 
-  FadeIn, 
-  FadeOut, 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
   withSequence,
-  withDelay 
-} from 'react-native-reanimated';
+  withDelay,
+} from "react-native-reanimated";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
@@ -48,7 +48,9 @@ export default function CheckInScreen() {
       setCheckIns(data);
     } catch (error) {
       console.error("Failed to fetch check-ins:", error);
-      setError(error instanceof Error ? error.message : "Failed to load check-ins");
+      setError(
+        error instanceof Error ? error.message : "Failed to load check-ins"
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -65,43 +67,43 @@ export default function CheckInScreen() {
 
   const getMoodIcon = (mood: string) => {
     switch (mood.toLowerCase()) {
-      case 'overjoyed':
-      case 'happy':
-        return 'happy';
-      case 'neutral':
-        return 'remove';
-      case 'sad':
-        return 'sad';
-      case 'depressed':
-        return 'cloud';
-      case 'angry':
-        return 'flash';
-      case 'anxious':
-        return 'alert-circle';
-      case 'calm':
-        return 'leaf';
+      case "overjoyed":
+      case "happy":
+        return "happy";
+      case "neutral":
+        return "remove";
+      case "sad":
+        return "sad";
+      case "depressed":
+        return "cloud";
+      case "angry":
+        return "flash";
+      case "anxious":
+        return "alert-circle";
+      case "calm":
+        return "leaf";
       default:
-        return 'ellipse';
+        return "ellipse";
     }
   };
 
   const getMoodColor = (mood: string) => {
     switch (mood.toLowerCase()) {
-      case 'overjoyed':
-      case 'happy':
+      case "overjoyed":
+      case "happy":
         return theme.colors.mood?.happy || theme.colors.primary;
-      case 'neutral':
+      case "neutral":
         return theme.colors.textSecondary;
-      case 'sad':
-        return theme.colors.mood?.sad || '#6B7280';
-      case 'depressed':
-        return theme.colors.mood?.sad || '#4B5563';
-      case 'angry':
-        return theme.colors.mood?.angry || '#EF4444';
-      case 'anxious':
-        return theme.colors.mood?.anxious || '#F59E0B';
-      case 'calm':
-        return theme.colors.mood?.calm || '#10B981';
+      case "sad":
+        return theme.colors.mood?.sad || "#6B7280";
+      case "depressed":
+        return theme.colors.mood?.sad || "#4B5563";
+      case "angry":
+        return theme.colors.mood?.angry || "#EF4444";
+      case "anxious":
+        return theme.colors.mood?.anxious || "#F59E0B";
+      case "calm":
+        return theme.colors.mood?.calm || "#10B981";
       default:
         return theme.colors.textSecondary;
     }
@@ -113,12 +115,17 @@ export default function CheckInScreen() {
     const today = new Date();
     const sortedCheckIns = checkIns
       .slice()
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
     for (const checkIn of sortedCheckIns) {
       const checkInDate = new Date(checkIn.createdAt);
-      const daysDiff = Math.floor((today.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-      
+      const daysDiff = Math.floor(
+        (today.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
       if (daysDiff === streak) {
         streak++;
       } else {
@@ -131,16 +138,17 @@ export default function CheckInScreen() {
   const getThisMonthCount = () => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    return checkIns.filter(checkIn => {
+
+    return checkIns.filter((checkIn) => {
       const checkInDate = new Date(checkIn.createdAt);
       return checkInDate >= startOfMonth;
     }).length;
   };
 
   const getLatestMood = () => {
-    if (checkIns.length === 0) return { mood: 'neutral', label: 'Ready to check in' };
-    
+    if (checkIns.length === 0)
+      return { mood: "neutral", label: "Ready to check in" };
+
     const latest = checkIns[0];
     return { mood: latest.mood, label: `Feeling ${latest.mood}` };
   };
@@ -162,7 +170,8 @@ export default function CheckInScreen() {
   const handleCheckInItemPress = (checkIn: CheckInResponse) => {
     // Navigate to check-in details
     console.log("Check-in item pressed:", checkIn.id);
-  };  if (loading) {
+  };
+  if (loading) {
     return (
       <AnimatedPageWrapper animationType="fadeIn">
         <View
@@ -176,8 +185,10 @@ export default function CheckInScreen() {
         >
           <ScrollView
             style={styles.scrollView}
-            showsVerticalScrollIndicator={false}          >            <View style={styles.content}>
-              <Animated.View 
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.content}>
+              <Animated.View
                 entering={FadeIn.duration(300)}
                 style={styles.loadingContainer}
               >
@@ -187,10 +198,20 @@ export default function CheckInScreen() {
                   variant="morphing"
                   visible={true}
                 />
-                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.loadingText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Loading your check-ins...
                 </Text>
-                <Text style={[styles.loadingSubtext, { color: theme.colors.textTertiary }]}>
+                <Text
+                  style={[
+                    styles.loadingSubtext,
+                    { color: theme.colors.textTertiary },
+                  ]}
+                >
                   Preparing your mood insights
                 </Text>
               </Animated.View>
@@ -225,11 +246,12 @@ export default function CheckInScreen() {
               onRefresh={onRefresh}
               tintColor={theme.colors.primary}
             />
-          }        >
+          }
+        >
           <View style={styles.content}>
             {/* Refreshing indicator */}
             {refreshing && (
-              <Animated.View 
+              <Animated.View
                 entering={FadeIn.duration(200)}
                 exiting={FadeOut.duration(200)}
                 style={styles.refreshingContainer}
@@ -265,41 +287,42 @@ export default function CheckInScreen() {
                   title="Your Progress"
                   subtitle="Check-in statistics"
                   stats={[
-                  {
-                    value: streakCount,
-                    label: "Day Streak",
-                    icon: "flame",
-                    color: theme.colors.primary,
-                  },
-                  {
-                    value: thisMonthCount,
-                    label: "This Month",
-                    icon: "calendar",
-                    color: theme.colors.mood?.happy || theme.colors.primary,
-                  },
-                  {
-                    value: checkIns.length,
-                    label: "Total",
-                    icon: "checkmark-circle",
-                    color: theme.colors.mood?.calm || theme.colors.primary,
-                  },
-                ]}
-                onPress={handleStatsPress}
-              />
-            </ShadowFriendlyAnimation>
+                    {
+                      value: streakCount,
+                      label: "Day Streak",
+                      icon: "flame",
+                      color: theme.colors.primary,
+                    },
+                    {
+                      value: thisMonthCount,
+                      label: "This Month",
+                      icon: "calendar",
+                      color: theme.colors.mood?.happy || theme.colors.primary,
+                    },
+                    {
+                      value: checkIns.length,
+                      label: "Total",
+                      icon: "checkmark-circle",
+                      color: theme.colors.mood?.calm || theme.colors.primary,
+                    },
+                  ]}
+                  onPress={handleStatsPress}
+                />
+              </ShadowFriendlyAnimation>
 
-            {/* Recent Check-ins Card */}
-            <ShadowFriendlyAnimation index={2} animationType="slideUp">
-              <RecentCheckInsCard
-                title="Recent Check-ins"
-                subtitle="Your latest mood tracking"
-                checkIns={checkIns}
-                onPress={handleRecentPress}
-                onItemPress={handleCheckInItemPress}
-                loading={false}
-                error={error}
-                onRetry={() => fetchCheckIns()}              />
-            </ShadowFriendlyAnimation>
+              {/* Recent Check-ins Card */}
+              <ShadowFriendlyAnimation index={2} animationType="slideUp">
+                <RecentCheckInsCard
+                  title="Recent Check-ins"
+                  subtitle="Your latest mood tracking"
+                  checkIns={checkIns}
+                  onPress={handleRecentPress}
+                  onItemPress={handleCheckInItemPress}
+                  loading={false}
+                  error={error}
+                  onRetry={() => fetchCheckIns()}
+                />
+              </ShadowFriendlyAnimation>
             </Animated.View>
           </View>
         </ScrollView>
@@ -314,20 +337,21 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },  content: {
+  },
+  content: {
     paddingBottom: 100, // Space for tab bar
   },
   contentContainer: {
     flex: 1,
   },
   refreshingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
     minHeight: 200,
   },

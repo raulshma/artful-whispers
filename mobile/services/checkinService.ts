@@ -1,4 +1,4 @@
-import { apiRequest } from '@/lib/api';
+import { apiRequest } from "@/lib/api";
 
 export interface CheckInData {
   mood: string;
@@ -24,13 +24,20 @@ export interface CheckInResponse {
   updatedAt: string;
 }
 
-export async function createCheckIn(checkInData: CheckInData): Promise<CheckInResponse> {
-  return apiRequest<CheckInResponse>('/api/check-ins', {
-    method: 'POST',
+export async function createCheckIn(
+  checkInData: CheckInData
+): Promise<CheckInResponse> {
+  return apiRequest<CheckInResponse>("/api/check-ins", {
+    method: "POST",
     body: JSON.stringify(checkInData),
   });
 }
 
-export async function getCheckIns(limit = 10, offset = 0): Promise<CheckInResponse[]> {
-  return apiRequest<CheckInResponse[]>(`/api/check-ins?limit=${limit}&offset=${offset}`);
+export async function getCheckIns(
+  limit = 10,
+  offset = 0
+): Promise<CheckInResponse[]> {
+  return apiRequest<CheckInResponse[]>(
+    `/api/check-ins?limit=${limit}&offset=${offset}`
+  );
 }

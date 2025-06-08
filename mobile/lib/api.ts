@@ -1,10 +1,10 @@
-import { config } from '@/config';
-import { getSession } from './auth';
+import { config } from "@/config";
+import { getSession } from "./auth";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -13,9 +13,9 @@ export async function apiRequest<T = any>(
   options: RequestInit = {}
 ): Promise<T> {
   const session = await getSession();
-  
+
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...options.headers,
   };
 
@@ -25,15 +25,15 @@ export async function apiRequest<T = any>(
   }
 
   const url = `${config.API_BASE_URL}${endpoint}`;
-  
+
   const response = await fetch(url, {
     ...options,
     headers,
-    credentials: 'include', // Important for cookies
+    credentials: "include", // Important for cookies
   });
 
   if (!response.ok) {
-    let errorMessage = 'An error occurred';
+    let errorMessage = "An error occurred";
     try {
       const errorData = await response.json();
       errorMessage = errorData.message || errorMessage;
@@ -45,8 +45,8 @@ export async function apiRequest<T = any>(
   }
 
   // Handle empty responses
-  const contentType = response.headers.get('content-type');
-  if (!contentType || !contentType.includes('application/json')) {
+  const contentType = response.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
     return {} as T;
   }
 
@@ -71,23 +71,23 @@ export interface MoodStat {
 }
 
 export async function fetchJournalSummary(
-  period?: string, 
+  period?: string,
   dateRange?: { startDate: Date; endDate: Date }
 ): Promise<JournalStatsData> {
-  let endpoint = '/api/stats/journal-summary';
+  let endpoint = "/api/stats/journal-summary";
   const params = new URLSearchParams();
-  
+
   if (dateRange) {
-    params.append('startDate', dateRange.startDate.toISOString());
-    params.append('endDate', dateRange.endDate.toISOString());
+    params.append("startDate", dateRange.startDate.toISOString());
+    params.append("endDate", dateRange.endDate.toISOString());
   } else if (period) {
-    params.append('period', period);
+    params.append("period", period);
   }
-  
+
   if (params.toString()) {
     endpoint += `?${params.toString()}`;
   }
-  
+
   return apiRequest<JournalStatsData>(endpoint);
 }
 
@@ -95,52 +95,52 @@ export async function fetchMoodCheckinDistribution(
   period?: string,
   dateRange?: { startDate: Date; endDate: Date }
 ): Promise<MoodStat[]> {
-  let endpoint = '/api/stats/mood-checkin-distribution';
+  let endpoint = "/api/stats/mood-checkin-distribution";
   const params = new URLSearchParams();
-  
+
   if (dateRange) {
-    params.append('startDate', dateRange.startDate.toISOString());
-    params.append('endDate', dateRange.endDate.toISOString());
+    params.append("startDate", dateRange.startDate.toISOString());
+    params.append("endDate", dateRange.endDate.toISOString());
   } else if (period) {
-    params.append('period', period);
+    params.append("period", period);
   }
-  
+
   if (params.toString()) {
     endpoint += `?${params.toString()}`;
   }
-  
+
   return apiRequest<MoodStat[]>(endpoint);
 }
 
 export interface CalendarDay {
   day: number;
-  mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null;
+  mood: "happy" | "neutral" | "sad" | "negative" | "skipped" | null;
   hasEntry: boolean;
 }
 
 export async function fetchCalendarData(
-  year?: number, 
+  year?: number,
   month?: number,
   dateRange?: { startDate: Date; endDate: Date }
 ): Promise<CalendarDay[]> {
-  let endpoint = '/api/stats/calendar-data';
+  let endpoint = "/api/stats/calendar-data";
   const params = new URLSearchParams();
-  
+
   if (dateRange) {
-    params.append('startDate', dateRange.startDate.toISOString());
-    params.append('endDate', dateRange.endDate.toISOString());
+    params.append("startDate", dateRange.startDate.toISOString());
+    params.append("endDate", dateRange.endDate.toISOString());
   } else {
     const currentDate = new Date();
     const targetYear = year || currentDate.getFullYear();
     const targetMonth = month || currentDate.getMonth() + 1;
-    params.append('year', targetYear.toString());
-    params.append('month', targetMonth.toString());
+    params.append("year", targetYear.toString());
+    params.append("month", targetMonth.toString());
   }
-  
+
   if (params.toString()) {
     endpoint += `?${params.toString()}`;
   }
-  
+
   return apiRequest<CalendarDay[]>(endpoint);
 }
 
@@ -178,52 +178,67 @@ export interface UserSettings {
 }
 
 export async function fetchUserProfile(): Promise<UserProfile> {
-  return apiRequest<UserProfile>('/api/profile');
+  return apiRequest<UserProfile>("/api/profile");
 }
 
-export async function updateUserProfile(updates: Partial<Pick<UserProfile, 'name' | 'email' | 'avatarUrl'>>): Promise<UserProfile> {
-  return apiRequest<UserProfile>('/api/profile', {
-    method: 'PUT',
+export async function updateUserProfile(
+  updates: Partial<Pick<UserProfile, "name" | "email" | "avatarUrl">>
+): Promise<UserProfile> {
+  return apiRequest<UserProfile>("/api/profile", {
+    method: "PUT",
     body: JSON.stringify(updates),
   });
 }
 
 export async function fetchUserStats(): Promise<UserStats> {
-  return apiRequest<UserStats>('/api/profile/stats');
+  return apiRequest<UserStats>("/api/profile/stats");
 }
 
-export async function syncUserStats(): Promise<{ message: string; stats: UserStats }> {
-  return apiRequest<{ message: string; stats: UserStats }>('/api/profile/stats/sync', {
-    method: 'POST',
-  });
+export async function syncUserStats(): Promise<{
+  message: string;
+  stats: UserStats;
+}> {
+  return apiRequest<{ message: string; stats: UserStats }>(
+    "/api/profile/stats/sync",
+    {
+      method: "POST",
+    }
+  );
 }
 
 export async function fetchUserSettings(): Promise<UserSettings> {
-  return apiRequest<UserSettings>('/api/settings');
+  return apiRequest<UserSettings>("/api/settings");
 }
 
-export async function updateUserSettings(updates: Partial<Pick<UserSettings, 'notificationsEnabled' | 'reminderEnabled' | 'darkModeEnabled'>>): Promise<UserSettings> {
-  return apiRequest<UserSettings>('/api/settings', {
-    method: 'PUT',
+export async function updateUserSettings(
+  updates: Partial<
+    Pick<
+      UserSettings,
+      "notificationsEnabled" | "reminderEnabled" | "darkModeEnabled"
+    >
+  >
+): Promise<UserSettings> {
+  return apiRequest<UserSettings>("/api/settings", {
+    method: "PUT",
     body: JSON.stringify(updates),
   });
 }
 
 export async function exportUserData(): Promise<Blob> {
   const response = await fetch(`${config.API_BASE_URL}/api/account/export`, {
-    credentials: 'include',
+    credentials: "include",
   });
-  
+
   if (!response.ok) {
-    throw new ApiError(response.status, 'Failed to export data');
+    throw new ApiError(response.status, "Failed to export data");
   }
-  
+
   return response.blob();
 }
 
 export async function deleteUserAccount(): Promise<void> {
-  return apiRequest<void>('/api/account', {
-    method: 'DELETE',
+  return apiRequest<void>("/api/account", {
+    method: "DELETE",
   });
 }
 

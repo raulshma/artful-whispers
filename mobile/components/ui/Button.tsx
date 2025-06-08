@@ -1,20 +1,21 @@
-import React from 'react';
+import React from "react";
 import {
   TouchableOpacity,
   TouchableOpacityProps,
   Text,
+  View,
   StyleSheet,
   ViewStyle,
   TextStyle,
   ActivityIndicator,
-} from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
-import * as Haptics from 'expo-haptics';
+} from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
 
-interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
+interface ButtonProps extends Omit<TouchableOpacityProps, "style"> {
   title: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "link";
+  size?: "small" | "medium" | "large";
   loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -26,8 +27,8 @@ interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
 
 export function Button({
   title,
-  variant = 'primary',
-  size = 'medium',
+  variant = "primary",
+  size = "medium",
   loading = false,
   leftIcon,
   rightIcon,
@@ -52,9 +53,9 @@ export function Button({
 
   const getButtonStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
       borderRadius: theme.borderRadius.lg,
       ...theme.shadows.sm,
     };
@@ -81,26 +82,32 @@ export function Button({
     // Variant styles
     const variantStyles: Record<string, ViewStyle> = {
       primary: {
-        backgroundColor: disabled ? theme.colors.textTertiary : theme.colors.primary,
+        backgroundColor: disabled
+          ? theme.colors.textTertiary
+          : theme.colors.primary,
       },
       secondary: {
-        backgroundColor: disabled ? theme.colors.backgroundTertiary : theme.colors.secondary,
+        backgroundColor: disabled
+          ? theme.colors.backgroundTertiary
+          : theme.colors.secondary,
         borderWidth: 1,
         borderColor: theme.colors.border,
       },
       outline: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         borderWidth: 1,
-        borderColor: disabled ? theme.colors.textTertiary : theme.colors.primary,
+        borderColor: disabled
+          ? theme.colors.textTertiary
+          : theme.colors.primary,
       },
       ghost: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
       },
       link: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         paddingHorizontal: 0,
         paddingVertical: 0,
-        minHeight: 'auto' as any,
+        minHeight: "auto" as any,
       },
     };
 
@@ -108,7 +115,7 @@ export function Button({
       ...baseStyle,
       ...sizeStyles[size],
       ...variantStyles[variant],
-      ...(fullWidth && { width: '100%' }),
+      ...(fullWidth && { width: "100%" }),
       opacity: disabled || loading ? 0.6 : 1,
     };
   };
@@ -122,7 +129,7 @@ export function Button({
 
     const variantStyles: Record<string, TextStyle> = {
       primary: {
-        color: '#FFFFFF',
+        color: "#FFFFFF",
       },
       secondary: {
         color: theme.colors.text,
@@ -135,7 +142,7 @@ export function Button({
       },
       link: {
         color: theme.colors.primary,
-        textDecorationLine: 'underline',
+        textDecorationLine: "underline",
       },
     };
 
@@ -156,19 +163,23 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' ? '#FFFFFF' : theme.colors.primary}
+          color={variant === "primary" ? "#FFFFFF" : theme.colors.primary}
         />
       ) : (
         <>
           {leftIcon}
-          <Text style={[
-            getTextStyle(),
-            textStyle,
-            leftIcon ? { marginLeft: theme.spacing.sm } : undefined
-          ]}>
+          <Text
+            style={[
+              getTextStyle(),
+              textStyle,
+              leftIcon ? { marginLeft: theme.spacing.sm } : undefined,
+            ]}
+          >
             {title}
           </Text>
-          {rightIcon && <Text style={{ marginLeft: theme.spacing.sm }}>{rightIcon}</Text>}
+          {rightIcon && (
+            <View style={{ marginLeft: theme.spacing.sm }}>{rightIcon}</View>
+          )}
         </>
       )}
     </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface TabContextType {
   activeTabIndex: number;
@@ -13,11 +13,11 @@ export function TabProvider({ children }: { children: ReactNode }) {
   const totalTabs = 4; // journal, stats, checkin, profile
 
   return (
-    <TabContext.Provider 
-      value={{ 
-        activeTabIndex, 
-        setActiveTabIndex, 
-        totalTabs 
+    <TabContext.Provider
+      value={{
+        activeTabIndex,
+        setActiveTabIndex,
+        totalTabs,
       }}
     >
       {children}
@@ -28,7 +28,7 @@ export function TabProvider({ children }: { children: ReactNode }) {
 export function useTabContext() {
   const context = useContext(TabContext);
   if (context === undefined) {
-    throw new Error('useTabContext must be used within a TabProvider');
+    throw new Error("useTabContext must be used within a TabProvider");
   }
   return context;
 }

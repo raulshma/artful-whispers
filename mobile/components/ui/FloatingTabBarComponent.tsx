@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { FloatingTabBar } from './FloatingTabBar';
-import { FloatingTabButton } from './FloatingTabButton';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useTabContext } from '@/contexts/TabContext';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { FloatingTabBar } from "./FloatingTabBar";
+import { FloatingTabButton } from "./FloatingTabButton";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useTabContext } from "@/contexts/TabContext";
 
 interface TabConfig {
   name: string;
@@ -13,13 +13,17 @@ interface TabConfig {
 }
 
 const TAB_CONFIGS: Record<string, TabConfig> = {
-  journal: { name: 'journal', icon: 'book.fill', label: 'Journal' },
-  stats: { name: 'stats', icon: 'chart.bar.fill', label: 'Stats' },
-  checkin: { name: 'checkin', icon: 'plus.circle.fill', label: 'Check In' },
-  profile: { name: 'profile', icon: 'person.fill', label: 'Profile' },
+  journal: { name: "journal", icon: "book.fill", label: "Journal" },
+  stats: { name: "stats", icon: "chart.bar.fill", label: "Stats" },
+  checkin: { name: "checkin", icon: "plus.circle.fill", label: "Check In" },
+  profile: { name: "profile", icon: "person.fill", label: "Profile" },
 };
 
-export function FloatingTabBarComponent({ state, descriptors, navigation }: BottomTabBarProps) {
+export function FloatingTabBarComponent({
+  state,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) {
   const { theme } = useTheme();
   const { setActiveTabIndex } = useTabContext();
   const [activeIndex, setActiveIndex] = useState(state.index);
@@ -31,7 +35,7 @@ export function FloatingTabBarComponent({ state, descriptors, navigation }: Bott
 
   const handleTabPress = (route: any, index: number) => {
     const event = navigation.emit({
-      type: 'tabPress',
+      type: "tabPress",
       target: route.key,
       canPreventDefault: true,
     });
@@ -42,10 +46,7 @@ export function FloatingTabBarComponent({ state, descriptors, navigation }: Bott
   };
 
   return (
-    <FloatingTabBar 
-      activeIndex={activeIndex} 
-      totalTabs={state.routes.length}
-    >
+    <FloatingTabBar activeIndex={activeIndex} totalTabs={state.routes.length}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const isFocused = state.index === index;

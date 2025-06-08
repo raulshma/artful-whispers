@@ -1,19 +1,19 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   TouchableOpacity,
   Text,
   ViewStyle,
   TextStyle,
-} from 'react-native';
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   useDerivedValue,
-} from 'react-native-reanimated';
-import { useTheme } from '@/contexts/ThemeContext';
-import * as Haptics from 'expo-haptics';
+} from "react-native-reanimated";
+import { useTheme } from "@/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
 
 interface SegmentedControlOption {
   id: string;
@@ -39,7 +39,7 @@ export function SegmentedControl({
   hapticFeedback = true,
 }: SegmentedControlProps) {
   const { theme } = useTheme();
-  const selectedIndex = options.findIndex(option => option.id === selectedId);
+  const selectedIndex = options.findIndex((option) => option.id === selectedId);
   const translateX = useSharedValue(0);
 
   const segmentWidth = useDerivedValue(() => {
@@ -54,11 +54,11 @@ export function SegmentedControl({
 
   const handlePress = (option: SegmentedControlOption) => {
     if (disabled || option.id === selectedId) return;
-    
+
     if (hapticFeedback) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    
+
     onSelectionChange(option);
   };
 
@@ -70,11 +70,11 @@ export function SegmentedControl({
   });
 
   const getContainerStyle = (): ViewStyle => ({
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.lg,
     padding: 2,
-    position: 'relative',
+    position: "relative",
     opacity: disabled ? 0.5 : 1,
   });
 
@@ -82,8 +82,8 @@ export function SegmentedControl({
     flex: 1,
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     zIndex: 1,
     minHeight: 40,
   });
@@ -91,7 +91,7 @@ export function SegmentedControl({
   const getTextStyle = (isSelected: boolean): TextStyle => ({
     ...theme.typography.label,
     color: isSelected ? theme.colors.primary : theme.colors.textSecondary,
-    fontWeight: isSelected ? '600' : '400',
+    fontWeight: isSelected ? "600" : "400",
   });
 
   return (
@@ -100,7 +100,7 @@ export function SegmentedControl({
       <Animated.View
         style={[
           {
-            position: 'absolute',
+            position: "absolute",
             top: 2,
             bottom: 2,
             backgroundColor: theme.colors.surface,
@@ -110,7 +110,7 @@ export function SegmentedControl({
           indicatorStyle,
         ]}
       />
-      
+
       {/* Segments */}
       {options.map((option) => {
         const isSelected = option.id === selectedId;
@@ -122,9 +122,7 @@ export function SegmentedControl({
             disabled={disabled}
             activeOpacity={0.7}
           >
-            <Text style={getTextStyle(isSelected)}>
-              {option.label}
-            </Text>
+            <Text style={getTextStyle(isSelected)}>{option.label}</Text>
           </TouchableOpacity>
         );
       })}
@@ -152,7 +150,7 @@ export function NumberPicker({
   value,
   onValueChange,
   label,
-  suffix = '',
+  suffix = "",
   style,
   disabled = false,
 }: NumberPickerProps) {
@@ -174,13 +172,15 @@ export function NumberPicker({
   return (
     <View style={style}>
       {label && (
-        <Text style={[
-          theme.typography.label,
-          { 
-            color: theme.colors.textSecondary,
-            marginBottom: theme.spacing.sm,
-          }
-        ]}>
+        <Text
+          style={[
+            theme.typography.label,
+            {
+              color: theme.colors.textSecondary,
+              marginBottom: theme.spacing.sm,
+            },
+          ]}
+        >
           {label}
         </Text>
       )}
@@ -236,25 +236,28 @@ export function SocialInteractionPicker({
   const { theme } = useTheme();
 
   const options: SegmentedControlOption[] = [
-    { id: 'no', label: 'No', value: false },
-    { id: 'yes', label: 'Yes', value: true },
+    { id: "no", label: "No", value: false },
+    { id: "yes", label: "Yes", value: true },
   ];
 
   const handleSelectionChange = (option: SegmentedControlOption) => {
     onValueChange(option.value);
   };
 
-  const selectedId = value === true ? 'yes' : value === false ? 'no' : undefined;
+  const selectedId =
+    value === true ? "yes" : value === false ? "no" : undefined;
 
   return (
     <View style={style}>
-      <Text style={[
-        theme.typography.label,
-        { 
-          color: theme.colors.textSecondary,
-          marginBottom: theme.spacing.sm,
-        }
-      ]}>
+      <Text
+        style={[
+          theme.typography.label,
+          {
+            color: theme.colors.textSecondary,
+            marginBottom: theme.spacing.sm,
+          },
+        ]}
+      >
         Did you interact/socialize?
       </Text>
       <SegmentedControl

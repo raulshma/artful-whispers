@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export interface CheckInData {
   mood: string;
@@ -20,24 +20,25 @@ interface CheckInContextType {
 }
 
 const defaultCheckInData: CheckInData = {
-  mood: '',
-  moodLabel: '',
+  mood: "",
+  moodLabel: "",
   moodCauses: [],
   moodIntensity: 5,
-  notes: '',
+  notes: "",
   companions: [],
-  location: '',
-  customLocationDetails: '',
+  location: "",
+  customLocationDetails: "",
 };
 
 const CheckInContext = createContext<CheckInContextType | undefined>(undefined);
 
 export function CheckInProvider({ children }: { children: ReactNode }) {
-  const [checkInData, setCheckInData] = useState<CheckInData>(defaultCheckInData);
+  const [checkInData, setCheckInData] =
+    useState<CheckInData>(defaultCheckInData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateCheckInData = (data: Partial<CheckInData>) => {
-    setCheckInData(prev => ({ ...prev, ...data }));
+    setCheckInData((prev) => ({ ...prev, ...data }));
   };
 
   const resetCheckInData = () => {
@@ -62,7 +63,7 @@ export function CheckInProvider({ children }: { children: ReactNode }) {
 export function useCheckIn() {
   const context = useContext(CheckInContext);
   if (context === undefined) {
-    throw new Error('useCheckIn must be used within a CheckInProvider');
+    throw new Error("useCheckIn must be used within a CheckInProvider");
   }
   return context;
 }

@@ -17,7 +17,9 @@ export default function CheckinStep1() {
   const router = useRouter();
   const { checkInData, updateCheckInData } = useCheckIn();
   const [selectedMood, setSelectedMood] = useState<any>(
-    checkInData.mood ? DEFAULT_MOODS.find(m => m.id === checkInData.mood) : null
+    checkInData.mood
+      ? DEFAULT_MOODS.find((m) => m.id === checkInData.mood)
+      : null
   );
 
   const handleMoodChange = (mood: any) => {

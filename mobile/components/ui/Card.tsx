@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   ViewProps,
@@ -6,33 +6,37 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
   Text,
-} from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface BaseCardProps {
-  variant?: 'default' | 'elevated' | 'outlined' | 'flat';
-  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-  margin?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  variant?: "default" | "elevated" | "outlined" | "flat";
+  padding?: "none" | "sm" | "md" | "lg" | "xl";
+  margin?: "none" | "sm" | "md" | "lg" | "xl";
+  borderRadius?: "none" | "sm" | "md" | "lg" | "xl" | "2xl";
   children: React.ReactNode;
   style?: ViewStyle;
 }
 
-interface CardProps extends BaseCardProps, Omit<ViewProps, 'children' | 'style'> {
+interface CardProps
+  extends BaseCardProps,
+    Omit<ViewProps, "children" | "style"> {
   pressable?: false;
 }
 
-interface PressableCardProps extends BaseCardProps, Omit<TouchableOpacityProps, 'style' | 'children'> {
+interface PressableCardProps
+  extends BaseCardProps,
+    Omit<TouchableOpacityProps, "style" | "children"> {
   pressable: true;
 }
 
 type CardComponentProps = CardProps | PressableCardProps;
 
 export function Card({
-  variant = 'default',
-  padding = 'md',
-  margin = 'none',
-  borderRadius = 'lg',
+  variant = "default",
+  padding = "md",
+  margin = "none",
+  borderRadius = "lg",
   children,
   style,
   pressable,
@@ -70,7 +74,7 @@ export function Card({
       md: theme.borderRadius.md,
       lg: theme.borderRadius.lg,
       xl: theme.borderRadius.xl,
-      '2xl': theme.borderRadius['2xl'],
+      "2xl": theme.borderRadius["2xl"],
     };
 
     // Variant styles
@@ -138,40 +142,73 @@ export function StatCard({
     value: number;
     isPositive: boolean;
   };
-} & Omit<CardComponentProps, 'children'>) {
+} & Omit<CardComponentProps, "children">) {
   const { theme } = useTheme();
 
   return (
     <Card {...cardProps}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+        }}
+      >
         <View style={{ flex: 1 }}>
-          <Text style={[theme.typography.captionSmall, { color: theme.colors.textSecondary, marginBottom: theme.spacing.xs }]}>
+          <Text
+            style={[
+              theme.typography.captionSmall,
+              {
+                color: theme.colors.textSecondary,
+                marginBottom: theme.spacing.xs,
+              },
+            ]}
+          >
             {title}
           </Text>
-          <Text style={[theme.typography.h3, { color: theme.colors.text, marginBottom: theme.spacing.xs }]}>
+          <Text
+            style={[
+              theme.typography.h3,
+              { color: theme.colors.text, marginBottom: theme.spacing.xs },
+            ]}
+          >
             {value}
           </Text>
           {subtitle && (
-            <Text style={[theme.typography.caption, { color: theme.colors.textTertiary }]}>
+            <Text
+              style={[
+                theme.typography.caption,
+                { color: theme.colors.textTertiary },
+              ]}
+            >
               {subtitle}
             </Text>
           )}
           {trend && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: theme.spacing.xs }}>
-              <Text style={[
-                theme.typography.captionSmall,
-                { color: trend.isPositive ? theme.colors.semantic.success : theme.colors.semantic.error }
-              ]}>
-                {trend.isPositive ? '+' : ''}{trend.value}%
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: theme.spacing.xs,
+              }}
+            >
+              <Text
+                style={[
+                  theme.typography.captionSmall,
+                  {
+                    color: trend.isPositive
+                      ? theme.colors.semantic.success
+                      : theme.colors.semantic.error,
+                  },
+                ]}
+              >
+                {trend.isPositive ? "+" : ""}
+                {trend.value}%
               </Text>
             </View>
           )}
         </View>
-        {icon && (
-          <View style={{ marginLeft: theme.spacing.md }}>
-            {icon}
-          </View>
-        )}
+        {icon && <View style={{ marginLeft: theme.spacing.md }}>{icon}</View>}
       </View>
     </Card>
   );

@@ -1,28 +1,28 @@
-import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import React, { useEffect } from "react";
+import { View } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSpring,
   withDelay,
-} from 'react-native-reanimated';
-import { useFocusEffect } from '@react-navigation/native';
+} from "react-native-reanimated";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface StaggeredAnimationProps {
   children: React.ReactNode;
   index: number;
-  animationType?: 'slideUp' | 'fadeIn' | 'scaleIn';
+  animationType?: "slideUp" | "fadeIn" | "scaleIn";
   delay?: number;
   duration?: number;
 }
 
-export function StaggeredAnimation({ 
-  children, 
-  index, 
-  animationType = 'slideUp',
+export function StaggeredAnimation({
+  children,
+  index,
+  animationType = "slideUp",
   delay = 0,
-  duration = 400 
+  duration = 400,
 }: StaggeredAnimationProps) {
   const opacity = useSharedValue(1); // Start visible to avoid shadow transitions
   const translateY = useSharedValue(20); // Reduce initial offset
@@ -36,30 +36,33 @@ export function StaggeredAnimation({
       scale.value = 0.95;
 
       // Calculate staggered delay
-      const staggerDelay = delay + (index * 80); // Slightly faster stagger
+      const staggerDelay = delay + index * 80; // Slightly faster stagger
 
       // Start animations with staggered timing
-      if (animationType === 'slideUp') {
+      if (animationType === "slideUp") {
         // Only animate transform to avoid shadow issues
         translateY.value = withDelay(
-          staggerDelay, 
-          withSpring(0, { 
-            damping: 18, 
+          staggerDelay,
+          withSpring(0, {
+            damping: 18,
             stiffness: 350,
-            mass: 0.7 
+            mass: 0.7,
           })
         );
-      } else if (animationType === 'fadeIn') {
+      } else if (animationType === "fadeIn") {
         // Minimal opacity animation
         opacity.value = 0.9;
-        opacity.value = withDelay(staggerDelay, withTiming(1, { duration: duration * 0.6 }));
-      } else if (animationType === 'scaleIn') {
+        opacity.value = withDelay(
+          staggerDelay,
+          withTiming(1, { duration: duration * 0.6 })
+        );
+      } else if (animationType === "scaleIn") {
         // Only animate scale
         scale.value = withDelay(
-          staggerDelay, 
-          withSpring(1, { 
-            damping: 15, 
-            stiffness: 450 
+          staggerDelay,
+          withSpring(1, {
+            damping: 15,
+            stiffness: 450,
           })
         );
       }
@@ -72,9 +75,9 @@ export function StaggeredAnimation({
   const animatedStyle = useAnimatedStyle(() => {
     let transform = [];
 
-    if (animationType === 'slideUp') {
+    if (animationType === "slideUp") {
       transform.push({ translateY: translateY.value });
-    } else if (animationType === 'scaleIn') {
+    } else if (animationType === "scaleIn") {
       transform.push({ scale: scale.value });
     }
 
@@ -87,9 +90,5 @@ export function StaggeredAnimation({
     };
   });
 
-  return (
-    <Animated.View style={animatedStyle}>
-      {children}
-    </Animated.View>
-  );
+  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 }

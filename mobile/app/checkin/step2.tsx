@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCheckIn } from "@/contexts/CheckInContext";
-import {
-  Header,
-  Button,
-  Card,
-  ToggleButton,
-  Slider,
-} from "@/components/ui";
+import { Header, Button, Card, ToggleButton, Slider } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 
 const MOOD_CAUSES = [

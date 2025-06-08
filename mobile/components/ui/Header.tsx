@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   TextStyle,
   StatusBar,
   Platform,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
-import { IconSymbol } from './IconSymbol';
-import * as Haptics from 'expo-haptics';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
+import { IconSymbol } from "./IconSymbol";
+import * as Haptics from "expo-haptics";
 
 interface HeaderProps {
   title?: string;
@@ -25,8 +25,8 @@ interface HeaderProps {
   style?: ViewStyle;
   titleStyle?: TextStyle;
   backgroundColor?: string;
-  variant?: 'default' | 'large' | 'minimal';
-  statusBarStyle?: 'auto' | 'light' | 'dark';
+  variant?: "default" | "large" | "minimal";
+  statusBarStyle?: "auto" | "light" | "dark";
 }
 
 export function Header({
@@ -39,8 +39,8 @@ export function Header({
   style,
   titleStyle,
   backgroundColor,
-  variant = 'default',
-  statusBarStyle = 'auto',
+  variant = "default",
+  statusBarStyle = "auto",
 }: HeaderProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -59,7 +59,7 @@ export function Header({
     const baseStyle: ViewStyle = {
       paddingTop: insets.top,
       backgroundColor: backgroundColor || theme.colors.surface,
-      borderBottomWidth: variant === 'minimal' ? 0 : 1,
+      borderBottomWidth: variant === "minimal" ? 0 : 1,
       borderBottomColor: theme.colors.border,
     };
 
@@ -97,7 +97,7 @@ export function Header({
     return {
       ...variantStyles[variant],
       color: theme.colors.text,
-      textAlign: 'center',
+      textAlign: "center",
       flex: 1,
     };
   };
@@ -105,7 +105,7 @@ export function Header({
   const getSubtitleStyle = (): TextStyle => ({
     ...theme.typography.caption,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.xs,
   });
 
@@ -113,13 +113,13 @@ export function Header({
     <>
       <StatusBar
         barStyle={
-          statusBarStyle === 'auto'
+          statusBarStyle === "auto"
             ? theme.isDark
-              ? 'light-content'
-              : 'dark-content'
-            : statusBarStyle === 'light'
-            ? 'light-content'
-            : 'dark-content'
+              ? "light-content"
+              : "dark-content"
+            : statusBarStyle === "light"
+            ? "light-content"
+            : "dark-content"
         }
         backgroundColor={backgroundColor || theme.colors.surface}
       />
@@ -158,9 +158,7 @@ export function Header({
           </View>
 
           {/* Right Section */}
-          <View style={styles.rightSection}>
-            {rightComponent}
-          </View>
+          <View style={styles.rightSection}>{rightComponent}</View>
         </View>
       </View>
     </>
@@ -173,7 +171,7 @@ export function NavigationHeader({
   onBackPress,
   rightComponent,
   ...props
-}: Omit<HeaderProps, 'showBackButton'>) {
+}: Omit<HeaderProps, "showBackButton">) {
   return (
     <Header
       title={title}
@@ -263,15 +261,14 @@ export function HeaderNotificationButton({
 
   return (
     <View>
-      <HeaderIconButton
-        iconName="bell"
-        onPress={onPress}
-      />
+      <HeaderIconButton iconName="bell" onPress={onPress} />
       {hasNotifications && (
-        <View style={[
-          styles.notificationDot,
-          { backgroundColor: theme.colors.semantic.error }
-        ]} />
+        <View
+          style={[
+            styles.notificationDot,
+            { backgroundColor: theme.colors.semantic.error },
+          ]}
+        />
       )}
     </View>
   );
@@ -279,22 +276,22 @@ export function HeaderNotificationButton({
 
 const styles = StyleSheet.create({
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     flex: 1,
   },
   leftSection: {
     flex: 1,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
   },
   titleSection: {
     flex: 2,
-    alignItems: 'center',
+    alignItems: "center",
   },
   rightSection: {
     flex: 1,
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   backButton: {
     padding: 4,
@@ -303,7 +300,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   notificationDot: {
-    position: 'absolute',
+    position: "absolute",
     top: 2,
     right: 2,
     width: 8,

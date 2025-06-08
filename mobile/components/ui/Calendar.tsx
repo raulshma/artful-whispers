@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,9 +6,9 @@ import {
   ScrollView,
   StyleSheet,
   ViewStyle,
-} from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
-import * as Haptics from 'expo-haptics';
+} from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
 
 interface MoodEntry {
   date: string; // YYYY-MM-DD format
@@ -26,10 +26,20 @@ interface CalendarProps {
   showMoodIndicators?: boolean;
 }
 
-const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export function Calendar({
@@ -43,8 +53,12 @@ export function Calendar({
 }: CalendarProps) {
   const { theme } = useTheme();
   const currentDate = new Date();
-  const [currentMonth, setCurrentMonth] = useState(month ?? currentDate.getMonth());
-  const [currentYear, setCurrentYear] = useState(year ?? currentDate.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(
+    month ?? currentDate.getMonth()
+  );
+  const [currentYear, setCurrentYear] = useState(
+    year ?? currentDate.getFullYear()
+  );
 
   const getDaysInMonth = (month: number, year: number) => {
     return new Date(year, month + 1, 0).getDate();
@@ -55,12 +69,15 @@ export function Calendar({
   };
 
   const formatDate = (day: number) => {
-    return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return `${currentYear}-${String(currentMonth + 1).padStart(
+      2,
+      "0"
+    )}-${String(day).padStart(2, "0")}`;
   };
 
   const getMoodForDate = (day: number) => {
     const dateString = formatDate(day);
-    return moodEntries.find(entry => entry.date === dateString);
+    return moodEntries.find((entry) => entry.date === dateString);
   };
 
   const isToday = (day: number) => {
@@ -82,9 +99,9 @@ export function Calendar({
     onDateSelect?.(dateString);
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
+  const navigateMonth = (direction: "prev" | "next") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (direction === 'prev') {
+    if (direction === "prev") {
       if (currentMonth === 0) {
         setCurrentMonth(11);
         setCurrentYear(currentYear - 1);
@@ -104,20 +121,20 @@ export function Calendar({
   const renderHeader = () => (
     <View style={styles.header}>
       <TouchableOpacity
-        onPress={() => navigateMonth('prev')}
+        onPress={() => navigateMonth("prev")}
         style={styles.navButton}
       >
         <Text style={[styles.navButtonText, { color: theme.colors.primary }]}>
           ‹
         </Text>
       </TouchableOpacity>
-      
+
       <Text style={[styles.monthYear, { color: theme.colors.text }]}>
         {MONTHS[currentMonth]} {currentYear}
       </Text>
-      
+
       <TouchableOpacity
-        onPress={() => navigateMonth('next')}
+        onPress={() => navigateMonth("next")}
         style={styles.navButton}
       >
         <Text style={[styles.navButtonText, { color: theme.colors.primary }]}>
@@ -129,7 +146,7 @@ export function Calendar({
 
   const renderDaysOfWeek = () => (
     <View style={styles.daysOfWeek}>
-      {DAYS_OF_WEEK.map(day => (
+      {DAYS_OF_WEEK.map((day) => (
         <Text
           key={day}
           style={[styles.dayOfWeek, { color: theme.colors.textSecondary }]}
@@ -147,9 +164,7 @@ export function Calendar({
 
     // Empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
-      days.push(
-        <View key={`empty-${i}`} style={styles.dayCell} />
-      );
+      days.push(<View key={`empty-${i}`} style={styles.dayCell} />);
     }
 
     // Days of the month
@@ -164,7 +179,7 @@ export function Calendar({
           style={[
             styles.dayCell,
             styles.dayButton,
-            today && { backgroundColor: theme.colors.primary + '20' },
+            today && { backgroundColor: theme.colors.primary + "20" },
             selected && { backgroundColor: theme.colors.primary },
           ]}
           onPress={() => handleDatePress(day)}
@@ -175,18 +190,18 @@ export function Calendar({
               styles.dayText,
               { color: theme.colors.text },
               today && { color: theme.colors.primary },
-              selected && { color: '#FFFFFF' },
+              selected && { color: "#FFFFFF" },
             ]}
           >
             {day}
           </Text>
-          
+
           {showMoodIndicators && mood && (
             <View
               style={[
                 styles.moodIndicator,
                 { backgroundColor: mood.color },
-                selected && { backgroundColor: '#FFFFFF' },
+                selected && { backgroundColor: "#FFFFFF" },
               ]}
             />
           )}
@@ -212,7 +227,7 @@ export function CompactCalendar({
   month,
   year,
   style,
-}: Omit<CalendarProps, 'selectedDate' | 'onDateSelect'>) {
+}: Omit<CalendarProps, "selectedDate" | "onDateSelect">) {
   const { theme } = useTheme();
   const currentDate = new Date();
   const calendarMonth = month ?? currentDate.getMonth();
@@ -227,12 +242,15 @@ export function CompactCalendar({
   };
 
   const formatDate = (day: number) => {
-    return `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return `${calendarYear}-${String(calendarMonth + 1).padStart(
+      2,
+      "0"
+    )}-${String(day).padStart(2, "0")}`;
   };
 
   const getMoodForDate = (day: number) => {
     const dateString = formatDate(day);
-    return moodEntries.find(entry => entry.date === dateString);
+    return moodEntries.find((entry) => entry.date === dateString);
   };
 
   const renderCompactDays = () => {
@@ -242,9 +260,7 @@ export function CompactCalendar({
 
     // Empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
-      days.push(
-        <View key={`empty-${i}`} style={styles.compactDayCell} />
-      );
+      days.push(<View key={`empty-${i}`} style={styles.compactDayCell} />);
     }
 
     // Days of the month
@@ -256,15 +272,12 @@ export function CompactCalendar({
           key={day}
           style={[
             styles.compactDayCell,
-            mood && { backgroundColor: mood.color + '40' },
+            mood && { backgroundColor: mood.color + "40" },
           ]}
         >
           {mood && (
             <View
-              style={[
-                styles.compactMoodDot,
-                { backgroundColor: mood.color },
-              ]}
+              style={[styles.compactMoodDot, { backgroundColor: mood.color }]}
             />
           )}
         </View>
@@ -276,7 +289,9 @@ export function CompactCalendar({
 
   return (
     <View style={[styles.compactContainer, style]}>
-      <Text style={[styles.compactHeader, { color: theme.colors.textSecondary }]}>
+      <Text
+        style={[styles.compactHeader, { color: theme.colors.textSecondary }]}
+      >
         {MONTHS[calendarMonth]} {calendarYear}
       </Text>
       {renderCompactDays()}
@@ -286,61 +301,61 @@ export function CompactCalendar({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 8,
   },
   navButton: {
     padding: 8,
     minWidth: 40,
-    alignItems: 'center',
+    alignItems: "center",
   },
   navButtonText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   monthYear: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   daysOfWeek: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 8,
   },
   dayOfWeek: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
     paddingVertical: 8,
   },
   calendar: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     paddingHorizontal: 8,
   },
   dayCell: {
-    width: '14.28%', // 100% / 7 days
+    width: "14.28%", // 100% / 7 days
     aspectRatio: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 2,
   },
   dayButton: {
     borderRadius: 8,
-    position: 'relative',
+    position: "relative",
   },
   dayText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   moodIndicator: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 4,
     width: 4,
     height: 4,
@@ -348,24 +363,26 @@ const styles = StyleSheet.create({
   },
   // Compact calendar styles
   compactContainer: {
-    backgroundColor: 'transparent',
-  },  compactHeader: {
+    backgroundColor: "transparent",
+  },
+  compactHeader: {
     fontSize: 10,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 6,
-    textAlign: 'center',
-  },compactCalendar: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    textAlign: "center",
+  },
+  compactCalendar: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     maxWidth: 150, // Constrain width to fit in stat cards
   },
   compactDayCell: {
-    width: '14.28%',
+    width: "14.28%",
     aspectRatio: 1,
     margin: 0.5, // Reduce margin for tighter layout
     borderRadius: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     minWidth: 8, // Ensure minimum size
   },
   compactMoodDot: {

@@ -17,12 +17,12 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCreateDiaryEntry } from "@/hooks/useDiary";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function AddJournalScreen() {
   const { theme } = useTheme();
   const router = useRouter();
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const createEntry = useCreateDiaryEntry();
   const saveButtonScale = React.useRef(new Animated.Value(1)).current;
@@ -30,14 +30,14 @@ export default function AddJournalScreen() {
   const getCurrentTime = () => {
     const now = new Date();
     // Get a more friendly date format
-    const dateString = now.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
+    const dateString = now.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
     });
-    const timeString = now.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
+    const timeString = now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true,
     });
     return { date: dateString, time: timeString };
@@ -54,9 +54,13 @@ export default function AddJournalScreen() {
     if (count > 4500) return theme.colors.semantic.error;
     if (count > 4000) return theme.colors.semantic.warning;
     return theme.colors.textTertiary;
-  };  const handleSave = async () => {
+  };
+  const handleSave = async () => {
     if (!content.trim()) {
-      Alert.alert('Share Your Thoughts', 'Please write something to create your journal entry.');
+      Alert.alert(
+        "Share Your Thoughts",
+        "Please write something to create your journal entry."
+      );
       return;
     }
 
@@ -75,28 +79,35 @@ export default function AddJournalScreen() {
     ]).start();
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       await createEntry.mutateAsync({
         content: content.trim(),
         date: today,
       });
-      
-      Alert.alert('✨ Journal Saved', 'Your thoughts have been captured beautifully!', [
-        { text: 'Continue Writing', onPress: () => router.back() }
-      ]);
+
+      Alert.alert(
+        "✨ Journal Saved",
+        "Your thoughts have been captured beautifully!",
+        [{ text: "Continue Writing", onPress: () => router.back() }]
+      );
     } catch (error: any) {
-      Alert.alert('Oops!', error.message || 'Something went wrong while saving. Please try again.');
+      Alert.alert(
+        "Oops!",
+        error.message || "Something went wrong while saving. Please try again."
+      );
     }
   };
 
   const { date, time } = getCurrentTime();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.keyboardContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={0}
         >
           {/* Enhanced Header with Gradient */}
@@ -108,7 +119,10 @@ export default function AddJournalScreen() {
           >
             <View style={styles.header}>
               <TouchableOpacity
-                style={[styles.backButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
+                style={[
+                  styles.backButton,
+                  { backgroundColor: "rgba(255,255,255,0.2)" },
+                ]}
                 onPress={() => router.back()}
                 disabled={createEntry.isPending}
               >
@@ -122,61 +136,97 @@ export default function AddJournalScreen() {
             </View>
           </LinearGradient>
 
-          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+          >
             {/* Enhanced Time Display */}
             <View style={styles.timeSection}>
-              <View style={[
-                styles.timeContainer,
-                {
-                  backgroundColor: theme.colors.backgroundGreen,
-                  ...theme.shadows.sm,
-                }
-              ]}>
+              <View
+                style={[
+                  styles.timeContainer,
+                  {
+                    backgroundColor: theme.colors.backgroundGreen,
+                    ...theme.shadows.sm,
+                  },
+                ]}
+              >
                 <View style={styles.timeContent}>
-                  <Ionicons name="calendar-outline" size={18} color={theme.colors.primary} />
+                  <Ionicons
+                    name="calendar-outline"
+                    size={18}
+                    color={theme.colors.primary}
+                  />
                   <View style={styles.timeTextContainer}>
-                    <Text style={[styles.dateText, { color: theme.colors.text }]}>
+                    <Text
+                      style={[styles.dateText, { color: theme.colors.text }]}
+                    >
                       {date}
                     </Text>
-                    <Text style={[styles.timeText, { color: theme.colors.textSecondary }]}>
+                    <Text
+                      style={[
+                        styles.timeText,
+                        { color: theme.colors.textSecondary },
+                      ]}
+                    >
                       {time}
                     </Text>
                   </View>
                 </View>
               </View>
             </View>
-
             {/* Enhanced Content Input */}
             <View style={styles.contentSection}>
-              <View style={[
-                styles.contentContainer,
-                {
-                  backgroundColor: theme.colors.surface,
-                  borderColor: content.trim() ? theme.colors.primary : theme.colors.border,
-                  ...theme.shadows.md,
-                }
-              ]}>
+              <View
+                style={[
+                  styles.contentContainer,
+                  {
+                    backgroundColor: theme.colors.surface,
+                    borderColor: content.trim()
+                      ? theme.colors.primary
+                      : theme.colors.border,
+                    ...theme.shadows.md,
+                  },
+                ]}
+              >
                 <View style={styles.contentHeader}>
                   <View style={styles.contentTitleContainer}>
-                    <Ionicons name="create-outline" size={18} color={theme.colors.primary} />
-                    <Text style={[styles.contentTitle, { color: theme.colors.text }]}>
+                    <Ionicons
+                      name="create-outline"
+                      size={18}
+                      color={theme.colors.primary}
+                    />
+                    <Text
+                      style={[
+                        styles.contentTitle,
+                        { color: theme.colors.text },
+                      ]}
+                    >
                       What's on your mind?
                     </Text>
-                  </View>                  <View style={styles.contentStats}>
-                    <Text style={[styles.wordCount, { color: theme.colors.textTertiary }]}>
+                  </View>
+                  <View style={styles.contentStats}>
+                    <Text
+                      style={[
+                        styles.wordCount,
+                        { color: theme.colors.textTertiary },
+                      ]}
+                    >
                       {wordCount} words
                     </Text>
-                    <Text style={[styles.charCount, { color: getCharacterColor() }]}>
+                    <Text
+                      style={[styles.charCount, { color: getCharacterColor() }]}
+                    >
                       {getCharacterCount()}/5000
                     </Text>
                   </View>
                 </View>
-                  <TextInput
+                <TextInput
                   style={[
                     styles.contentInput,
-                    { 
+                    {
                       color: theme.colors.text,
-                    }
+                    },
                   ]}
                   value={content}
                   onChangeText={handleContentChange}
@@ -198,15 +248,19 @@ Take your time... there's no rush. 💚"
                   autoFocus
                 />
               </View>
-            </View>            {/* Enhanced Save Button */}
+            </View>
+            {/* Enhanced Save Button */}
             <View style={styles.saveSection}>
-              <Animated.View style={{ transform: [{ scale: saveButtonScale }] }}>
+              <Animated.View
+                style={{ transform: [{ scale: saveButtonScale }] }}
+              >
                 <TouchableOpacity
                   style={[
                     styles.saveButton,
                     {
-                      opacity: (!content.trim() || createEntry.isPending) ? 0.6 : 1,
-                    }
+                      opacity:
+                        !content.trim() || createEntry.isPending ? 0.6 : 1,
+                    },
                   ]}
                   onPress={handleSave}
                   disabled={createEntry.isPending || !content.trim()}
@@ -221,21 +275,32 @@ Take your time... there's no rush. 💚"
                     {createEntry.isPending ? (
                       <View style={styles.loadingContainer}>
                         <ActivityIndicator color="white" size="small" />
-                        <Text style={styles.saveButtonText}>Saving your thoughts...</Text>
+                        <Text style={styles.saveButtonText}>
+                          Saving your thoughts...
+                        </Text>
                       </View>
                     ) : (
                       <View style={styles.saveButtonContent}>
-                        <Ionicons name="checkmark-circle" size={20} color="white" />
-                        <Text style={styles.saveButtonText}>Save Journal Entry</Text>
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={20}
+                          color="white"
+                        />
+                        <Text style={styles.saveButtonText}>
+                          Save Journal Entry
+                        </Text>
                       </View>
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
-              
+
               {/* Helpful tip */}
-              <Text style={[styles.tipText, { color: theme.colors.textTertiary }]}>
-                💡 Your entries are private and secure. Take your time to express yourself.
+              <Text
+                style={[styles.tipText, { color: theme.colors.textTertiary }]}
+              >
+                💡 Your entries are private and secure. Take your time to
+                express yourself.
               </Text>
             </View>
           </ScrollView>
@@ -255,7 +320,7 @@ const styles = StyleSheet.create({
   keyboardContainer: {
     flex: 1,
   },
-  
+
   // Enhanced Header Styles
   headerGradient: {
     paddingBottom: 20,
@@ -263,9 +328,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 24,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 4,
@@ -274,23 +339,23 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerContent: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: 'white',
+    fontWeight: "700",
+    color: "white",
     marginBottom: 2,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '500',
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "500",
   },
   headerSpacer: {
     width: 40,
@@ -310,23 +375,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 16,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   timeContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   timeTextContainer: {
     marginLeft: 10,
   },
   dateText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 2,
   },
   timeText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
   // Enhanced Content Section
@@ -341,42 +406,43 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 18,
     paddingTop: 18,
     paddingBottom: 12,
-  },  contentTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  },
+  contentTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   contentTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   contentStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   wordCount: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   charCount: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   contentInput: {
     fontSize: 16,
     lineHeight: 24,
     paddingHorizontal: 18,
     paddingBottom: 18,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     minHeight: 300,
-    fontWeight: '400',
+    fontWeight: "400",
   },
 
   // Enhanced Save Section
@@ -392,28 +458,28 @@ const styles = StyleSheet.create({
   saveButtonGradient: {
     paddingVertical: 18,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   saveButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: 'white',
+    fontWeight: "700",
+    color: "white",
   },
   loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   tipText: {
     fontSize: 13,
-    textAlign: 'center',
-    fontWeight: '500',
+    textAlign: "center",
+    fontWeight: "500",
     lineHeight: 18,
   },
 });

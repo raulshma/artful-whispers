@@ -17,14 +17,17 @@ function TabLayoutContent() {
   return (
     <>
       {/* Dynamic background that responds to tab changes */}
-      <DynamicTabBackground activeIndex={activeTabIndex} totalTabs={totalTabs} />
-      
+      <DynamicTabBackground
+        activeIndex={activeTabIndex}
+        totalTabs={totalTabs}
+      />
+
       <Tabs
         tabBar={(props) => <FloatingTabBarComponent {...props} />}
         screenOptions={{
           headerShown: false,
           // Hide the default tab bar since we're using a custom floating one
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       >
         <Tabs.Screen

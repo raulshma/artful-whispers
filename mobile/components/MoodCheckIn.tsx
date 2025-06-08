@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/contexts/ThemeContext";
 
-type MoodLevel = 'overjoyed' | 'happy' | 'neutral' | 'sad' | 'depressed';
+type MoodLevel = "overjoyed" | "happy" | "neutral" | "sad" | "depressed";
 
 interface MoodOption {
   id: MoodLevel;
@@ -21,7 +21,7 @@ interface MoodOption {
 interface CheckInQuestion {
   id: string;
   text: string;
-  type: 'single' | 'multiple' | 'scale' | 'text';
+  type: "single" | "multiple" | "scale" | "text";
   options?: string[];
   scaleMin?: number;
   scaleMax?: number;
@@ -36,82 +36,99 @@ interface MoodCheckInProps {
 export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
-  
+
   const [selectedMood, setSelectedMood] = useState<MoodLevel | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState<Record<string, any>>({});
 
   const moodOptions: MoodOption[] = [
     {
-      id: 'overjoyed',
+      id: "overjoyed",
       label: "I'm Feeling Overjoyed",
-      icon: 'happy',
+      icon: "happy",
       color: theme.colors.mood.happy,
     },
     {
-      id: 'happy',
+      id: "happy",
       label: "I'm Feeling Happy",
-      icon: 'happy-outline',
+      icon: "happy-outline",
       color: theme.colors.mood.happy,
     },
     {
-      id: 'neutral',
+      id: "neutral",
       label: "I'm Feeling Neutral",
-      icon: 'remove',
+      icon: "remove",
       color: theme.colors.mood.neutral,
     },
     {
-      id: 'sad',
+      id: "sad",
       label: "I'm Feeling Sad",
-      icon: 'sad-outline',
+      icon: "sad-outline",
       color: theme.colors.mood.sad,
     },
     {
-      id: 'depressed',
+      id: "depressed",
       label: "I'm Feeling Depressed",
-      icon: 'sad',
+      icon: "sad",
       color: theme.colors.mood.negative,
     },
   ];
 
   const questions: CheckInQuestion[] = [
     {
-      id: 'causes',
-      text: 'Why do you feel depressed?',
-      type: 'multiple',
-      options: ['Work', 'Family', 'Friend', 'Social Media', 'Financial Issue', 'Health', 'Other'],
+      id: "causes",
+      text: "Why do you feel depressed?",
+      type: "multiple",
+      options: [
+        "Work",
+        "Family",
+        "Friend",
+        "Social Media",
+        "Financial Issue",
+        "Health",
+        "Other",
+      ],
     },
     {
-      id: 'activity_level',
-      text: 'How active are you? (1 - 10)',
-      type: 'scale',
+      id: "activity_level",
+      text: "How active are you? (1 - 10)",
+      type: "scale",
       scaleMin: 1,
       scaleMax: 10,
     },
     {
-      id: 'sleep_hours',
-      text: 'How long did you sleep last night?',
-      type: 'scale',
+      id: "sleep_hours",
+      text: "How long did you sleep last night?",
+      type: "scale",
       scaleMin: 1,
       scaleMax: 12,
-      scaleLabels: ['Hour'],
+      scaleLabels: ["Hour"],
     },
     {
-      id: 'social_interaction',
-      text: 'Did you interact/socialize with other people today?',
-      type: 'single',
-      options: ['None', '1', '2', '3', '4', '5+'],
+      id: "social_interaction",
+      text: "Did you interact/socialize with other people today?",
+      type: "single",
+      options: ["None", "1", "2", "3", "4", "5+"],
     },
     {
-      id: 'company',
-      text: 'Who are you currently with?',
-      type: 'single',
-      options: ['Alone', 'Friend', 'Family', 'Pet', 'Colleague', 'Partner', 'AI', 'Other'],
+      id: "company",
+      text: "Who are you currently with?",
+      type: "single",
+      options: [
+        "Alone",
+        "Friend",
+        "Family",
+        "Pet",
+        "Colleague",
+        "Partner",
+        "AI",
+        "Other",
+      ],
     },
     {
-      id: 'notes',
-      text: 'Enter additional note',
-      type: 'text',
+      id: "notes",
+      text: "Enter additional note",
+      type: "text",
     },
   ];
 
@@ -119,7 +136,7 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
     setSelectedMood(mood);
     setResponses({ ...responses, mood });
     // Skip questions if mood is positive
-    if (mood === 'overjoyed' || mood === 'happy') {
+    if (mood === "overjoyed" || mood === "happy") {
       setCurrentStep(questions.length); // Go to completion
     } else {
       setCurrentStep(1); // Go to first question
@@ -129,7 +146,7 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
   const handleResponse = (questionId: string, response: any) => {
     const newResponses = { ...responses, [questionId]: response };
     setResponses(newResponses);
-    
+
     if (currentStep < questions.length) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -155,49 +172,48 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
 
       <View style={styles.content}>
         <Text style={styles.title}>How are you feeling this day?</Text>
-        
+
         <View style={styles.moodContainer}>
           <View style={styles.moodFace}>
-            <Ionicons 
-              name="happy" 
-              size={80} 
-              color={theme.colors.primary} 
-            />
+            <Ionicons name="happy" size={80} color={theme.colors.primary} />
           </View>
-          
+
           <View style={styles.moodOptions}>
             {moodOptions.map((option) => (
               <TouchableOpacity
                 key={option.id}
                 style={[
                   styles.moodOption,
-                  selectedMood === option.id && styles.selectedMoodOption
+                  selectedMood === option.id && styles.selectedMoodOption,
                 ]}
                 onPress={() => handleMoodSelect(option.id)}
                 activeOpacity={0.7}
               >
-                <Ionicons 
-                  name={option.icon as any} 
-                  size={24} 
-                  color={option.color} 
+                <Ionicons
+                  name={option.icon as any}
+                  size={24}
+                  color={option.color}
                 />
                 <Text style={styles.moodOptionText}>{option.label}</Text>
               </TouchableOpacity>
-            ))}          </View>
+            ))}
+          </View>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.continueButton,
-            selectedMood && { backgroundColor: theme.colors.primary }
+            selectedMood && { backgroundColor: theme.colors.primary },
           ]}
           disabled={!selectedMood}
           onPress={() => selectedMood && handleMoodSelect(selectedMood)}
         >
-          <Text style={[
-            styles.continueButtonText,
-            selectedMood && { color: '#FFFFFF' }
-          ]}>
+          <Text
+            style={[
+              styles.continueButtonText,
+              selectedMood && { color: "#FFFFFF" },
+            ]}
+          >
             Set Mood ✓
           </Text>
         </TouchableOpacity>
@@ -219,16 +235,12 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
 
         <View style={styles.content}>
           <View style={styles.moodIndicator}>
-            <Ionicons 
-              name="sad" 
-              size={48} 
-              color={theme.colors.mood.negative} 
-            />
+            <Ionicons name="sad" size={48} color={theme.colors.mood.negative} />
           </View>
-          
+
           <Text style={styles.questionTitle}>{question.text}</Text>
-          
-          {question.type === 'single' && (
+
+          {question.type === "single" && (
             <Text style={styles.questionSubtitle}>Select the causes</Text>
           )}
 
@@ -245,9 +257,9 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
             ))}
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.continueButton}
-            onPress={() => handleResponse(question.id, 'skipped')}
+            onPress={() => handleResponse(question.id, "skipped")}
           >
             <Text style={styles.continueButtonText}>Continue →</Text>
           </TouchableOpacity>
@@ -265,16 +277,17 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
     return (
       <View style={styles.completionContainer}>
         <View style={styles.completionContent}>
-          <Ionicons 
-            name="checkmark-circle" 
-            size={64} 
-            color={theme.colors.primary} 
+          <Ionicons
+            name="checkmark-circle"
+            size={64}
+            color={theme.colors.primary}
           />
           <Text style={styles.completionTitle}>Check In Completed</Text>
           <Text style={styles.completionSubtitle}>
-            Thank you for checking in your mood today. Don&apos;t forget to check in daily.
+            Thank you for checking in your mood today. Don&apos;t forget to
+            check in daily.
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.continueButton}
             onPress={() => onComplete(responses)}
           >
@@ -286,134 +299,135 @@ export default function MoodCheckIn({ onComplete, onClose }: MoodCheckInProps) {
   }
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.md,
-  },
-  closeButton: {
-    padding: theme.spacing.sm,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: theme.spacing.lg,
-    alignItems: 'center',
-  },
-  title: {
-    ...theme.typography.h3,
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  moodContainer: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  moodFace: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: theme.colors.backgroundGreen,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  moodOptions: {
-    width: '100%',
-    gap: theme.spacing.sm,
-  },
-  moodOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.lg,
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.lg,
-    gap: theme.spacing.md,
-  },
-  selectedMoodOption: {
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-  },
-  moodOptionText: {
-    ...theme.typography.body,
-    color: theme.colors.text,
-    flex: 1,
-  },
-  continueButton: {
-    backgroundColor: theme.colors.backgroundSecondary,
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.xl,
-    borderRadius: theme.borderRadius.full,
-    marginTop: theme.spacing.xl,
-    minWidth: 200,
-    alignItems: 'center',
-  },
-  continueButtonText: {
-    ...theme.typography.bodyMedium,
-    color: theme.colors.textSecondary,
-    fontWeight: '600',
-  },
-  moodIndicator: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-  },
-  questionTitle: {
-    ...theme.typography.h4,
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginBottom: theme.spacing.sm,
-  },
-  questionSubtitle: {
-    ...theme.typography.bodySmall,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  optionsContainer: {
-    width: '100%',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.xl,
-  },
-  optionButton: {
-    backgroundColor: theme.colors.card,
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.lg,
-    alignItems: 'center',
-  },
-  optionButtonText: {
-    ...theme.typography.body,
-    color: theme.colors.text,
-  },
-  completionContainer: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  completionContent: {
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.xl,
-  },
-  completionTitle: {
-    ...theme.typography.h3,
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.sm,
-  },
-  completionSubtitle: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: theme.spacing.md,
+      paddingTop: theme.spacing.xl,
+      paddingBottom: theme.spacing.md,
+    },
+    closeButton: {
+      padding: theme.spacing.sm,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: theme.spacing.lg,
+      alignItems: "center",
+    },
+    title: {
+      ...theme.typography.h3,
+      color: theme.colors.text,
+      textAlign: "center",
+      marginBottom: theme.spacing.xl,
+    },
+    moodContainer: {
+      alignItems: "center",
+      marginBottom: theme.spacing.xl,
+    },
+    moodFace: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: theme.colors.backgroundGreen,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: theme.spacing.xl,
+    },
+    moodOptions: {
+      width: "100%",
+      gap: theme.spacing.sm,
+    },
+    moodOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: theme.spacing.lg,
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.borderRadius.lg,
+      gap: theme.spacing.md,
+    },
+    selectedMoodOption: {
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+    },
+    moodOptionText: {
+      ...theme.typography.body,
+      color: theme.colors.text,
+      flex: 1,
+    },
+    continueButton: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: theme.spacing.xl,
+      borderRadius: theme.borderRadius.full,
+      marginTop: theme.spacing.xl,
+      minWidth: 200,
+      alignItems: "center",
+    },
+    continueButtonText: {
+      ...theme.typography.bodyMedium,
+      color: theme.colors.textSecondary,
+      fontWeight: "600",
+    },
+    moodIndicator: {
+      alignItems: "center",
+      marginBottom: theme.spacing.lg,
+    },
+    questionTitle: {
+      ...theme.typography.h4,
+      color: theme.colors.text,
+      textAlign: "center",
+      marginBottom: theme.spacing.sm,
+    },
+    questionSubtitle: {
+      ...theme.typography.bodySmall,
+      color: theme.colors.textSecondary,
+      textAlign: "center",
+      marginBottom: theme.spacing.xl,
+    },
+    optionsContainer: {
+      width: "100%",
+      gap: theme.spacing.sm,
+      marginBottom: theme.spacing.xl,
+    },
+    optionButton: {
+      backgroundColor: theme.colors.card,
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: theme.spacing.lg,
+      borderRadius: theme.borderRadius.lg,
+      alignItems: "center",
+    },
+    optionButtonText: {
+      ...theme.typography.body,
+      color: theme.colors.text,
+    },
+    completionContainer: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    completionContent: {
+      alignItems: "center",
+      paddingHorizontal: theme.spacing.xl,
+    },
+    completionTitle: {
+      ...theme.typography.h3,
+      color: theme.colors.text,
+      textAlign: "center",
+      marginTop: theme.spacing.lg,
+      marginBottom: theme.spacing.sm,
+    },
+    completionSubtitle: {
+      ...theme.typography.body,
+      color: theme.colors.textSecondary,
+      textAlign: "center",
+      marginBottom: theme.spacing.xl,
+    },
+  });

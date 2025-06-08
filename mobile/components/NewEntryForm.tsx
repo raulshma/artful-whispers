@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,11 +11,11 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useCreateDiaryEntry } from '@/hooks/useDiary';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useCreateDiaryEntry } from "@/hooks/useDiary";
 
 interface NewEntryFormProps {
   onCancel: () => void;
@@ -23,49 +23,62 @@ interface NewEntryFormProps {
 }
 
 const MOOD_OPTIONS = [
-  { label: 'Happy', value: 'happy', color: '#10B981', icon: '😊' },
-  { label: 'Sad', value: 'sad', color: '#6B7280', icon: '😢' },
-  { label: 'Excited', value: 'excited', color: '#F59E0B', icon: '🎉' },
-  { label: 'Calm', value: 'calm', color: '#3B82F6', icon: '😌' },
-  { label: 'Anxious', value: 'anxious', color: '#EF4444', icon: '😰' },
-  { label: 'Grateful', value: 'grateful', color: '#8B5CF6', icon: '🙏' },
-  { label: 'Angry', value: 'angry', color: '#DC2626', icon: '😠' },
-  { label: 'Peaceful', value: 'peaceful', color: '#059669', icon: '☮️' },
+  { label: "Happy", value: "happy", color: "#10B981", icon: "😊" },
+  { label: "Sad", value: "sad", color: "#6B7280", icon: "😢" },
+  { label: "Excited", value: "excited", color: "#F59E0B", icon: "🎉" },
+  { label: "Calm", value: "calm", color: "#3B82F6", icon: "😌" },
+  { label: "Anxious", value: "anxious", color: "#EF4444", icon: "😰" },
+  { label: "Grateful", value: "grateful", color: "#8B5CF6", icon: "🙏" },
+  { label: "Angry", value: "angry", color: "#DC2626", icon: "😠" },
+  { label: "Peaceful", value: "peaceful", color: "#059669", icon: "☮️" },
 ];
 
-export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps) {
-  const [content, setContent] = useState('');
-  const [title, setTitle] = useState('');
+export default function NewEntryForm({
+  onCancel,
+  onSuccess,
+}: NewEntryFormProps) {
+  const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
   const [selectedMood, setSelectedMood] = useState(MOOD_OPTIONS[1]); // Default to 'Sad' as shown in design
   const [showMoodSelector, setShowMoodSelector] = useState(false);
   const createEntry = useCreateDiaryEntry();
-  const { theme } = useTheme();  const handleSubmit = async () => {
+  const { theme } = useTheme();
+  const handleSubmit = async () => {
     if (!content.trim()) {
-      Alert.alert('Write Something', 'Please share your thoughts to create a reflection.');
+      Alert.alert(
+        "Write Something",
+        "Please share your thoughts to create a reflection."
+      );
       return;
     }
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       await createEntry.mutateAsync({
         content: content.trim(),
         date: today,
       });
-      
-      Alert.alert('Reflection Saved', 'Your journal entry has been saved successfully!');
-      setContent('');
-      setTitle('');
+
+      Alert.alert(
+        "Reflection Saved",
+        "Your journal entry has been saved successfully!"
+      );
+      setContent("");
+      setTitle("");
       onSuccess?.();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to save your reflection. Please try again.');
+      Alert.alert(
+        "Error",
+        error.message || "Failed to save your reflection. Please try again."
+      );
     }
   };
 
   const getCurrentTime = () => {
     const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
+    const timeString = now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true,
     });
     return `Today, ${timeString}`;
@@ -76,12 +89,15 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
         styles.container,
         {
           backgroundColor: theme.colors.background,
-        }
+        },
       ]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -102,10 +118,10 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
           <TextInput
             style={[
               styles.titleInput,
-              { 
+              {
                 color: theme.colors.text,
                 borderBottomColor: theme.colors.border,
-              }
+              },
             ]}
             value={title}
             onChangeText={setTitle}
@@ -123,43 +139,53 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
               {
                 backgroundColor: theme.colors.surface,
                 borderColor: theme.colors.border,
-              }
+              },
             ]}
             onPress={() => setShowMoodSelector(true)}
           >
             <Text style={[styles.moodText, { color: selectedMood.color }]}>
               {selectedMood.icon} {selectedMood.label}
             </Text>
-            <Ionicons name="chevron-down" size={16} color={theme.colors.textSecondary} />
+            <Ionicons
+              name="chevron-down"
+              size={16}
+              color={theme.colors.textSecondary}
+            />
           </TouchableOpacity>
 
-          <View style={[
-            styles.timeContainer,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.border,
-            }
-          ]}>
-            <Text style={[styles.timeText, { color: theme.colors.textSecondary }]}>
+          <View
+            style={[
+              styles.timeContainer,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+              },
+            ]}
+          >
+            <Text
+              style={[styles.timeText, { color: theme.colors.textSecondary }]}
+            >
               {getCurrentTime()}
             </Text>
           </View>
         </View>
 
         {/* Content Input */}
-        <View style={[
-          styles.contentContainer,
-          {
-            backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
-          }
-        ]}>
+        <View
+          style={[
+            styles.contentContainer,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.border,
+            },
+          ]}
+        >
           <TextInput
             style={[
               styles.contentInput,
-              { 
+              {
                 color: theme.colors.text,
-              }
+              },
             ]}
             value={content}
             onChangeText={setContent}
@@ -177,8 +203,8 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
             styles.saveButton,
             {
               backgroundColor: theme.colors.primary,
-              opacity: (!content.trim() || createEntry.isPending) ? 0.5 : 1,
-            }
+              opacity: !content.trim() || createEntry.isPending ? 0.5 : 1,
+            },
           ]}
           onPress={handleSubmit}
           disabled={createEntry.isPending || !content.trim()}
@@ -202,12 +228,14 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
         onRequestClose={() => setShowMoodSelector(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[
-            styles.modalContent,
-            {
-              backgroundColor: theme.colors.surface,
-            }
-          ]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: theme.colors.surface,
+              },
+            ]}
+          >
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
                 How are you feeling?
@@ -216,7 +244,11 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
                 style={styles.modalCloseButton}
                 onPress={() => setShowMoodSelector(false)}
               >
-                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
 
@@ -227,9 +259,12 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
                   style={[
                     styles.moodOption,
                     {
-                      backgroundColor: selectedMood.value === mood.value ? mood.color + '20' : 'transparent',
+                      backgroundColor:
+                        selectedMood.value === mood.value
+                          ? mood.color + "20"
+                          : "transparent",
                       borderColor: theme.colors.border,
-                    }
+                    },
                   ]}
                   onPress={() => {
                     setSelectedMood(mood);
@@ -237,13 +272,19 @@ export default function NewEntryForm({ onCancel, onSuccess }: NewEntryFormProps)
                   }}
                 >
                   <Text style={styles.moodIcon}>{mood.icon}</Text>
-                  <Text style={[
-                    styles.moodLabel,
-                    { 
-                      color: selectedMood.value === mood.value ? mood.color : theme.colors.text,
-                      fontWeight: selectedMood.value === mood.value ? '600' : '400',
-                    }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.moodLabel,
+                      {
+                        color:
+                          selectedMood.value === mood.value
+                            ? mood.color
+                            : theme.colors.text,
+                        fontWeight:
+                          selectedMood.value === mood.value ? "600" : "400",
+                      },
+                    ]}
+                  >
                     {mood.label}
                   </Text>
                   {selectedMood.value === mood.value && (
@@ -267,20 +308,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   headerSpacer: {
     width: 40,
@@ -291,19 +332,19 @@ const styles = StyleSheet.create({
   },
   titleInput: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: "600",
     paddingBottom: 8,
     borderBottomWidth: 1,
   },
   metaRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 20,
     paddingBottom: 16,
     gap: 12,
   },
   moodSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
@@ -312,7 +353,7 @@ const styles = StyleSheet.create({
   },
   moodText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   timeContainer: {
     flex: 1,
@@ -335,7 +376,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     padding: 16,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     minHeight: 280,
   },
   saveButton: {
@@ -343,39 +384,39 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
+    fontWeight: "600",
+    color: "white",
   },
   loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   modalContent: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '70%',
+    maxHeight: "70%",
   },
   modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   modalCloseButton: {
     padding: 4,
@@ -384,8 +425,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   moodOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 12,

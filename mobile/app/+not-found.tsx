@@ -9,14 +9,14 @@ export default function NotFoundScreen() {
   const router = useRouter();
 
   const handleGoHome = () => {
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/journal");
   };
 
   const handleGoBack = () => {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace("/(tabs)");
+      router.replace("/(tabs)/journal");
     }
   };
 

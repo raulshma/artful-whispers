@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { ViewStyle } from 'react-native';
+import React, { useEffect } from "react";
+import { ViewStyle } from "react-native";
 import {
   Canvas,
   Circle,
@@ -9,7 +9,7 @@ import {
   LinearGradient,
   vec,
   Blur,
-} from '@shopify/react-native-skia';
+} from "@shopify/react-native-skia";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -20,14 +20,14 @@ import Animated, {
   Easing,
   useDerivedValue,
   runOnJS,
-} from 'react-native-reanimated';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native-reanimated";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface SkiaLoadingAnimationProps {
   size?: number;
   color?: string;
   style?: ViewStyle;
-  variant?: 'ripple' | 'morphing' | 'orbital' | 'breathing';
+  variant?: "ripple" | "morphing" | "orbital" | "breathing";
   visible?: boolean;
 }
 
@@ -35,46 +35,81 @@ export function SkiaLoadingAnimation({
   size = 80,
   color,
   style,
-  variant = 'ripple',
+  variant = "ripple",
   visible = true,
 }: SkiaLoadingAnimationProps) {
   const { theme } = useTheme();
   const animationColor = color || theme.colors.primary;
 
-  if (variant === 'ripple') {
-    return <RippleAnimation size={size} color={animationColor} style={style} visible={visible} />;
+  if (variant === "ripple") {
+    return (
+      <RippleAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        visible={visible}
+      />
+    );
   }
 
-  if (variant === 'morphing') {
-    return <MorphingAnimation size={size} color={animationColor} style={style} visible={visible} />;
+  if (variant === "morphing") {
+    return (
+      <MorphingAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        visible={visible}
+      />
+    );
   }
 
-  if (variant === 'orbital') {
-    return <OrbitalAnimation size={size} color={animationColor} style={style} visible={visible} />;
+  if (variant === "orbital") {
+    return (
+      <OrbitalAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        visible={visible}
+      />
+    );
   }
 
-  if (variant === 'breathing') {
-    return <BreathingAnimation size={size} color={animationColor} style={style} visible={visible} />;
+  if (variant === "breathing") {
+    return (
+      <BreathingAnimation
+        size={size}
+        color={animationColor}
+        style={style}
+        visible={visible}
+      />
+    );
   }
 
-  return <RippleAnimation size={size} color={animationColor} style={style} visible={visible} />;
+  return (
+    <RippleAnimation
+      size={size}
+      color={animationColor}
+      style={style}
+      visible={visible}
+    />
+  );
 }
 
 // Ripple Animation - Expanding concentric circles
-function RippleAnimation({ 
-  size, 
-  color, 
-  style, 
-  visible 
-}: { 
-  size: number; 
-  color: string; 
-  style?: ViewStyle; 
+function RippleAnimation({
+  size,
+  color,
+  style,
+  visible,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
   visible: boolean;
 }) {
   const center = size / 2;
   const maxRadius = size * 0.4;
-  
+
   const ripple1 = useSharedValue(0);
   const ripple2 = useSharedValue(0);
   const ripple3 = useSharedValue(0);
@@ -156,12 +191,14 @@ function RippleAnimation({
   }));
 
   return (
-    <Animated.View style={[{ width: size, height: size }, style, animatedStyle]}>
+    <Animated.View
+      style={[{ width: size, height: size }, style, animatedStyle]}
+    >
       {/* Ripple 1 */}
-      <Animated.View 
+      <Animated.View
         style={[
           {
-            position: 'absolute',
+            position: "absolute",
             width: maxRadius * 2,
             height: maxRadius * 2,
             left: center - maxRadius,
@@ -170,15 +207,15 @@ function RippleAnimation({
             borderWidth: 3,
             borderColor: color,
           },
-          ripple1Style
+          ripple1Style,
         ]}
       />
-      
+
       {/* Ripple 2 */}
-      <Animated.View 
+      <Animated.View
         style={[
           {
-            position: 'absolute',
+            position: "absolute",
             width: maxRadius * 2,
             height: maxRadius * 2,
             left: center - maxRadius,
@@ -187,15 +224,15 @@ function RippleAnimation({
             borderWidth: 2,
             borderColor: color,
           },
-          ripple2Style
+          ripple2Style,
         ]}
       />
-      
+
       {/* Ripple 3 */}
-      <Animated.View 
+      <Animated.View
         style={[
           {
-            position: 'absolute',
+            position: "absolute",
             width: maxRadius * 2,
             height: maxRadius * 2,
             left: center - maxRadius,
@@ -204,14 +241,14 @@ function RippleAnimation({
             borderWidth: 1,
             borderColor: color,
           },
-          ripple3Style
+          ripple3Style,
         ]}
       />
-      
+
       {/* Center dot */}
-      <Animated.View 
+      <Animated.View
         style={{
-          position: 'absolute',
+          position: "absolute",
           width: 8,
           height: 8,
           left: center - 4,
@@ -225,20 +262,20 @@ function RippleAnimation({
 }
 
 // Morphing Animation - Shape-shifting blob using Skia
-function MorphingAnimation({ 
-  size, 
-  color, 
-  style, 
-  visible 
-}: { 
-  size: number; 
-  color: string; 
-  style?: ViewStyle; 
+function MorphingAnimation({
+  size,
+  color,
+  style,
+  visible,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
   visible: boolean;
 }) {
   const center = size / 2;
   const baseRadius = size * 0.15;
-  
+
   const morph = useSharedValue(0);
   const opacity = useSharedValue(visible ? 1 : 0);
   const scale = useSharedValue(visible ? 1 : 0);
@@ -274,11 +311,14 @@ function MorphingAnimation({
   const createMorphPath = useDerivedValue(() => {
     const path = Skia.Path.Make();
     const t = morph.value;
-    
+
     const radius1 = baseRadius * (1 + 0.5 * Math.sin(t * Math.PI * 2));
-    const radius2 = baseRadius * (1 + 0.5 * Math.cos(t * Math.PI * 2 + Math.PI / 3));
-    const radius3 = baseRadius * (1 + 0.5 * Math.sin(t * Math.PI * 2 + Math.PI * 2 / 3));
-    const radius4 = baseRadius * (1 + 0.5 * Math.cos(t * Math.PI * 2 + Math.PI));
+    const radius2 =
+      baseRadius * (1 + 0.5 * Math.cos(t * Math.PI * 2 + Math.PI / 3));
+    const radius3 =
+      baseRadius * (1 + 0.5 * Math.sin(t * Math.PI * 2 + (Math.PI * 2) / 3));
+    const radius4 =
+      baseRadius * (1 + 0.5 * Math.cos(t * Math.PI * 2 + Math.PI));
 
     path.moveTo(center + radius1, center);
     path.quadTo(center, center - radius2, center - radius3, center);
@@ -289,17 +329,15 @@ function MorphingAnimation({
   });
 
   return (
-    <Animated.View style={[{ width: size, height: size }, style, animatedStyle]}>
+    <Animated.View
+      style={[{ width: size, height: size }, style, animatedStyle]}
+    >
       <Canvas style={{ width: size, height: size }}>
-        <Path
-          path={createMorphPath}
-          color={color}
-          opacity={0.7}
-        >
+        <Path path={createMorphPath} color={color} opacity={0.7}>
           <LinearGradient
             start={vec(0, 0)}
             end={vec(size, size)}
-            colors={[color, color + '40']}
+            colors={[color, color + "40"]}
           />
           <Blur blur={2} />
         </Path>
@@ -309,20 +347,20 @@ function MorphingAnimation({
 }
 
 // Orbital Animation - Particles orbiting around center
-function OrbitalAnimation({ 
-  size, 
-  color, 
-  style, 
-  visible 
-}: { 
-  size: number; 
-  color: string; 
-  style?: ViewStyle; 
+function OrbitalAnimation({
+  size,
+  color,
+  style,
+  visible,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
   visible: boolean;
 }) {
   const center = size / 2;
   const orbitRadius = size * 0.25;
-  
+
   const rotation = useSharedValue(0);
   const opacity = useSharedValue(visible ? 1 : 0);
   const scale = useSharedValue(visible ? 1 : 0);
@@ -358,7 +396,9 @@ function OrbitalAnimation({
   const particles = Array.from({ length: 6 }, (_, i) => i);
 
   return (
-    <Animated.View style={[{ width: size, height: size }, style, animatedStyle]}>
+    <Animated.View
+      style={[{ width: size, height: size }, style, animatedStyle]}
+    >
       <Canvas style={{ width: size, height: size }}>
         {/* Orbit path */}
         <Circle
@@ -370,21 +410,25 @@ function OrbitalAnimation({
           style="stroke"
           strokeWidth={1}
         />
-        
+
         {/* Orbiting particles */}
         {particles.map((_, index) => {
-          const angle = useDerivedValue(() => 
-            rotation.value + (index * 2 * Math.PI) / particles.length
+          const angle = useDerivedValue(
+            () => rotation.value + (index * 2 * Math.PI) / particles.length
           );
-          const x = useDerivedValue(() => center + Math.cos(angle.value) * orbitRadius);
-          const y = useDerivedValue(() => center + Math.sin(angle.value) * orbitRadius);
-          const particleSize = useDerivedValue(() => 
-            4 + Math.sin(rotation.value + index) * 2
+          const x = useDerivedValue(
+            () => center + Math.cos(angle.value) * orbitRadius
           );
-          const particleOpacity = useDerivedValue(() => 
-            0.8 + Math.sin(rotation.value + index) * 0.2
+          const y = useDerivedValue(
+            () => center + Math.sin(angle.value) * orbitRadius
           );
-          
+          const particleSize = useDerivedValue(
+            () => 4 + Math.sin(rotation.value + index) * 2
+          );
+          const particleOpacity = useDerivedValue(
+            () => 0.8 + Math.sin(rotation.value + index) * 0.2
+          );
+
           return (
             <Circle
               key={index}
@@ -396,34 +440,28 @@ function OrbitalAnimation({
             />
           );
         })}
-        
+
         {/* Center core */}
-        <Circle
-          cx={center}
-          cy={center}
-          r={6}
-          color={color}
-          opacity={0.5}
-        />
+        <Circle cx={center} cy={center} r={6} color={color} opacity={0.5} />
       </Canvas>
     </Animated.View>
   );
 }
 
 // Breathing Animation - Pulsing organic shape
-function BreathingAnimation({ 
-  size, 
-  color, 
-  style, 
-  visible 
-}: { 
-  size: number; 
-  color: string; 
-  style?: ViewStyle; 
+function BreathingAnimation({
+  size,
+  color,
+  style,
+  visible,
+}: {
+  size: number;
+  color: string;
+  style?: ViewStyle;
   visible: boolean;
 }) {
   const center = size / 2;
-  
+
   const breathe = useSharedValue(0);
   const opacity = useSharedValue(visible ? 1 : 0);
   const scale = useSharedValue(visible ? 1 : 0);
@@ -456,18 +494,20 @@ function BreathingAnimation({
     transform: [{ scale: scale.value }],
   }));
 
-  const innerRadius = useDerivedValue(() => 
-    size * 0.1 * (1 + breathe.value * 0.5)
+  const innerRadius = useDerivedValue(
+    () => size * 0.1 * (1 + breathe.value * 0.5)
   );
-  const middleRadius = useDerivedValue(() => 
-    size * 0.2 * (1 + breathe.value * 0.3)
+  const middleRadius = useDerivedValue(
+    () => size * 0.2 * (1 + breathe.value * 0.3)
   );
-  const outerRadius = useDerivedValue(() => 
-    size * 0.3 * (1 + breathe.value * 0.1)
+  const outerRadius = useDerivedValue(
+    () => size * 0.3 * (1 + breathe.value * 0.1)
   );
 
   return (
-    <Animated.View style={[{ width: size, height: size }, style, animatedStyle]}>
+    <Animated.View
+      style={[{ width: size, height: size }, style, animatedStyle]}
+    >
       <Canvas style={{ width: size, height: size }}>
         {/* Outer ring */}
         <Circle
@@ -477,7 +517,7 @@ function BreathingAnimation({
           color={color}
           opacity={useDerivedValue(() => 0.2 * (1 - breathe.value * 0.5))}
         />
-        
+
         {/* Middle ring */}
         <Circle
           cx={center}
@@ -486,7 +526,7 @@ function BreathingAnimation({
           color={color}
           opacity={useDerivedValue(() => 0.4 * (1 - breathe.value * 0.3))}
         />
-        
+
         {/* Inner core */}
         <Circle
           cx={center}
@@ -498,7 +538,7 @@ function BreathingAnimation({
           <LinearGradient
             start={vec(0, 0)}
             end={vec(size, size)}
-            colors={[color, color + '80']}
+            colors={[color, color + "80"]}
           />
         </Circle>
       </Canvas>

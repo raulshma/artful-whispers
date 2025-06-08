@@ -71,33 +71,39 @@ export default function ProfileScreen() {
         fetchUserStats(),
         fetchUserSettings(),
       ]);
-      
+
       setProfile(profileData);
       setStats(statsData);
       setSettings(settingsData);
     } catch (error) {
-      console.error('Failed to load profile data:', error);
-      Alert.alert('Error', 'Failed to load profile data');
+      console.error("Failed to load profile data:", error);
+      Alert.alert("Error", "Failed to load profile data");
     } finally {
       setLoading(false);
     }
   };
 
-  const updateSettingValue = async (key: keyof Pick<UserSettings, 'notificationsEnabled' | 'reminderEnabled' | 'darkModeEnabled'>, value: boolean) => {
+  const updateSettingValue = async (
+    key: keyof Pick<
+      UserSettings,
+      "notificationsEnabled" | "reminderEnabled" | "darkModeEnabled"
+    >,
+    value: boolean
+  ) => {
     try {
       const updatedSettings = await updateUserSettings({ [key]: value });
       setSettings(updatedSettings);
-      
+
       // Provide haptic feedback
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (error) {
       console.error(`Failed to update ${key}:`, error);
-      Alert.alert('Error', `Failed to update ${key}`);
-      
+      Alert.alert("Error", `Failed to update ${key}`);
+
       // Revert local state
-      if (key === 'notificationsEnabled') setNotificationsEnabled(!value);
-      if (key === 'reminderEnabled') setReminderEnabled(!value);
-      if (key === 'darkModeEnabled') setIsDarkMode(!value);
+      if (key === "notificationsEnabled") setNotificationsEnabled(!value);
+      if (key === "reminderEnabled") setReminderEnabled(!value);
+      if (key === "darkModeEnabled") setIsDarkMode(!value);
     }
   };
 
@@ -106,13 +112,13 @@ export default function ProfileScreen() {
       setSyncingStats(true);
       const response = await syncUserStats();
       setStats(response.stats);
-      
+
       // Provide haptic feedback
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Success', 'Journey stats have been synced successfully!');
+      Alert.alert("Success", "Journey stats have been synced successfully!");
     } catch (error) {
-      console.error('Failed to sync stats:', error);
-      Alert.alert('Error', 'Failed to sync journey stats. Please try again.');
+      console.error("Failed to sync stats:", error);
+      Alert.alert("Error", "Failed to sync journey stats. Please try again.");
     } finally {
       setSyncingStats(false);
     }
@@ -144,11 +150,11 @@ export default function ProfileScreen() {
   const handleExportData = async () => {
     try {
       const blob = await exportUserData();
-      
-      if (Platform.OS === 'web') {
+
+      if (Platform.OS === "web") {
         // For web, create download link
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `user-data-${Date.now()}.json`;
         a.click();
@@ -160,18 +166,18 @@ export default function ProfileScreen() {
           try {
             await Share.share({
               message: reader.result as string,
-              title: 'User Data Export',
+              title: "User Data Export",
             });
           } catch (error) {
-            console.error('Share error:', error);
+            console.error("Share error:", error);
           }
         };
         reader.readAsText(blob);
       }
-      
+
       Alert.alert("Success", "Your data has been exported successfully!");
     } catch (error) {
-      console.error('Export error:', error);
+      console.error("Export error:", error);
       Alert.alert("Error", "Failed to export data");
     }
   };
@@ -199,9 +205,12 @@ export default function ProfileScreen() {
                       try {
                         await deleteUserAccount();
                         await signOut();
-                        Alert.alert("Account Deleted", "Your account has been permanently deleted.");
+                        Alert.alert(
+                          "Account Deleted",
+                          "Your account has been permanently deleted."
+                        );
                       } catch (error) {
-                        console.error('Delete account error:', error);
+                        console.error("Delete account error:", error);
                         Alert.alert("Error", "Failed to delete account");
                       }
                     } else {
@@ -221,7 +230,7 @@ export default function ProfileScreen() {
   const handleToggleTheme = async (value: boolean) => {
     setIsDarkMode(value);
     toggleTheme();
-    await updateSettingValue('darkModeEnabled', value);
+    await updateSettingValue("darkModeEnabled", value);
   };
 
   const settingsItems = [
@@ -234,7 +243,7 @@ export default function ProfileScreen() {
       value: notificationsEnabled,
       onToggle: (value: boolean) => {
         setNotificationsEnabled(value);
-        updateSettingValue('notificationsEnabled', value);
+        updateSettingValue("notificationsEnabled", value);
       },
     },
     {
@@ -246,7 +255,7 @@ export default function ProfileScreen() {
       value: reminderEnabled,
       onToggle: (value: boolean) => {
         setReminderEnabled(value);
-        updateSettingValue('reminderEnabled', value);
+        updateSettingValue("reminderEnabled", value);
       },
     },
     {
@@ -307,7 +316,9 @@ export default function ProfileScreen() {
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-        >          <View style={styles.content}>
+        >
+          
+          <View style={styles.content}>
             {/* User Profile Header */}
             <ShadowFriendlyAnimation index={0} animationType="slideUp">
               <Card style={styles.profileCard}>
@@ -326,7 +337,9 @@ export default function ProfileScreen() {
                   </View>
 
                   <View style={styles.profileInfo}>
-                    <Text style={[styles.userName, { color: theme.colors.text }]}>
+                    <Text
+                      style={[styles.userName, { color: theme.colors.text }]}
+                    >
                       {profile?.name || user?.name || "User"}
                     </Text>
                     <Text
@@ -343,16 +356,19 @@ export default function ProfileScreen() {
                         { color: theme.colors.textTertiary },
                       ]}
                     >
-                      Member since {profile?.joinDate
-                        ? new Date(profile.joinDate).toLocaleDateString("en-US", {
-                            month: "long",
-                            year: "numeric",
-                          })
+                      Member since
+                      {profile?.joinDate
+                        ? new Date(profile.joinDate).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
                         : new Date().toLocaleDateString("en-US", {
                             month: "long",
                             year: "numeric",
-                          })
-                      }
+                          })}
                     </Text>
                   </View>
 
@@ -362,18 +378,24 @@ export default function ProfileScreen() {
                     onPress={handleEditProfile}
                     style={styles.editButton}
                   />
-                </View>              </Card>
+                </View>
+              </Card>
             </ShadowFriendlyAnimation>
             {/* Stats Overview */}
             <ShadowFriendlyAnimation index={1} animationType="slideUp">
               <Card style={styles.statsCard}>
-                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                <Text
+                  style={[styles.sectionTitle, { color: theme.colors.text }]}
+                >
                   Your Journey
                 </Text>
                 <View style={styles.statsGrid}>
                   <View style={styles.statItem}>
                     <Text
-                      style={[styles.statNumber, { color: theme.colors.primary }]}
+                      style={[
+                        styles.statNumber,
+                        { color: theme.colors.primary },
+                      ]}
                     >
                       {loading ? "..." : stats?.checkInsCount || 0}
                     </Text>
@@ -388,7 +410,10 @@ export default function ProfileScreen() {
                   </View>
                   <View style={styles.statItem}>
                     <Text
-                      style={[styles.statNumber, { color: theme.colors.primary }]}
+                      style={[
+                        styles.statNumber,
+                        { color: theme.colors.primary },
+                      ]}
                     >
                       {loading ? "..." : stats?.journalEntriesCount || 0}
                     </Text>
@@ -403,7 +428,10 @@ export default function ProfileScreen() {
                   </View>
                   <View style={styles.statItem}>
                     <Text
-                      style={[styles.statNumber, { color: theme.colors.primary }]}
+                      style={[
+                        styles.statNumber,
+                        { color: theme.colors.primary },
+                      ]}
                     >
                       {loading ? "..." : stats?.currentStreak || 0}
                     </Text>
@@ -416,12 +444,15 @@ export default function ProfileScreen() {
                       Day Streak
                     </Text>
                   </View>
-                </View>              </Card>
+                </View>
+              </Card>
             </ShadowFriendlyAnimation>
             {/* Settings */}
             <ShadowFriendlyAnimation index={2} animationType="slideUp">
               <Card style={styles.settingsCard}>
-                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                <Text
+                  style={[styles.sectionTitle, { color: theme.colors.text }]}
+                >
                   Preferences
                 </Text>
                 {settingsItems.map((item) => (
@@ -435,24 +466,31 @@ export default function ProfileScreen() {
                         value={item.value}
                         onValueChange={(value) => {
                           item.onToggle(value);
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light
+                          );
                         }}
                         trackColor={{
                           false: theme.colors.border,
                           true: theme.colors.primary + "80",
                         }}
                         thumbColor={
-                          item.value ? theme.colors.primary : theme.colors.surface
+                          item.value
+                            ? theme.colors.primary
+                            : theme.colors.surface
                         }
                       />
                     }
                   />
-                ))}              </Card>
+                ))}
+              </Card>
             </ShadowFriendlyAnimation>
             {/* Account */}
             <ShadowFriendlyAnimation index={3} animationType="slideUp">
               <Card style={styles.accountCard}>
-                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                <Text
+                  style={[styles.sectionTitle, { color: theme.colors.text }]}
+                >
                   Account
                 </Text>
                 {accountItems.map((item) => (
@@ -478,7 +516,11 @@ export default function ProfileScreen() {
                 Danger Zone
               </Text>
               <ListItem
-                title={syncingStats ? "Syncing Journey Stats..." : "Sync Journey Stats"}
+                title={
+                  syncingStats
+                    ? "Syncing Journey Stats..."
+                    : "Sync Journey Stats"
+                }
                 subtitle="Recalculate all statistics from your data"
                 leftIcon="arrow.clockwise.circle.fill"
                 rightIcon="chevron.right"
@@ -500,7 +542,8 @@ export default function ProfileScreen() {
                 title="Sign Out"
                 variant="secondary"
                 onPress={handleSignOut}
-                style={styles.signOutButton}              />
+                style={styles.signOutButton}
+              />
             </View>
           </View>
         </ScrollView>
@@ -594,6 +637,6 @@ const styles = StyleSheet.create({
   },
   signOutButton: {
     width: "100%",
-    marginBottom: 65
+    marginBottom: 65,
   },
 });

@@ -1,5 +1,10 @@
-import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import apiRequest from '../lib/api';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  useQuery,
+} from "@tanstack/react-query";
+import apiRequest from "../lib/api";
 
 // Import shared types if available, or define locally
 export interface DiaryEntry {
@@ -31,7 +36,7 @@ export interface UpdateDiaryEntryData {
 
 export function useInfiniteDiaryEntries(limit: number = 10) {
   return useInfiniteQuery({
-    queryKey: ['diary-entries', { limit }],
+    queryKey: ["diary-entries", { limit }],
     queryFn: async ({ pageParam = 0 }) => {
       const entries = await apiRequest<DiaryEntry[]>(
         `/api/diary-entries?limit=${limit}&offset=${pageParam}`
@@ -48,37 +53,40 @@ export function useInfiniteDiaryEntries(limit: number = 10) {
 
 export function useCreateDiaryEntry() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: CreateDiaryEntryData) => {
-      return apiRequest<DiaryEntry>('/api/diary-entries', {
-        method: 'POST',
+      return apiRequest<DiaryEntry>("/api/diary-entries", {
+        method: "POST",
         body: JSON.stringify(data),
       });
     },
     onSuccess: () => {
       // Invalidate and refetch diary entries
-      queryClient.invalidateQueries({ queryKey: ['diary-entries'] });
+      queryClient.invalidateQueries({ queryKey: ["diary-entries"] });
     },
   });
 }
 
 export function useUpdateDiaryEntry() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: UpdateDiaryEntryData }) => {
-      return await apiRequest<DiaryEntry>(
-        `/api/diary-entries/${id}`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify(data),
-        }
-      );
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: UpdateDiaryEntryData;
+    }) => {
+      return await apiRequest<DiaryEntry>(`/api/diary-entries/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       // Invalidate and refetch diary entries
-      queryClient.invalidateQueries({ queryKey: ['diary-entries'] });
+      queryClient.invalidateQueries({ queryKey: ["diary-entries"] });
     },
   });
 }
@@ -91,14 +99,14 @@ export function useFavoriteToggle() {
       return await apiRequest<DiaryEntry>(
         `/api/diary-entries/${entryId}/favorite`,
         {
-          method: 'PATCH',
+          method: "PATCH",
         }
       );
     },
     onSuccess: (updatedEntry) => {
       // Update the infinite query cache
       queryClient.setQueriesData(
-        { queryKey: ['diary-entries'] },
+        { queryKey: ["diary-entries"] },
         (oldData: any) => {
           if (!oldData) return oldData;
 
@@ -118,7 +126,7 @@ export function useFavoriteToggle() {
 
 export function useDiaryEntriesByDate(date: string) {
   return useQuery({
-    queryKey: ['diary-entries', 'date', date],
+    queryKey: ["diary-entries", "date", date],
     queryFn: async () => {
       return apiRequest<DiaryEntry[]>(`/api/diary-entries/date/${date}/all`);
     },
@@ -128,10 +136,12 @@ export function useDiaryEntriesByDate(date: string) {
 
 export function useSearchDiaryEntries(query: string, enabled: boolean = true) {
   return useQuery({
-    queryKey: ['diary-entries', 'search', query],
+    queryKey: ["diary-entries", "search", query],
     queryFn: async () => {
       if (!query.trim()) return [];
-      return apiRequest<DiaryEntry[]>(`/api/diary-entries/search?q=${encodeURIComponent(query)}`);
+      return apiRequest<DiaryEntry[]>(
+        `/api/diary-entries/search?q=${encodeURIComponent(query)}`
+      );
     },
     enabled: enabled && !!query.trim(),
     staleTime: 1 * 60 * 1000, // 1 minute

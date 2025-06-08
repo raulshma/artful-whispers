@@ -9,20 +9,20 @@ export const FontSizes = {
   base: 16,
   lg: 18,
   xl: 20,
-  '2xl': 24,
-  '3xl': 30,
-  '4xl': 36,
-  '5xl': 48,
-  '6xl': 60,
+  "2xl": 24,
+  "3xl": 30,
+  "4xl": 36,
+  "5xl": 48,
+  "6xl": 60,
 } as const;
 
 export const FontWeights = {
-  light: '300' as const,
-  normal: '400' as const,
-  medium: '500' as const,
-  semibold: '600' as const,
-  bold: '700' as const,
-  extrabold: '800' as const,
+  light: "300" as const,
+  normal: "400" as const,
+  medium: "500" as const,
+  semibold: "600" as const,
+  bold: "700" as const,
+  extrabold: "800" as const,
 };
 
 export const LineHeights = {
@@ -31,29 +31,29 @@ export const LineHeights = {
   base: 24,
   lg: 28,
   xl: 28,
-  '2xl': 32,
-  '3xl': 36,
-  '4xl': 40,
-  '5xl': 56,
-  '6xl': 72,
+  "2xl": 32,
+  "3xl": 36,
+  "4xl": 40,
+  "5xl": 56,
+  "6xl": 72,
 } as const;
 
 export const Typography = {
   // Headers
   h1: {
-    fontSize: FontSizes['4xl'],
+    fontSize: FontSizes["4xl"],
     fontWeight: FontWeights.bold,
-    lineHeight: LineHeights['4xl'],
+    lineHeight: LineHeights["4xl"],
   },
   h2: {
-    fontSize: FontSizes['3xl'],
+    fontSize: FontSizes["3xl"],
     fontWeight: FontWeights.bold,
-    lineHeight: LineHeights['3xl'],
+    lineHeight: LineHeights["3xl"],
   },
   h3: {
-    fontSize: FontSizes['2xl'],
+    fontSize: FontSizes["2xl"],
     fontWeight: FontWeights.semibold,
-    lineHeight: LineHeights['2xl'],
+    lineHeight: LineHeights["2xl"],
   },
   h4: {
     fontSize: FontSizes.xl,
@@ -76,7 +76,8 @@ export const Typography = {
     fontSize: FontSizes.base,
     fontWeight: FontWeights.normal,
     lineHeight: LineHeights.base,
-  },  bodyLarge: {
+  },
+  bodyLarge: {
     fontSize: FontSizes.lg,
     fontWeight: FontWeights.normal,
     lineHeight: LineHeights.lg,

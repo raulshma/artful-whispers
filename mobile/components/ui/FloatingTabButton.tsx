@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Pressable, Text, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from "react";
+import { Pressable, Text, StyleSheet, View } from "react-native";
 import {
   Canvas,
   Circle,
@@ -8,7 +8,7 @@ import {
   Path,
   Skia,
   Group,
-} from '@shopify/react-native-skia';
+} from "@shopify/react-native-skia";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -18,11 +18,11 @@ import Animated, {
   interpolate,
   runOnJS,
   useDerivedValue,
-} from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { IconSymbol } from './IconSymbol';
-import { useTheme } from '@/contexts/ThemeContext';
-import { TabParticleSystem } from './TabParticleSystem';
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+import { IconSymbol } from "./IconSymbol";
+import { useTheme } from "@/contexts/ThemeContext";
+import { TabParticleSystem } from "./TabParticleSystem";
 
 interface FloatingTabButtonProps {
   icon: string;
@@ -45,7 +45,7 @@ export function FloatingTabButton({
   activeColor,
 }: FloatingTabButtonProps) {
   const { theme } = useTheme();
-  
+
   // Animation values
   const scale = useSharedValue(1);
   const iconScale = useSharedValue(1);
@@ -59,7 +59,9 @@ export function FloatingTabButton({
   // Particle system state
   const [particleTrigger, setParticleTrigger] = useState(false);
   // Derived values for Skia
-  const skiaRippleScale = useDerivedValue(() => rippleScale.value * (RIPPLE_SIZE / 2));
+  const skiaRippleScale = useDerivedValue(
+    () => rippleScale.value * (RIPPLE_SIZE / 2)
+  );
   const skiaRippleOpacity = useDerivedValue(() => rippleOpacity.value);
   const skiaGlowOpacity = useDerivedValue(() => glowOpacity.value);
 
@@ -71,7 +73,7 @@ export function FloatingTabButton({
       opacity.value = withTiming(1, { duration: 200 });
       translateY.value = withSpring(-2, { damping: 15, stiffness: 400 });
       glowOpacity.value = withTiming(0.6, { duration: 300 });
-      
+
       // Subtle pulse animation for active tab
       pulseScale.value = withSequence(
         withTiming(1.02, { duration: 800 }),
@@ -91,14 +93,14 @@ export function FloatingTabButton({
     // Press animation
     scale.value = withSpring(0.92, { damping: 15, stiffness: 500 });
     iconScale.value = withSpring(0.9, { damping: 15, stiffness: 500 });
-    
+
     // Ripple effect
     rippleScale.value = 0;
     rippleOpacity.value = 0.3;
     rippleScale.value = withTiming(1, { duration: 400 });
     rippleOpacity.value = withTiming(0, { duration: 400 });
-    
-    if (process.env.EXPO_OS === 'ios') {
+
+    if (process.env.EXPO_OS === "ios") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
@@ -117,18 +119,16 @@ export function FloatingTabButton({
       // Trigger particle explosion
       setParticleTrigger(true);
       setTimeout(() => setParticleTrigger(false), 100);
-      
+
       // Success haptic for tab switch
-      if (process.env.EXPO_OS === 'ios') {
+      if (process.env.EXPO_OS === "ios") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     }
     onPress();
-  };  const containerStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { translateY: translateY.value },
-    ],
+  };
+  const containerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }, { translateY: translateY.value }],
     opacity: opacity.value,
   }));
 
@@ -166,9 +166,9 @@ export function FloatingTabButton({
               cy={BUTTON_SIZE / 2}
               r={skiaRippleScale}
               opacity={skiaRippleOpacity}
-              color={activeColor + '40'}
+              color={activeColor + "40"}
             />
-            
+
             {/* Glow effect for active tab */}
             {isActive && (
               <Circle
@@ -181,9 +181,9 @@ export function FloatingTabButton({
                   start={vec(0, 0)}
                   end={vec(BUTTON_SIZE, BUTTON_SIZE)}
                   colors={[
-                    activeColor + '20',
-                    activeColor + '10',
-                    activeColor + '05',
+                    activeColor + "20",
+                    activeColor + "10",
+                    activeColor + "05",
                   ]}
                 />
               </Circle>
@@ -212,7 +212,7 @@ export function FloatingTabButton({
               styles.label,
               {
                 color: currentColor,
-                fontWeight: isActive ? '600' : '500',
+                fontWeight: isActive ? "600" : "500",
               },
             ]}
           >
@@ -226,11 +226,11 @@ export function FloatingTabButton({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   particleContainer: {
-    position: 'absolute',
+    position: "absolute",
     width: RIPPLE_SIZE,
     height: RIPPLE_SIZE,
     top: -8,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   effectsContainer: {
-    position: 'absolute',
+    position: "absolute",
     width: RIPPLE_SIZE,
     height: RIPPLE_SIZE,
     top: -8,
@@ -250,24 +250,24 @@ const styles = StyleSheet.create({
     height: RIPPLE_SIZE,
   },
   button: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 6,
     paddingHorizontal: 4,
     minWidth: BUTTON_SIZE,
     zIndex: 3,
   },
   buttonContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   label: {
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 2,
   },
 });

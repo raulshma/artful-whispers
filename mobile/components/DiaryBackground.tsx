@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ImageBackground, Animated } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ImageBackground, Animated } from "react-native";
+import { BlurView } from "expo-blur";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface DiaryBackgroundProps {
   imageUrl: string | null;
@@ -9,12 +9,17 @@ interface DiaryBackgroundProps {
 
 export default function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(imageUrl);
+  const isDark = colorScheme === "dark";
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
+    imageUrl
+  );
   const [fadeAnim] = useState(new Animated.Value(imageUrl ? 1 : 0));
   useEffect(() => {
-    console.log('DiaryBackground imageUrl changed:', { from: currentImageUrl, to: imageUrl });
-    
+    console.log("DiaryBackground imageUrl changed:", {
+      from: currentImageUrl,
+      to: imageUrl,
+    });
+
     if (imageUrl !== currentImageUrl) {
       if (currentImageUrl && imageUrl) {
         // Crossfade between images
@@ -54,17 +59,14 @@ export default function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
   return (
     <View style={styles.container}>
       {/* Base background layer */}
-      <View 
+      <View
         style={[
-          styles.baseBackground, 
-          { backgroundColor: isDark ? '#0a0b0d' : '#fffef7' }
-        ]} 
+          styles.baseBackground,
+          { backgroundColor: isDark ? "#0a0b0d" : "#fffef7" },
+        ]}
       />
-        {currentImageUrl && (
-        <Animated.View style={[
-          styles.imageContainer,
-          { opacity: fadeAnim }
-        ]}>
+      {currentImageUrl && (
+        <Animated.View style={[styles.imageContainer, { opacity: fadeAnim }]}>
           <ImageBackground
             source={{ uri: currentImageUrl }}
             style={styles.imageBackground}
@@ -73,7 +75,7 @@ export default function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
             <BlurView
               intensity={isDark ? 85 : 80}
               style={styles.blurOverlay}
-              tint={isDark ? 'dark' : 'light'}
+              tint={isDark ? "dark" : "light"}
             />
           </ImageBackground>
         </Animated.View>
@@ -84,35 +86,35 @@ export default function DiaryBackground({ imageUrl }: DiaryBackgroundProps) {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
   baseBackground: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
   imageContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
   imageBackground: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
   blurOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,

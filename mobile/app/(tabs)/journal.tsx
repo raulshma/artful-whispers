@@ -240,11 +240,10 @@ export default function JournalScreen() {
                 tintColor={theme.colors.primary}
               />
             }
-          />        </ShadowFriendlyAnimation>
+          />
+        </ShadowFriendlyAnimation>
 
-        <FloatingComposeButton
-          hasEntriesToday={todayEntries.length > 0}
-        />
+        <FloatingComposeButton hasEntriesToday={todayEntries.length > 0} />
       </View>
     </AnimatedPageWrapper>
   );
@@ -340,7 +339,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
-  },  retryButtonText: {
+  },
+  retryButtonText: {
     color: "white",
     fontSize: 14,
     fontWeight: "600",

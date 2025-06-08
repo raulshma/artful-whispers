@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   TextInput,
   TextInputProps,
@@ -7,17 +7,17 @@ import {
   TouchableOpacity,
   ViewStyle,
   TextStyle,
-} from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
 
-interface InputProps extends Omit<TextInputProps, 'style'> {
+interface InputProps extends Omit<TextInputProps, "style"> {
   label?: string;
   error?: string;
   helperText?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
-  variant?: 'default' | 'outlined' | 'filled';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "default" | "outlined" | "filled";
+  size?: "small" | "medium" | "large";
   fullWidth?: boolean;
   containerStyle?: ViewStyle;
   inputStyle?: TextStyle;
@@ -31,8 +31,8 @@ export function Input({
   helperText,
   leftIcon,
   rightIcon,
-  variant = 'outlined',
-  size = 'medium',
+  variant = "outlined",
+  size = "medium",
   fullWidth = true,
   containerStyle,
   inputStyle,
@@ -72,8 +72,8 @@ export function Input({
 
   const getInputContainerStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      flexDirection: 'row',
-      alignItems: multiline ? 'flex-start' : 'center',
+      flexDirection: "row",
+      alignItems: multiline ? "flex-start" : "center",
       borderRadius: theme.borderRadius.md,
       ...getSizeStyles(),
     };
@@ -81,22 +81,31 @@ export function Input({
     const variantStyles: Record<string, ViewStyle> = {
       default: {
         borderBottomWidth: 1,
-        borderBottomColor: error ? theme.colors.semantic.error : 
-                          isFocused ? theme.colors.primary : theme.colors.border,
-        backgroundColor: 'transparent',
+        borderBottomColor: error
+          ? theme.colors.semantic.error
+          : isFocused
+          ? theme.colors.primary
+          : theme.colors.border,
+        backgroundColor: "transparent",
       },
       outlined: {
         borderWidth: 1,
-        borderColor: error ? theme.colors.semantic.error : 
-                    isFocused ? theme.colors.primary : theme.colors.border,
+        borderColor: error
+          ? theme.colors.semantic.error
+          : isFocused
+          ? theme.colors.primary
+          : theme.colors.border,
         backgroundColor: theme.colors.surface,
       },
       filled: {
         backgroundColor: theme.colors.surfaceSecondary,
         borderWidth: 0,
         borderBottomWidth: 2,
-        borderBottomColor: error ? theme.colors.semantic.error : 
-                          isFocused ? theme.colors.primary : 'transparent',
+        borderBottomColor: error
+          ? theme.colors.semantic.error
+          : isFocused
+          ? theme.colors.primary
+          : "transparent",
       },
     };
 
@@ -112,48 +121,50 @@ export function Input({
       color: theme.colors.text,
       fontSize: getSizeStyles().fontSize,
       paddingVertical: multiline ? theme.spacing.sm : 0,
-      textAlignVertical: multiline ? 'top' : 'center',
+      textAlignVertical: multiline ? "top" : "center",
     };
   };
 
   const renderPasswordToggle = () => {
     if (!secureTextEntry) return null;
-    
+
     return (
       <TouchableOpacity
         onPress={() => setIsPasswordVisible(!isPasswordVisible)}
         style={{ marginLeft: theme.spacing.sm }}
       >
         <Text style={{ color: theme.colors.textSecondary }}>
-          {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
+          {isPasswordVisible ? "👁️" : "👁️‍🗨️"}
         </Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={[{ width: fullWidth ? '100%' : 'auto' }, containerStyle]}>
+    <View style={[{ width: fullWidth ? "100%" : "auto" }, containerStyle]}>
       {label && (
-        <Text style={[
-          theme.typography.label,
-          { 
-            color: theme.colors.textSecondary,
-            marginBottom: theme.spacing.xs,
-          },
-          labelStyle
-        ]}>
+        <Text
+          style={[
+            theme.typography.label,
+            {
+              color: theme.colors.textSecondary,
+              marginBottom: theme.spacing.xs,
+            },
+            labelStyle,
+          ]}
+        >
           {label}
-          {required && <Text style={{ color: theme.colors.semantic.error }}> *</Text>}
+          {required && (
+            <Text style={{ color: theme.colors.semantic.error }}> *</Text>
+          )}
         </Text>
       )}
-      
+
       <View style={getInputContainerStyle()}>
         {leftIcon && (
-          <View style={{ marginRight: theme.spacing.sm }}>
-            {leftIcon}
-          </View>
+          <View style={{ marginRight: theme.spacing.sm }}>{leftIcon}</View>
         )}
-        
+
         <TextInput
           style={[getInputStyle(), inputStyle]}
           placeholderTextColor={theme.colors.textTertiary}
@@ -164,24 +175,26 @@ export function Input({
           onBlur={() => setIsFocused(false)}
           {...props}
         />
-        
+
         {secureTextEntry && renderPasswordToggle()}
-        
+
         {rightIcon && !secureTextEntry && (
-          <View style={{ marginLeft: theme.spacing.sm }}>
-            {rightIcon}
-          </View>
+          <View style={{ marginLeft: theme.spacing.sm }}>{rightIcon}</View>
         )}
       </View>
-      
+
       {(error || helperText) && (
-        <Text style={[
-          theme.typography.captionSmall,
-          {
-            color: error ? theme.colors.semantic.error : theme.colors.textTertiary,
-            marginTop: theme.spacing.xs,
-          }
-        ]}>
+        <Text
+          style={[
+            theme.typography.captionSmall,
+            {
+              color: error
+                ? theme.colors.semantic.error
+                : theme.colors.textTertiary,
+              marginTop: theme.spacing.xs,
+            },
+          ]}
+        >
           {error || helperText}
         </Text>
       )}
@@ -190,6 +203,6 @@ export function Input({
 }
 
 // Specialized TextArea component
-export function TextArea(props: Omit<InputProps, 'multiline'>) {
+export function TextArea(props: Omit<InputProps, "multiline">) {
   return <Input {...props} multiline={true} />;
 }

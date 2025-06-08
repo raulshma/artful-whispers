@@ -1,14 +1,9 @@
-import React, { useRef } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useRef } from "react";
+import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import { useTheme } from '@/contexts/ThemeContext';
-import { useRouter } from 'expo-router';
+import { useTheme } from "@/contexts/ThemeContext";
+import { useRouter } from "expo-router";
 
 interface FloatingComposeButtonProps {
   hasEntriesToday?: boolean;
@@ -36,7 +31,7 @@ export default function FloatingComposeButton({
   };
 
   const handlePress = () => {
-    router.push('/addJournal');
+    router.push("/addJournal");
   };
 
   return (
@@ -55,22 +50,25 @@ export default function FloatingComposeButton({
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           activeOpacity={1}
-        >          <View style={styles.gradientButton}>
-            <Ionicons 
-              name="create-outline" 
-              size={26} 
-              color={theme.colors.text} 
+        >
+          <View style={styles.gradientButton}>
+            <Ionicons
+              name="create-outline"
+              size={26}
+              color={theme.colors.text}
             />
-            
+
             {/* Small indicator for multiple entries */}
             {hasEntriesToday && (
-              <View style={[
-                styles.indicator,
-                {
-                  backgroundColor: theme.colors.accent,
-                  borderColor: theme.colors.text,
-                }
-              ]} />
+              <View
+                style={[
+                  styles.indicator,
+                  {
+                    backgroundColor: theme.colors.accent,
+                    borderColor: theme.colors.text,
+                  },
+                ]}
+              />
             )}
           </View>
         </TouchableOpacity>
@@ -81,13 +79,13 @@ export default function FloatingComposeButton({
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 95,
     right: 20,
     zIndex: 1100,
   },
   buttonContainer: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 6,
@@ -100,17 +98,17 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   gradientButton: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
   },
   indicator: {
-    position: 'absolute',
+    position: "absolute",
     top: 4,
     right: 4,
     width: 12,
