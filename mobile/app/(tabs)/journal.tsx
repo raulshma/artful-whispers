@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInfiniteDiaryEntries, useFavoriteToggle } from "@/hooks/useDiary";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -21,6 +22,7 @@ import { Spacing } from "@/constants/Spacing";
 export default function JournalScreen() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -75,13 +77,14 @@ export default function JournalScreen() {
 
   const handleLongPress = useCallback((entryId: number) => {
     handleToggleFavorite(entryId);
-  }, [handleToggleFavorite]);
-  const renderEntry = ({ item }: { item: any }) => (
+  }, [handleToggleFavorite]);  const renderEntry = ({ item }: { item: any }) => (
     <DiaryEntryCard
       entry={item}
       onPress={() => {
-        // TODO: Navigate to entry detail
-        Alert.alert("Entry", "Entry detail view coming soon!");
+        router.push({
+          pathname: "entryDetails" as any,
+          params: { entry: JSON.stringify(item) },
+        });
       }}
       onLongPress={handleLongPress}
       onToggleFavorite={handleToggleFavorite}
