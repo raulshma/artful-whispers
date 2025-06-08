@@ -62,13 +62,13 @@ export default function CheckinComplete() {
   const handleContinue = () => {
     // Reset the check-in data and navigate back to the main app
     resetCheckInData();
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/journal");
   };
 
   const handleViewInsights = () => {
     // Reset the check-in data and navigate to insights/stats page
     resetCheckInData();
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/checkin");
     // Could also navigate to a specific insights page
   };
 
