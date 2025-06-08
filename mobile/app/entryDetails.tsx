@@ -330,8 +330,8 @@ export default function EntryDetailsScreen() {
             style={[
               styles.nextEntryPreviewContainer,
               {
-                backgroundColor: theme.colors.backgroundSecondary,
-                borderColor: theme.colors.primary + "20",
+                borderTopColor: theme.colors.border,
+                backgroundColor: theme.colors.background, // Blend with page background
               },
             ]}
             onPress={() => {
@@ -346,49 +346,28 @@ export default function EntryDetailsScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.nextEntryPreview}>
-              <View
-                style={[
-                  styles.nextEntryIconContainer,
-                  {
-                    backgroundColor: theme.colors.primary + "15",
-                  },
-                ]}
-              >
-                <Ionicons
-                  name="book-outline"
-                  size={20}
-                  color={theme.colors.primary}
-                />
-              </View>
-              <Text
-                style={[styles.nextEntryTitle, { color: theme.colors.text }]}
-              >
-                {nextEntry.title || "Next Entry"}
-              </Text>
-              <Text
-                style={[
-                  styles.nextEntryDate,
-                  { color: theme.colors.textTertiary },
-                ]}
-              >
-                {formatDate(nextEntry.date)}
-              </Text>
-              <View style={styles.nextEntryAction}>
+              <View style={styles.nextEntryTextContainer}>
+                <Text
+                  style={[styles.nextEntryTitle, { color: theme.colors.text }]}
+                  numberOfLines={1}
+                >
+                  {nextEntry.title || "Next Entry"}
+                </Text>
                 <Text
                   style={[
-                    styles.nextEntryActionText,
-                    { color: theme.colors.primary },
+                    styles.nextEntryDate,
+                    { color: theme.colors.textSecondary },
                   ]}
+                  numberOfLines={1}
                 >
-                  Tap to slide up
+                  {formatDate(nextEntry.date)}
                 </Text>
-                <Ionicons
-                  name="arrow-up"
-                  size={16}
-                  color={theme.colors.primary}
-                  style={styles.nextEntryActionIcon}
-                />
               </View>
+              <Ionicons
+                name="chevron-forward-outline"
+                size={24}
+                color={theme.colors.primary}
+              />
             </View>
           </TouchableOpacity>
         )}
@@ -551,7 +530,7 @@ const styles = StyleSheet.create({
     height: 16,
   },
   imagePromptSection: {
-    marginTop: 24,
+    marginTop: 0,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
@@ -570,57 +549,31 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   nextEntryPreviewContainer: {
-    marginTop: 32,
-    marginHorizontal: 16,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    overflow: "hidden",
-    // Add transition support
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: 24,
+    paddingHorizontal: 8, // Align with content padding
+    paddingVertical: 8
+    // Removed marginHorizontal, borderRadius, borderWidth (except top), shadow, elevation
   },
   nextEntryPreview: {
-    padding: 24,
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
-  nextEntryIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
+  nextEntryTextContainer: {
+    // New style for left-aligned text
+    flex: 1,
+    marginRight: 16, // Space before the chevron
   },
   nextEntryTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    textAlign: "center",
-    marginBottom: 6,
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "left", // Changed
+    marginBottom: 4, // Adjusted
   },
   nextEntryDate: {
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 16,
+    fontSize: 13,
+    textAlign: "left", // Changed
+    // Removed marginBottom, color will be set inline
   },
-  nextEntryAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  nextEntryActionText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  nextEntryActionIcon: {
-    marginLeft: 4,
-  },
-  nextEntryIcon: {
-    marginTop: 4,
-  },
+  // Removed: nextEntryIconContainer, nextEntryHint, nextEntryAction, nextEntryActionText, nextEntryActionIcon
 });
