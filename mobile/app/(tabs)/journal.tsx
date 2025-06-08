@@ -61,23 +61,31 @@ export default function JournalScreen() {
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
-    }    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-  const handleToggleFavorite = useCallback(async (entryId: number) => {
-    try {
-      const updatedEntry = await favoriteToggle.mutateAsync(entryId);
-      // Show feedback based on the new favorite status
-      const message = updatedEntry.isFavorite 
-        ? "Added to favorites ❤️" 
-        : "Removed from favorites";
-      Alert.alert("Success", message);
-    } catch (error) {
-      Alert.alert("Error", "Failed to update favorite status");
     }
-  }, [favoriteToggle]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const handleToggleFavorite = useCallback(
+    async (entryId: number) => {
+      try {
+        const updatedEntry = await favoriteToggle.mutateAsync(entryId);
+        // Show feedback based on the new favorite status
+        const message = updatedEntry.isFavorite
+          ? "Added to favorites ❤️"
+          : "Removed from favorites";
+        Alert.alert("Success", message);
+      } catch (error) {
+        Alert.alert("Error", "Failed to update favorite status");
+      }
+    },
+    [favoriteToggle]
+  );
 
-  const handleLongPress = useCallback((entryId: number) => {
-    handleToggleFavorite(entryId);
-  }, [handleToggleFavorite]);  const renderEntry = ({ item }: { item: any }) => (
+  const handleLongPress = useCallback(
+    (entryId: number) => {
+      handleToggleFavorite(entryId);
+    },
+    [handleToggleFavorite]
+  );
+  const renderEntry = ({ item }: { item: any }) => (
     <DiaryEntryCard
       entry={item}
       onPress={() => {
@@ -111,7 +119,9 @@ export default function JournalScreen() {
       <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
         No entries yet
       </Text>
-      <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
+      <Text
+        style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}
+      >
         Tap the + button to start writing
       </Text>
     </View>
@@ -119,7 +129,9 @@ export default function JournalScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         <View style={styles.loadingContainer}>
           <SkiaLoadingAnimation
             variant="ripple"
@@ -134,12 +146,19 @@ export default function JournalScreen() {
 
   if (isError) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         <View style={styles.errorContainer}>
           <Text style={[styles.errorTitle, { color: theme.colors.text }]}>
             Unable to load entries
           </Text>
-          <Text style={[styles.errorSubtitle, { color: theme.colors.textSecondary }]}>
+          <Text
+            style={[
+              styles.errorSubtitle,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
             {error?.message || "Something went wrong. Please try again."}
           </Text>
         </View>
@@ -148,14 +167,16 @@ export default function JournalScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <FlatList
         data={entries}
         renderItem={renderEntry}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={[
           styles.listContainer,
-          { paddingTop: insets.top + Spacing.md }
+          { paddingTop: insets.top + Spacing.md },
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
