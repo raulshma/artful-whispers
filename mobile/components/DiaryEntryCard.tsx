@@ -243,7 +243,7 @@ export default function DiaryEntryCard({
 const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
-    marginHorizontal: 20,
+    marginHorizontal: 0, // Removed horizontal margin to work with parent padding
     marginVertical: 12,
     overflow: "hidden",
     borderWidth: 1,
