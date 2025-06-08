@@ -18,7 +18,6 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DiaryEntry } from "@/hooks/useDiary";
 import { useFavoriteToggle, useAdjacentDiaryEntry } from "@/hooks/useDiary";
-import { FadeMergeTransition } from "@/components/skia/FadeMergeTransition";
 
 const { width, height } = Dimensions.get("window");
 
@@ -28,35 +27,15 @@ export default function EntryDetailsScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const favoriteToggle = useFavoriteToggle();
-
   // Parse the entry data from params
   const entry: DiaryEntry = JSON.parse(params.entry as string);
   const [currentEntry, setCurrentEntry] = useState<DiaryEntry>(entry);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Fetch next entry
   const { data: nextEntry, isLoading: isLoadingNext } = useAdjacentDiaryEntry(
     currentEntry.id,
     "next"
   );
-
-  // Enhanced transition function with Skia animation
-  const triggerTransition = useCallback(async () => {
-    if (!nextEntry || isTransitioning) return;
-
-    setIsTransitioning(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }, [nextEntry, isTransitioning]);
-
-  const handleTransitionComplete = useCallback(() => {
-    if (nextEntry) {
-      // Update the current entry after transition completes
-      setCurrentEntry(nextEntry);
-      // Update URL params to reflect new entry
-      router.setParams({ entry: JSON.stringify(nextEntry) });
-    }
-    setIsTransitioning(false);
-  }, [nextEntry, router]);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -351,50 +330,45 @@ export default function EntryDetailsScreen() {
             style={[
               styles.nextEntryPreviewContainer,
               {
-                backgroundColor: isTransitioning
-                  ? theme.colors.backgroundTertiary
-                  : theme.colors.backgroundSecondary,
-                borderColor: isTransitioning
-                  ? theme.colors.primary + "40"
-                  : theme.colors.primary + "20",
-                opacity: isTransitioning ? 0.7 : 1,
+                backgroundColor: theme.colors.backgroundSecondary,
+                borderColor: theme.colors.primary + "20",
               },
             ]}
-            onPress={triggerTransition}
-            activeOpacity={0.8}
-            disabled={isTransitioning}
+            onPress={() => {
+              if (nextEntry) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.replace({
+                  pathname: "/entryDetails",
+                  params: { entry: JSON.stringify(nextEntry) },
+                });
+              }
+            }}
+            activeOpacity={0.7}
           >
             <View style={styles.nextEntryPreview}>
               <View
                 style={[
                   styles.nextEntryIconContainer,
                   {
-                    backgroundColor: isTransitioning
-                      ? theme.colors.primary + "25"
-                      : theme.colors.primary + "15",
+                    backgroundColor: theme.colors.primary + "15",
                   },
                 ]}
               >
-                {isTransitioning ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={theme.colors.primary}
-                  />
-                ) : (
-                  <Ionicons
-                    name="book-outline"
-                    size={20}
-                    color={theme.colors.primary}
-                  />
-                )}
+                <Ionicons
+                  name="book-outline"
+                  size={20}
+                  color={theme.colors.primary}
+                />
               </View>
               <Text
                 style={[
                   styles.nextEntryHint,
-                  { color: theme.colors.textSecondary },
+                  {
+                    color: theme.colors.textSecondary,
+                  },
                 ]}
               >
-                {isTransitioning ? "Loading..." : "Continue your journey"}
+                Swipe up to continue
               </Text>
               <Text
                 style={[styles.nextEntryTitle, { color: theme.colors.text }]}
@@ -409,30 +383,29 @@ export default function EntryDetailsScreen() {
               >
                 {formatDate(nextEntry.date)}
               </Text>
-              {!isTransitioning && (
-                <View style={styles.nextEntryAction}>
-                  <Text
-                    style={[
-                      styles.nextEntryActionText,
-                      { color: theme.colors.primary },
-                    ]}
-                  >
-                    Tap to continue
-                  </Text>
-                  <Ionicons
-                    name="arrow-forward"
-                    size={16}
-                    color={theme.colors.primary}
-                    style={styles.nextEntryActionIcon}
-                  />
-                </View>
-              )}
+              <View style={styles.nextEntryAction}>
+                <Text
+                  style={[
+                    styles.nextEntryActionText,
+                    { color: theme.colors.primary },
+                  ]}
+                >
+                  Tap to slide up
+                </Text>
+                <Ionicons
+                  name="arrow-up"
+                  size={16}
+                  color={theme.colors.primary}
+                  style={styles.nextEntryActionIcon}
+                />
+              </View>
             </View>
           </TouchableOpacity>
         )}
       </View>
     </View>
   );
+
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -444,11 +417,6 @@ export default function EntryDetailsScreen() {
       >
         {renderContent()}
       </ScrollView>
-      {/* Page transition overlay */}
-      <FadeMergeTransition
-        isTransitioning={isTransitioning}
-        onTransitionComplete={handleTransitionComplete}
-      />
     </View>
   );
 }
@@ -617,6 +585,15 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.5,
     overflow: "hidden",
+    // Add transition support
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   nextEntryPreview: {
     padding: 24,

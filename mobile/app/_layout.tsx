@@ -37,7 +37,13 @@ function AppWithTheme() {
             />
             <Stack.Screen
               name="entryDetails"
-              options={{ headerShown: false }}
+              options={{
+                headerShown: false,
+                presentation: "modal",
+                animation: "fade_from_bottom", // Changed to slide_from_bottom
+                gestureEnabled: true,
+                gestureDirection: "vertical",
+              }}
             />
             <Stack.Screen name="+not-found" />
           </Stack>
