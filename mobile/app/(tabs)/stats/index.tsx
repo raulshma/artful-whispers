@@ -9,6 +9,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/contexts/ThemeContext";
+import { router } from "expo-router";
 import Animated, { 
   FadeIn, 
   FadeOut, 
@@ -21,9 +22,6 @@ import Animated, {
 import JournalStats from "@/components/JournalStats";
 import MoodStatsCard from "@/components/MoodStatsCard";
 import MoodCalendar from "@/components/MoodCalendar";
-import JournalAdvancedStats from "@/components/JournalAdvancedStats";
-import MoodAdvancedStats from "@/components/MoodAdvancedStats";
-import CalendarAdvancedStats from "@/components/CalendarAdvancedStats";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
@@ -69,11 +67,6 @@ export default function JournalStatsScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<string>("currentMonth");
-  
-  // Modal visibility states
-  const [journalStatsVisible, setJournalStatsVisible] = useState(false);
-  const [moodStatsVisible, setMoodStatsVisible] = useState(false);
-  const [calendarStatsVisible, setCalendarStatsVisible] = useState(false);
 
   // Fetch journal summary stats
   const {
@@ -128,25 +121,36 @@ export default function JournalStatsScreen() {
     }
   };
   const handleJournalStatsPress = () => {
-    setJournalStatsVisible(true);
+    router.push({
+      pathname: "./stats/journal-advanced",
+      params: { period: selectedPeriod }
+    });
   };
 
   const handleMoodStatsPress = () => {
-    setMoodStatsVisible(true);
+    router.push({
+      pathname: "./stats/mood-advanced",
+      params: { period: selectedPeriod }
+    });
   };
 
   const handleCalendarPress = () => {
-    setCalendarStatsVisible(true);
+    router.push({
+      pathname: "./stats/calendar-advanced",
+      params: { currentMonth: new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' }) }
+    });
   };
 
   const handleCalendarDayPress = (day: number) => {
     // Navigate to entry for that day or show day details
     console.log("Calendar day pressed:", day);
   };
+
   const handleAddJournalPress = () => {
     // Navigate to add new journal entry
     console.log("Add journal pressed");
   };
+
   return (
     <AnimatedPageWrapper animationType="fadeIn">
       <View
@@ -164,7 +168,8 @@ export default function JournalStatsScreen() {
               onRefresh={handleRefresh}
               tintColor={theme.colors.primary}
             />
-          }        >
+          }
+        >
           <View style={styles.content}>
             {/* Refreshing indicator */}
             {refreshing && (
@@ -176,7 +181,9 @@ export default function JournalStatsScreen() {
                   visible={refreshing}
                 />
               </View>
-            )}            {/* Loading State */}
+            )}
+
+            {/* Loading State */}
             {(journalLoading || moodLoading || calendarLoading) && (
               <Animated.View 
                 entering={FadeIn.duration(300)}
@@ -196,7 +203,9 @@ export default function JournalStatsScreen() {
                   Analyzing your journal data
                 </Text>
               </Animated.View>
-            )}{/* Error State */}
+            )}
+
+            {/* Error State */}
             {(journalError || moodError || calendarError) && (
               <Animated.View 
                 entering={FadeIn.duration(300)}
@@ -260,7 +269,9 @@ export default function JournalStatsScreen() {
                       </Text>
                     </View>
                   </ShadowFriendlyAnimation>
-                )}                {/* Calendar View */}
+                )}
+
+                {/* Calendar View */}
                 {calendarData && calendarData.length > 0 ? (
                   <ShadowFriendlyAnimation index={2} animationType="slideUp">
                     <MoodCalendar
@@ -288,35 +299,9 @@ export default function JournalStatsScreen() {
                   </ShadowFriendlyAnimation>
                 )}
               </Animated.View>
-            )}          </View>
+            )}
+          </View>
         </ScrollView>
-        
-        {/* Advanced Stats Modals */}
-        {journalStats && (
-          <JournalAdvancedStats
-            visible={journalStatsVisible}
-            onClose={() => setJournalStatsVisible(false)}
-            data={journalStats}
-            period={selectedPeriod}
-          />
-        )}
-        
-        {moodDistribution && (
-          <MoodAdvancedStats
-            visible={moodStatsVisible}
-            onClose={() => setMoodStatsVisible(false)}
-            stats={moodDistribution}
-            period={selectedPeriod}
-          />
-        )}
-        
-        <CalendarAdvancedStats
-          visible={calendarStatsVisible}
-          onClose={() => setCalendarStatsVisible(false)}
-          days={calendarData || mockCalendarDays}
-          currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
-          onDayPress={handleCalendarDayPress}
-        />
       </View>
     </AnimatedPageWrapper>
   );
@@ -341,7 +326,8 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },  content: {
+  },
+  content: {
     paddingBottom: 100, // Space for tab bar
   },
   contentContainer: {
@@ -350,7 +336,8 @@ const styles = StyleSheet.create({
   refreshingContainer: {
     alignItems: 'center',
     paddingVertical: 20,
-  },  loadingContainer: {
+  },
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
