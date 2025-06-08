@@ -39,10 +39,11 @@ function AppWithTheme() {
               name="entryDetails"
               options={{
                 headerShown: false,
-                presentation: "modal",
-                animation: "fade_from_bottom", // Changed to slide_from_bottom
+                presentation: "transparentModal", // Changed from "modal"
+                animation: "fade_from_bottom", // Changed from "fade"
                 gestureEnabled: true,
                 gestureDirection: "vertical",
+                contentStyle: { backgroundColor: "transparent" }, // Kept for safety, might be redundant
               }}
             />
             <Stack.Screen name="+not-found" />
