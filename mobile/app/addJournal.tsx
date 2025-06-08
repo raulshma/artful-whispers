@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -119,129 +120,141 @@ export default function AddJournalScreen() {
 
   const { date, time } = getCurrentTime();
   const hasContent = content.trim().length > 0;
-
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          style={styles.keyboardContainer}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={0}
-        >
-          {/* Minimal Header */}
-          <View
-            style={[styles.header, { borderBottomColor: theme.colors.border }]}
+    <>
+      <StatusBar
+        barStyle={theme.isDark ? "light-content" : "dark-content"}
+        backgroundColor={theme.colors.background}
+        translucent={false}
+      />
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
+        <SafeAreaView style={styles.safeArea}>
+          <KeyboardAvoidingView
+            style={styles.keyboardContainer}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={0}
           >
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={handleDiscard}
-              disabled={createEntry.isPending}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Ionicons
-                name="close"
-                size={24}
-                color={theme.colors.textSecondary}
-              />
-            </TouchableOpacity>
-
-            <View style={styles.headerCenter}>
-              <Text style={[styles.headerDate, { color: theme.colors.text }]}>
-                {date}
-              </Text>
-              <Text
-                style={[
-                  styles.headerTime,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                {time}
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.saveButton,
-                {
-                  backgroundColor: hasContent
-                    ? theme.colors.primary
-                    : theme.colors.backgroundSecondary,
-                },
-              ]}
-              onPress={handleSave}
-              disabled={createEntry.isPending || !hasContent}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {createEntry.isPending ? (
-                <ActivityIndicator
-                  size="small"
-                  color={theme.colors.background}
-                />
-              ) : (
-                <Text
-                  style={[
-                    styles.saveButtonText,
-                    {
-                      color: hasContent
-                        ? theme.colors.background
-                        : theme.colors.textTertiary,
-                    },
-                  ]}
-                >
-                  Save
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.scrollContent}
-          >
-            {/* Content Input */}
-            <TextInput
-              ref={contentInputRef}
-              style={[styles.contentInput, { color: theme.colors.text }]}
-              value={content}
-              onChangeText={handleContentChange}
-              placeholder="What's on your mind today?
-
-Share your thoughts, experiences, or feelings. This is your space to reflect and express yourself freely."
-              placeholderTextColor={theme.colors.textTertiary}
-              multiline
-              textAlignVertical="top"
-              maxLength={5000}
-              scrollEnabled={false}
-              autoFocus
-            />
-
-            {/* Bottom Spacing for Keyboard */}
-            <View style={styles.bottomSpacing} />
-          </ScrollView>
-          {/* Stats Footer */}
-          {hasContent && (
+            {/* Minimal Header */}
             <View
               style={[
-                styles.statsFooter,
-                {
-                  backgroundColor: theme.colors.background,
-                  borderTopColor: theme.colors.border,
-                },
+                styles.header,
+                { borderBottomColor: theme.colors.border },
               ]}
             >
-              <Text
-                style={[styles.statsText, { color: theme.colors.textTertiary }]}
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={handleDiscard}
+                disabled={createEntry.isPending}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                {wordCount} words • {getReadingTime()}
-              </Text>
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
+              </TouchableOpacity>
+
+              <View style={styles.headerCenter}>
+                <Text style={[styles.headerDate, { color: theme.colors.text }]}>
+                  {date}
+                </Text>
+                <Text
+                  style={[
+                    styles.headerTime,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {time}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.saveButton,
+                  {
+                    backgroundColor: hasContent
+                      ? theme.colors.primary
+                      : theme.colors.backgroundSecondary,
+                  },
+                ]}
+                onPress={handleSave}
+                disabled={createEntry.isPending || !hasContent}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                {createEntry.isPending ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.background}
+                  />
+                ) : (
+                  <Text
+                    style={[
+                      styles.saveButtonText,
+                      {
+                        color: hasContent
+                          ? theme.colors.background
+                          : theme.colors.textTertiary,
+                      },
+                    ]}
+                  >
+                    Save
+                  </Text>
+                )}
+              </TouchableOpacity>
             </View>
-          )}
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </View>
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.scrollContent}
+            >
+              {/* Content Input */}
+              <TextInput
+                ref={contentInputRef}
+                style={[styles.contentInput, { color: theme.colors.text }]}
+                value={content}
+                onChangeText={handleContentChange}
+                placeholder="What's on your mind today?
+
+Share your thoughts, experiences, or feelings. This is your space to reflect and express yourself freely."
+                placeholderTextColor={theme.colors.textTertiary}
+                multiline
+                textAlignVertical="top"
+                maxLength={5000}
+                scrollEnabled={false}
+                autoFocus
+              />
+
+              {/* Bottom Spacing for Keyboard */}
+              <View style={styles.bottomSpacing} />
+            </ScrollView>
+            {/* Stats Footer */}
+            {hasContent && (
+              <View
+                style={[
+                  styles.statsFooter,
+                  {
+                    backgroundColor: theme.colors.background,
+                    borderTopColor: theme.colors.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statsText,
+                    { color: theme.colors.textTertiary },
+                  ]}
+                >
+                  {wordCount} words • {getReadingTime()}
+                </Text>
+              </View>
+            )}
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </View>
+    </>
   );
 }
 
