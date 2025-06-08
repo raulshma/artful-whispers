@@ -107,8 +107,7 @@ const createStyles = (theme: any) =>
       padding: theme.spacing.lg,
       marginVertical: theme.spacing.sm,
       marginHorizontal: theme.spacing.md,
-      ...theme.shadows.md,
-      width: cardWidth,
+      ...theme.shadows.md
     },
     header: {
       flexDirection: "row",
