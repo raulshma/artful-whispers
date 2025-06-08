@@ -18,9 +18,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCreateDiaryEntry } from "@/hooks/useDiary";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 
 export default function AddJournalScreen() {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   const router = useRouter();
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
@@ -54,15 +56,19 @@ export default function AddJournalScreen() {
     if (count > 4500) return theme.colors.semantic.error;
     if (count > 4000) return theme.colors.semantic.warning;
     return theme.colors.textTertiary;
-  };
-  const handleSave = async () => {
+  };  const handleSave = async () => {
     if (!content.trim()) {
+      // Provide gentle haptic feedback for validation error
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       Alert.alert(
         "Share Your Thoughts",
         "Please write something to create your journal entry."
       );
       return;
     }
+
+    // Provide success haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     // Animate button press
     Animated.sequence([
@@ -85,12 +91,17 @@ export default function AddJournalScreen() {
         date: today,
       });
 
+      // Success haptic feedback
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
       Alert.alert(
         "✨ Journal Saved",
         "Your thoughts have been captured beautifully!",
         [{ text: "Continue Writing", onPress: () => router.back() }]
       );
     } catch (error: any) {
+      // Error haptic feedback
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert(
         "Oops!",
         error.message || "Something went wrong while saving. Please try again."
@@ -99,11 +110,8 @@ export default function AddJournalScreen() {
   };
 
   const { date, time } = getCurrentTime();
-
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.keyboardContainer}
@@ -119,11 +127,11 @@ export default function AddJournalScreen() {
           >
             <View style={styles.header}>
               <TouchableOpacity
-                style={[
-                  styles.backButton,
-                  { backgroundColor: "rgba(255,255,255,0.2)" },
-                ]}
-                onPress={() => router.back()}
+                style={styles.backButton}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.back();
+                }}
                 disabled={createEntry.isPending}
               >
                 <Ionicons name="arrow-back" size={22} color="white" />
@@ -139,18 +147,11 @@ export default function AddJournalScreen() {
           <ScrollView
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
             {/* Enhanced Time Display */}
             <View style={styles.timeSection}>
-              <View
-                style={[
-                  styles.timeContainer,
-                  {
-                    backgroundColor: theme.colors.backgroundGreen,
-                    ...theme.shadows.sm,
-                  },
-                ]}
-              >
+              <View style={styles.timeContainer}>
                 <View style={styles.timeContent}>
                   <Ionicons
                     name="calendar-outline"
@@ -158,34 +159,22 @@ export default function AddJournalScreen() {
                     color={theme.colors.primary}
                   />
                   <View style={styles.timeTextContainer}>
-                    <Text
-                      style={[styles.dateText, { color: theme.colors.text }]}
-                    >
-                      {date}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.timeText,
-                        { color: theme.colors.textSecondary },
-                      ]}
-                    >
-                      {time}
-                    </Text>
+                    <Text style={styles.dateText}>{date}</Text>
+                    <Text style={styles.timeText}>{time}</Text>
                   </View>
                 </View>
               </View>
             </View>
+
             {/* Enhanced Content Input */}
             <View style={styles.contentSection}>
               <View
                 style={[
                   styles.contentContainer,
                   {
-                    backgroundColor: theme.colors.surface,
                     borderColor: content.trim()
                       ? theme.colors.primary
                       : theme.colors.border,
-                    ...theme.shadows.md,
                   },
                 ]}
               >
@@ -196,24 +185,10 @@ export default function AddJournalScreen() {
                       size={18}
                       color={theme.colors.primary}
                     />
-                    <Text
-                      style={[
-                        styles.contentTitle,
-                        { color: theme.colors.text },
-                      ]}
-                    >
-                      What's on your mind?
-                    </Text>
+                    <Text style={styles.contentTitle}>What's on your mind?</Text>
                   </View>
                   <View style={styles.contentStats}>
-                    <Text
-                      style={[
-                        styles.wordCount,
-                        { color: theme.colors.textTertiary },
-                      ]}
-                    >
-                      {wordCount} words
-                    </Text>
+                    <Text style={styles.wordCount}>{wordCount} words</Text>
                     <Text
                       style={[styles.charCount, { color: getCharacterColor() }]}
                     >
@@ -222,12 +197,7 @@ export default function AddJournalScreen() {
                   </View>
                 </View>
                 <TextInput
-                  style={[
-                    styles.contentInput,
-                    {
-                      color: theme.colors.text,
-                    },
-                  ]}
+                  style={styles.contentInput}
                   value={content}
                   onChangeText={handleContentChange}
                   placeholder="How are you feeling today? What's been on your mind?
@@ -249,6 +219,7 @@ Take your time... there's no rush. 💚"
                 />
               </View>
             </View>
+
             {/* Enhanced Save Button */}
             <View style={styles.saveSection}>
               <Animated.View
@@ -296,9 +267,7 @@ Take your time... there's no rush. 💚"
               </Animated.View>
 
               {/* Helpful tip */}
-              <Text
-                style={[styles.tipText, { color: theme.colors.textTertiary }]}
-              >
+              <Text style={styles.tipText}>
                 💡 Your entries are private and secure. Take your time to
                 express yourself.
               </Text>
@@ -306,180 +275,181 @@ Take your time... there's no rush. 💚"
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
-  );
+    </View>  );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  keyboardContainer: {
-    flex: 1,
-  },
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    safeArea: {
+      flex: 1,
+    },
+    keyboardContainer: {
+      flex: 1,
+    },
+    // Header
+    headerGradient: {
+      paddingBottom: theme.spacing.lg,
+      borderBottomLeftRadius: theme.borderRadius["2xl"],
+      borderBottomRightRadius: theme.borderRadius["2xl"],
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: theme.spacing.lg,
+      paddingTop: theme.spacing.md,
+      paddingBottom: theme.spacing.xs,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      borderRadius: theme.borderRadius.xl,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgba(255,255,255,0.2)",
+    },
+    headerContent: {
+      flex: 1,
+      alignItems: "center",
+    },
+    headerTitle: {
+      ...theme.typography.h4,
+      color: "white",
+      marginBottom: 2,
+    },
+    headerSubtitle: {
+      ...theme.typography.caption,
+      color: "rgba(255,255,255,0.8)",
+    },
+    headerSpacer: {
+      width: 40,
+    },
+    // Content
+    scrollView: {
+      flex: 1,
+    },
+    timeSection: {
+      paddingHorizontal: theme.spacing.lg,
+      paddingTop: theme.spacing["2xl"],
+      paddingBottom: theme.spacing.md,
+    },
+    timeContainer: {
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.borderRadius.lg,
+      alignSelf: "flex-start",
+      backgroundColor: theme.colors.backgroundGreen,
+      ...theme.shadows.sm,
+    },
+    timeContent: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    timeTextContainer: {
+      marginLeft: theme.spacing.sm,
+    },
+    dateText: {
+      ...theme.typography.bodyMedium,
+      color: theme.colors.text,
+      marginBottom: 2,
+    },
+    timeText: {
+      ...theme.typography.caption,
+      color: theme.colors.textSecondary,
+    },
+    // Content Section
+    contentSection: {
+      paddingHorizontal: theme.spacing.lg,
+      flex: 1,
+    },
+    contentContainer: {
+      borderRadius: theme.borderRadius.xl,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+      minHeight: 360,
+      flex: 1,
+      backgroundColor: theme.colors.surface,
+      ...theme.shadows.md,
+    },
+    contentHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: theme.spacing.lg,
+      paddingTop: theme.spacing.lg,
+      paddingBottom: theme.spacing.md,
+    },
+    contentTitleContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    contentTitle: {
+      ...theme.typography.bodyMedium,
+      color: theme.colors.text,
+      marginLeft: theme.spacing.sm,
+    },
+    contentStats: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: theme.spacing.md,
+    },
+    wordCount: {
+      ...theme.typography.caption,
+      color: theme.colors.textTertiary,
+    },
+    charCount: {
+      ...theme.typography.caption,
+    },
+    contentInput: {
+      ...theme.typography.body,
+      color: theme.colors.text,
+      paddingHorizontal: theme.spacing.lg,
+      paddingBottom: theme.spacing.lg,
+      textAlignVertical: "top",
+      minHeight: 300,
+    },
+    // Save Section
+    saveSection: {
+      paddingHorizontal: theme.spacing.lg,
+      paddingTop: theme.spacing["2xl"],
+      paddingBottom: theme.spacing.xl,
+    },
+    saveButton: {
+      borderRadius: theme.borderRadius.lg,
+      marginBottom: theme.spacing.md,
+      ...theme.shadows.md,
+    },
+    saveButtonGradient: {
+      paddingVertical: theme.spacing.lg,
+      borderRadius: theme.borderRadius.lg,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    saveButtonContent: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: theme.spacing.sm,
+    },
+    saveButtonText: {
+      ...theme.typography.bodyMedium,
+      fontWeight: "700",
+      color: "white",
+    },
+    loadingContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: theme.spacing.sm,
+    },
+    tipText: {
+      ...theme.typography.caption,
+      color: theme.colors.textTertiary,
+      textAlign: "center",
+      lineHeight: 18,
+    },
+  });
 
-  // Enhanced Header Styles
-  headerGradient: {
-    paddingBottom: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 4,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerContent: {
-    flex: 1,
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "white",
-    marginBottom: 2,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
-    fontWeight: "500",
-  },
-  headerSpacer: {
-    width: 40,
-  },
 
-  scrollView: {
-    flex: 1,
-  },
-
-  // Enhanced Time Section
-  timeSection: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 16,
-  },
-  timeContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    alignSelf: "flex-start",
-  },
-  timeContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  timeTextContainer: {
-    marginLeft: 10,
-  },
-  dateText: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 2,
-  },
-  timeText: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-
-  // Enhanced Content Section
-  contentSection: {
-    paddingHorizontal: 20,
-    flex: 1,
-  },
-  contentContainer: {
-    borderRadius: 20,
-    borderWidth: 2,
-    minHeight: 360,
-    flex: 1,
-  },
-  contentHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 12,
-  },
-  contentTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  contentTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 8,
-  },
-  contentStats: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  wordCount: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  charCount: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  contentInput: {
-    fontSize: 16,
-    lineHeight: 24,
-    paddingHorizontal: 18,
-    paddingBottom: 18,
-    textAlignVertical: "top",
-    minHeight: 300,
-    fontWeight: "400",
-  },
-
-  // Enhanced Save Section
-  saveSection: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 30,
-  },
-  saveButton: {
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-  saveButtonGradient: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  saveButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "white",
-  },
-  loadingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  tipText: {
-    fontSize: 13,
-    textAlign: "center",
-    fontWeight: "500",
-    lineHeight: 18,
-  },
-});
