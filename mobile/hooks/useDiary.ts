@@ -147,3 +147,19 @@ export function useSearchDiaryEntries(query: string, enabled: boolean = true) {
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
+
+export function useAdjacentDiaryEntry(
+  currentEntryId: number,
+  direction: "next" | "previous"
+) {
+  return useQuery({
+    queryKey: ["diary-entry", "adjacent", currentEntryId, direction],
+    queryFn: async () => {
+      return apiRequest<DiaryEntry | null>(
+        `/api/diary-entries/${currentEntryId}/adjacent?direction=${direction}`
+      );
+    },
+    enabled: !!currentEntryId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}

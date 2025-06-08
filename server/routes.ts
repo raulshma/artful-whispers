@@ -201,15 +201,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const validatedData = insertDiaryEntrySchema.parse(req.body);
         if (!req.user) {
           return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        const entry = await storage.createDiaryEntry({
+        }        const entry = await storage.createDiaryEntry({
           ...validatedData,
           userId: req.user.id,
         });
 
         // Start sentiment analysis and image generation in background
         analyzeSentimentAndGenerateImage(entry);
+
+        // Recalculate user stats in background (for streaks)
+        storage.calculateUserStats(req.user.id).catch(error => {
+          console.error("Failed to update user stats:", error);
+        });
 
         res.status(201).json(entry);
       } catch (error) {
@@ -274,6 +277,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Get adjacent diary entry (next/previous) (protected route)
+  app.get(
+    "/api/diary-entries/:id/adjacent",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const id = parseInt(req.params.id);
+        const direction = req.query.direction as "next" | "previous";
+
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        if (!direction || !["next", "previous"].includes(direction)) {
+          return res
+            .status(400)
+            .json({ message: "Invalid direction parameter" });
+        }
+
+        const adjacentEntry = await storage.getAdjacentDiaryEntry(
+          id,
+          req.user.id,
+          direction
+        );
+        res.json(adjacentEntry);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to fetch adjacent diary entry" });
+      }
+    }
+  );
+
   // Create new check-in (protected route)
   app.post(
     "/api/check-ins",
@@ -284,11 +318,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (!req.user) {
           return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        const checkIn = await storage.createCheckIn({
+        }        const checkIn = await storage.createCheckIn({
           ...validatedData,
           userId: req.user.id,
+        });
+
+        // Recalculate user stats in background (for streaks)
+        storage.calculateUserStats(req.user.id).catch(error => {
+          console.error("Failed to update user stats:", error);
         });
 
         res.status(201).json(checkIn);

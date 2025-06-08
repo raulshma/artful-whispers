@@ -14,55 +14,133 @@ import {
   type UserProfile,
   type UserStats,
   type UserSettings,
-  type UpdateUserSettings
+  type UpdateUserSettings,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, ilike, or, and, count, sql } from "drizzle-orm";
+import { eq, desc, ilike, or, and, count, sql, gt, lt, asc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  updateUserProfile(id: string, profile: UpdateUserProfile): Promise<User | undefined>;
+  updateUserProfile(
+    id: string,
+    profile: UpdateUserProfile
+  ): Promise<User | undefined>;
   markUserOnboarded(id: string): Promise<User | undefined>;
-  
+
   // Profile methods
   getUserProfile(userId: string): Promise<UserProfile | undefined>;
-  createUserProfile(userId: string, name: string, email: string): Promise<UserProfile>;
-  updateUserProfileData(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | undefined>;
-  
+  createUserProfile(
+    userId: string,
+    name: string,
+    email: string
+  ): Promise<UserProfile>;
+  updateUserProfileData(
+    userId: string,
+    updates: Partial<UserProfile>
+  ): Promise<UserProfile | undefined>;
+
   // Stats methods
   getUserStats(userId: string): Promise<UserStats | undefined>;
   createUserStats(userId: string): Promise<UserStats>;
-  updateUserStats(userId: string, updates: Partial<UserStats>): Promise<UserStats | undefined>;
+  updateUserStats(
+    userId: string,
+    updates: Partial<UserStats>
+  ): Promise<UserStats | undefined>;
   calculateUserStats(userId: string): Promise<UserStats>;
-  
+
   // Settings methods
   getUserSettings(userId: string): Promise<UserSettings | undefined>;
   createUserSettings(userId: string): Promise<UserSettings>;
-  updateUserSettings(userId: string, updates: UpdateUserSettings): Promise<UserSettings | undefined>;
-  
+  updateUserSettings(
+    userId: string,
+    updates: UpdateUserSettings
+  ): Promise<UserSettings | undefined>;
+
   // Account management
   exportUserData(userId: string): Promise<any>;
   deleteUserAccount(userId: string): Promise<boolean>;
-  
+
   // Diary entry methods
-  getDiaryEntries(userId: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
+  getDiaryEntries(
+    userId: string,
+    limit?: number,
+    offset?: number
+  ): Promise<DiaryEntry[]>;
   getDiaryEntry(id: number): Promise<DiaryEntry | undefined>;
-  getDiaryEntryByDate(userId: string, date: string): Promise<DiaryEntry | undefined>;
-  createDiaryEntry(entry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry>;
-  updateDiaryEntry(id: number, updates: Partial<DiaryEntry>): Promise<DiaryEntry | undefined>;
-  searchDiaryEntries(userId: string, query: string, limit?: number, offset?: number): Promise<DiaryEntry[]>;
+  getDiaryEntryByDate(
+    userId: string,
+    date: string
+  ): Promise<DiaryEntry | undefined>;
+  createDiaryEntry(
+    entry: InsertDiaryEntry & { userId: string }
+  ): Promise<DiaryEntry>;
+  updateDiaryEntry(
+    id: number,
+    updates: Partial<DiaryEntry>
+  ): Promise<DiaryEntry | undefined>;
+  searchDiaryEntries(
+    userId: string,
+    query: string,
+    limit?: number,
+    offset?: number
+  ): Promise<DiaryEntry[]>;
   getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]>;
   toggleFavorite(id: number, userId: string): Promise<DiaryEntry | undefined>;
-  
+  getAdjacentDiaryEntry(
+    currentId: number,
+    userId: string,
+    direction: "next" | "previous"
+  ): Promise<DiaryEntry | null>;
+
   // Check-in methods
   createCheckIn(checkIn: InsertCheckIn & { userId: string }): Promise<CheckIn>;
-  getCheckIns(userId: string, limit?: number, offset?: number): Promise<CheckIn[]>;
+  getCheckIns(
+    userId: string,
+    limit?: number,
+    offset?: number
+  ): Promise<CheckIn[]>;
   getCheckIn(id: number): Promise<CheckIn | undefined>;
-    // Stats methods (existing)
-  getJournalSummaryStats(userId: string, period?: string, startDate?: string, endDate?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }>;
-  getMoodCheckinDistribution(userId: string, period?: string, startDate?: string, endDate?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>>;
-  getCalendarData(userId: string, year?: number, month?: number, startDate?: string, endDate?: string): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>>;
+  // Stats methods (existing)
+  getJournalSummaryStats(
+    userId: string,
+    period?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<{
+    positive: number;
+    neutral: number;
+    negative: number;
+    skipped: number;
+    total: number;
+  }>;
+  getMoodCheckinDistribution(
+    userId: string,
+    period?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<
+    Array<{
+      mood: string;
+      count: number;
+      color: string;
+      icon: string;
+      percentage: number;
+    }>
+  >;
+  getCalendarData(
+    userId: string,
+    year?: number,
+    month?: number,
+    startDate?: string,
+    endDate?: string
+  ): Promise<
+    Array<{
+      day: number;
+      mood: "happy" | "neutral" | "sad" | "negative" | "skipped" | null;
+      hasEntry: boolean;
+    }>
+  >;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -76,7 +154,11 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async getDiaryEntries(userId: string, limit = 10, offset = 0): Promise<DiaryEntry[]> {
+  async getDiaryEntries(
+    userId: string,
+    limit = 10,
+    offset = 0
+  ): Promise<DiaryEntry[]> {
     const entries = await db
       .select()
       .from(diaryEntries)
@@ -88,21 +170,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDiaryEntry(id: number): Promise<DiaryEntry | undefined> {
-    const [entry] = await db.select().from(diaryEntries).where(eq(diaryEntries.id, id));
-    return entry || undefined;
-  }
-
-  async getDiaryEntryByDate(userId: string, date: string): Promise<DiaryEntry | undefined> {
     const [entry] = await db
       .select()
       .from(diaryEntries)
-      .where(
-        and(eq(diaryEntries.date, date), eq(diaryEntries.userId, userId))
-      );
+      .where(eq(diaryEntries.id, id));
     return entry || undefined;
   }
 
-  async createDiaryEntry(insertEntry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry> {
+  async getDiaryEntryByDate(
+    userId: string,
+    date: string
+  ): Promise<DiaryEntry | undefined> {
+    const [entry] = await db
+      .select()
+      .from(diaryEntries)
+      .where(and(eq(diaryEntries.date, date), eq(diaryEntries.userId, userId)));
+    return entry || undefined;
+  }
+
+  async createDiaryEntry(
+    insertEntry: InsertDiaryEntry & { userId: string }
+  ): Promise<DiaryEntry> {
     const [entry] = await db
       .insert(diaryEntries)
       .values({
@@ -113,7 +201,10 @@ export class DatabaseStorage implements IStorage {
     return entry;
   }
 
-  async updateDiaryEntry(id: number, updates: Partial<DiaryEntry>): Promise<DiaryEntry | undefined> {
+  async updateDiaryEntry(
+    id: number,
+    updates: Partial<DiaryEntry>
+  ): Promise<DiaryEntry | undefined> {
     const [updatedEntry] = await db
       .update(diaryEntries)
       .set(updates)
@@ -121,12 +212,17 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedEntry || undefined;
   }
-  async updateUserProfile(id: string, profile: UpdateUserProfile): Promise<User | undefined> {
+  async updateUserProfile(
+    id: string,
+    profile: UpdateUserProfile
+  ): Promise<User | undefined> {
     const [updatedUser] = await db
       .update(users)
       .set({
         ...profile,
-        languages: profile.languages ? JSON.stringify(profile.languages) : undefined,
+        languages: profile.languages
+          ? JSON.stringify(profile.languages)
+          : undefined,
         updatedAt: new Date(),
       })
       .where(eq(users.id, id))
@@ -146,7 +242,12 @@ export class DatabaseStorage implements IStorage {
     return updatedUser || undefined;
   }
 
-  async searchDiaryEntries(userId: string, query: string, limit = 10, offset = 0): Promise<DiaryEntry[]> {
+  async searchDiaryEntries(
+    userId: string,
+    query: string,
+    limit = 10,
+    offset = 0
+  ): Promise<DiaryEntry[]> {
     const entries = await db
       .select()
       .from(diaryEntries)
@@ -166,24 +267,28 @@ export class DatabaseStorage implements IStorage {
     return entries;
   }
 
-  async getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]> {
+  async getDiaryEntriesByDate(
+    userId: string,
+    date: string
+  ): Promise<DiaryEntry[]> {
     const entries = await db
       .select()
       .from(diaryEntries)
-      .where(
-        and(eq(diaryEntries.date, date), eq(diaryEntries.userId, userId))
-      )
+      .where(and(eq(diaryEntries.date, date), eq(diaryEntries.userId, userId)))
       .orderBy(desc(diaryEntries.createdAt));
     return entries;
   }
 
-  async toggleFavorite(id: number, userId: string): Promise<DiaryEntry | undefined> {
+  async toggleFavorite(
+    id: number,
+    userId: string
+  ): Promise<DiaryEntry | undefined> {
     // First get the current entry to check ownership and current favorite status
     const [currentEntry] = await db
       .select()
       .from(diaryEntries)
       .where(and(eq(diaryEntries.id, id), eq(diaryEntries.userId, userId)));
-    
+
     if (!currentEntry) {
       return undefined;
     }
@@ -194,12 +299,64 @@ export class DatabaseStorage implements IStorage {
       .set({ isFavorite: !currentEntry.isFavorite })
       .where(eq(diaryEntries.id, id))
       .returning();
-    
+
     return updatedEntry || undefined;
   }
 
+  async getAdjacentDiaryEntry(
+    currentId: number,
+    userId: string,
+    direction: "next" | "previous"
+  ): Promise<DiaryEntry | null> {
+    // First get the current entry to find its creation date
+    const [currentEntry] = await db
+      .select()
+      .from(diaryEntries)
+      .where(
+        and(eq(diaryEntries.id, currentId), eq(diaryEntries.userId, userId))
+      );
+
+    if (!currentEntry) {
+      return null;
+    }
+
+    let adjacentEntry;
+
+    if (direction !== "next") {
+      // Get the next newer entry (created after current entry)
+      [adjacentEntry] = await db
+        .select()
+        .from(diaryEntries)
+        .where(
+          and(
+            eq(diaryEntries.userId, userId),
+            gt(diaryEntries.createdAt, currentEntry.createdAt)
+          )
+        )
+        .orderBy(asc(diaryEntries.createdAt))
+        .limit(1);
+    } else {
+      // Get the previous older entry (created before current entry)
+      [adjacentEntry] = await db
+        .select()
+        .from(diaryEntries)
+        .where(
+          and(
+            eq(diaryEntries.userId, userId),
+            lt(diaryEntries.createdAt, currentEntry.createdAt)
+          )
+        )
+        .orderBy(desc(diaryEntries.createdAt))
+        .limit(1);
+    }
+
+    return adjacentEntry || null;
+  }
+
   // Check-in methods
-  async createCheckIn(insertCheckIn: InsertCheckIn & { userId: string }): Promise<CheckIn> {
+  async createCheckIn(
+    insertCheckIn: InsertCheckIn & { userId: string }
+  ): Promise<CheckIn> {
     const [checkIn] = await db
       .insert(checkIns)
       .values({
@@ -210,7 +367,11 @@ export class DatabaseStorage implements IStorage {
     return checkIn;
   }
 
-  async getCheckIns(userId: string, limit = 10, offset = 0): Promise<CheckIn[]> {
+  async getCheckIns(
+    userId: string,
+    limit = 10,
+    offset = 0
+  ): Promise<CheckIn[]> {
     const checkInList = await db
       .select()
       .from(checkIns)
@@ -222,13 +383,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCheckIn(id: number): Promise<CheckIn | undefined> {
-    const [checkIn] = await db.select().from(checkIns).where(eq(checkIns.id, id));
+    const [checkIn] = await db
+      .select()
+      .from(checkIns)
+      .where(eq(checkIns.id, id));
     return checkIn || undefined;
   }
   // Stats methods implementation
-  async getJournalSummaryStats(userId: string, period?: string, startDate?: string, endDate?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }> {
+  async getJournalSummaryStats(
+    userId: string,
+    period?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<{
+    positive: number;
+    neutral: number;
+    negative: number;
+    skipped: number;
+    total: number;
+  }> {
     let whereCondition = eq(diaryEntries.userId, userId);
-    
+
     // Add date range filtering if specified
     if (startDate && endDate) {
       whereCondition = and(
@@ -240,21 +415,21 @@ export class DatabaseStorage implements IStorage {
       // Fallback to period-based filtering for backward compatibility
       const now = new Date();
       let dateThreshold: Date;
-      
+
       switch (period) {
-        case 'last30days':
+        case "last30days":
           dateThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           break;
-        case 'last7days':
+        case "last7days":
           dateThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           break;
-        case 'currentMonth':
+        case "currentMonth":
           dateThreshold = new Date(now.getFullYear(), now.getMonth(), 1);
           break;
         default:
           dateThreshold = new Date(0); // All time
       }
-      
+
       whereCondition = and(
         eq(diaryEntries.userId, userId),
         sql`${diaryEntries.createdAt} >= ${dateThreshold.toISOString()}`
@@ -262,9 +437,27 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Define mood categories
-    const positiveMoods = ['happy', 'joy', 'excited', 'grateful', 'content', 'optimistic', 'cheerful', 'positive'];
-    const neutralMoods = ['neutral', 'calm', 'okay', 'normal', 'balanced'];
-    const negativeMoods = ['sad', 'angry', 'anxious', 'frustrated', 'depressed', 'worried', 'stressed', 'negative'];
+    const positiveMoods = [
+      "happy",
+      "joy",
+      "excited",
+      "grateful",
+      "content",
+      "optimistic",
+      "cheerful",
+      "positive",
+    ];
+    const neutralMoods = ["neutral", "calm", "okay", "normal", "balanced"];
+    const negativeMoods = [
+      "sad",
+      "angry",
+      "anxious",
+      "frustrated",
+      "depressed",
+      "worried",
+      "stressed",
+      "negative",
+    ];
 
     // Get all entries for the user within the period
     const entries = await db
@@ -277,16 +470,16 @@ export class DatabaseStorage implements IStorage {
     let negative = 0;
     let skipped = 0;
 
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const mood = entry.mood?.toLowerCase();
-      
-      if (!mood || mood === 'skipped' || mood === '') {
+
+      if (!mood || mood === "skipped" || mood === "") {
         skipped++;
-      } else if (positiveMoods.some(pm => mood.includes(pm))) {
+      } else if (positiveMoods.some((pm) => mood.includes(pm))) {
         positive++;
-      } else if (neutralMoods.some(nm => mood.includes(nm))) {
+      } else if (neutralMoods.some((nm) => mood.includes(nm))) {
         neutral++;
-      } else if (negativeMoods.some(nm => mood.includes(nm))) {
+      } else if (negativeMoods.some((nm) => mood.includes(nm))) {
         negative++;
       } else {
         // Default unknown moods to neutral
@@ -298,9 +491,22 @@ export class DatabaseStorage implements IStorage {
 
     return { positive, neutral, negative, skipped, total };
   }
-  async getMoodCheckinDistribution(userId: string, period?: string, startDate?: string, endDate?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>> {
+  async getMoodCheckinDistribution(
+    userId: string,
+    period?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<
+    Array<{
+      mood: string;
+      count: number;
+      color: string;
+      icon: string;
+      percentage: number;
+    }>
+  > {
     let whereCondition = eq(checkIns.userId, userId);
-    
+
     // Add date range filtering if specified
     if (startDate && endDate) {
       whereCondition = and(
@@ -312,21 +518,21 @@ export class DatabaseStorage implements IStorage {
       // Fallback to period-based filtering for backward compatibility
       const now = new Date();
       let dateThreshold: Date;
-      
+
       switch (period) {
-        case 'currentMonth':
+        case "currentMonth":
           dateThreshold = new Date(now.getFullYear(), now.getMonth(), 1);
           break;
-        case 'last7days':
+        case "last7days":
           dateThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           break;
-        case 'last30days':
+        case "last30days":
           dateThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           break;
         default:
           dateThreshold = new Date(0); // All time
       }
-      
+
       whereCondition = and(
         eq(checkIns.userId, userId),
         sql`${checkIns.createdAt} >= ${dateThreshold.toISOString()}`
@@ -337,7 +543,7 @@ export class DatabaseStorage implements IStorage {
     const moodCounts = await db
       .select({
         mood: checkIns.mood,
-        count: count(checkIns.mood).as('count')
+        count: count(checkIns.mood).as("count"),
       })
       .from(checkIns)
       .where(whereCondition)
@@ -345,39 +551,60 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(count(checkIns.mood)));
 
     // Calculate total for percentages
-    const totalCheckIns = moodCounts.reduce((sum, item) => sum + (item.count as number), 0);
+    const totalCheckIns = moodCounts.reduce(
+      (sum, item) => sum + (item.count as number),
+      0
+    );
 
     // Map moods to colors and icons
     const moodMapping: Record<string, { color: string; icon: string }> = {
-      'happy': { color: '#4CAF50', icon: 'happy-outline' },
-      'excited': { color: '#FF9800', icon: 'happy-outline' },
-      'grateful': { color: '#2196F3', icon: 'heart-outline' },
-      'content': { color: '#8BC34A', icon: 'checkmark-circle-outline' },
-      'calm': { color: '#00BCD4', icon: 'leaf-outline' },
-      'neutral': { color: '#FFC107', icon: 'remove-circle-outline' },
-      'okay': { color: '#9E9E9E', icon: 'remove-outline' },
-      'sad': { color: '#F44336', icon: 'sad-outline' },
-      'angry': { color: '#E91E63', icon: 'flame-outline' },
-      'anxious': { color: '#9C27B0', icon: 'alert-circle-outline' },
-      'stressed': { color: '#FF5722', icon: 'warning-outline' },
-      'worried': { color: '#795548', icon: 'help-circle-outline' },
+      happy: { color: "#4CAF50", icon: "happy-outline" },
+      excited: { color: "#FF9800", icon: "happy-outline" },
+      grateful: { color: "#2196F3", icon: "heart-outline" },
+      content: { color: "#8BC34A", icon: "checkmark-circle-outline" },
+      calm: { color: "#00BCD4", icon: "leaf-outline" },
+      neutral: { color: "#FFC107", icon: "remove-circle-outline" },
+      okay: { color: "#9E9E9E", icon: "remove-outline" },
+      sad: { color: "#F44336", icon: "sad-outline" },
+      angry: { color: "#E91E63", icon: "flame-outline" },
+      anxious: { color: "#9C27B0", icon: "alert-circle-outline" },
+      stressed: { color: "#FF5722", icon: "warning-outline" },
+      worried: { color: "#795548", icon: "help-circle-outline" },
     };
 
-    return moodCounts.map(item => {
+    return moodCounts.map((item) => {
       const mood = item.mood.toLowerCase();
-      const mapping = moodMapping[mood] || { color: '#757575', icon: 'ellipse-outline' };
-      const percentage = totalCheckIns > 0 ? Math.round(((item.count as number) / totalCheckIns) * 100) : 0;
+      const mapping = moodMapping[mood] || {
+        color: "#757575",
+        icon: "ellipse-outline",
+      };
+      const percentage =
+        totalCheckIns > 0
+          ? Math.round(((item.count as number) / totalCheckIns) * 100)
+          : 0;
 
       return {
         mood: item.mood,
         count: item.count as number,
         color: mapping.color,
         icon: mapping.icon,
-        percentage
+        percentage,
       };
     });
   }
-  async getCalendarData(userId: string, year?: number, month?: number, startDate?: string, endDate?: string): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>> {
+  async getCalendarData(
+    userId: string,
+    year?: number,
+    month?: number,
+    startDate?: string,
+    endDate?: string
+  ): Promise<
+    Array<{
+      day: number;
+      mood: "happy" | "neutral" | "sad" | "negative" | "skipped" | null;
+      hasEntry: boolean;
+    }>
+  > {
     let firstDay: Date;
     let lastDay: Date;
     let daysInRange: number;
@@ -386,7 +613,10 @@ export class DatabaseStorage implements IStorage {
       // Use provided date range
       firstDay = new Date(startDate);
       lastDay = new Date(endDate);
-      daysInRange = Math.ceil((lastDay.getTime() - firstDay.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      daysInRange =
+        Math.ceil(
+          (lastDay.getTime() - firstDay.getTime()) / (1000 * 60 * 60 * 24)
+        ) + 1;
     } else {
       // Fallback to year/month for backward compatibility
       const currentYear = year || new Date().getFullYear();
@@ -400,39 +630,63 @@ export class DatabaseStorage implements IStorage {
     const entries = await db
       .select({
         date: diaryEntries.date,
-        mood: diaryEntries.mood
+        mood: diaryEntries.mood,
       })
       .from(diaryEntries)
       .where(
         and(
           eq(diaryEntries.userId, userId),
-          sql`DATE(${diaryEntries.date}) >= ${firstDay.toISOString().split('T')[0]}`,
-          sql`DATE(${diaryEntries.date}) <= ${lastDay.toISOString().split('T')[0]}`
+          sql`DATE(${diaryEntries.date}) >= ${
+            firstDay.toISOString().split("T")[0]
+          }`,
+          sql`DATE(${diaryEntries.date}) <= ${
+            lastDay.toISOString().split("T")[0]
+          }`
         )
       );
 
     // Create a map of day -> mood for quick lookup
     const entryMap = new Map<number, string>();
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const day = new Date(entry.date).getDate();
-      entryMap.set(day, entry.mood || '');
+      entryMap.set(day, entry.mood || "");
     });
 
     // Helper function to categorize mood
-    const categorizeMood = (mood: string): 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null => {
-      if (!mood || mood === 'skipped') return 'skipped';
-      
-      const lowerMood = mood.toLowerCase();
-      const positiveMoods = ['happy', 'joy', 'excited', 'grateful', 'content', 'optimistic', 'cheerful', 'positive'];
-      const neutralMoods = ['neutral', 'calm', 'okay', 'normal', 'balanced'];
-      const negativeMoods = ['sad', 'angry', 'anxious', 'frustrated', 'depressed', 'worried', 'stressed', 'negative'];
+    const categorizeMood = (
+      mood: string
+    ): "happy" | "neutral" | "sad" | "negative" | "skipped" | null => {
+      if (!mood || mood === "skipped") return "skipped";
 
-      if (positiveMoods.some(pm => lowerMood.includes(pm))) return 'happy';
-      if (neutralMoods.some(nm => lowerMood.includes(nm))) return 'neutral';
-      if (negativeMoods.some(nm => lowerMood.includes(nm))) return 'negative';
-      
+      const lowerMood = mood.toLowerCase();
+      const positiveMoods = [
+        "happy",
+        "joy",
+        "excited",
+        "grateful",
+        "content",
+        "optimistic",
+        "cheerful",
+        "positive",
+      ];
+      const neutralMoods = ["neutral", "calm", "okay", "normal", "balanced"];
+      const negativeMoods = [
+        "sad",
+        "angry",
+        "anxious",
+        "frustrated",
+        "depressed",
+        "worried",
+        "stressed",
+        "negative",
+      ];
+
+      if (positiveMoods.some((pm) => lowerMood.includes(pm))) return "happy";
+      if (neutralMoods.some((nm) => lowerMood.includes(nm))) return "neutral";
+      if (negativeMoods.some((nm) => lowerMood.includes(nm))) return "negative";
+
       // Default to neutral for unknown moods
-      return 'neutral';
+      return "neutral";
     };
 
     // Build calendar data for all days in the range
@@ -449,7 +703,7 @@ export class DatabaseStorage implements IStorage {
         calendarData.push({
           day,
           mood,
-          hasEntry
+          hasEntry,
         });
 
         currentDate.setDate(currentDate.getDate() + 1);
@@ -464,7 +718,7 @@ export class DatabaseStorage implements IStorage {
         calendarData.push({
           day,
           mood,
-          hasEntry
+          hasEntry,
         });
       }
     }
@@ -474,11 +728,18 @@ export class DatabaseStorage implements IStorage {
 
   // Profile methods
   async getUserProfile(userId: string): Promise<UserProfile | undefined> {
-    const [profile] = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId));
+    const [profile] = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId));
     return profile || undefined;
   }
 
-  async createUserProfile(userId: string, name: string, email: string): Promise<UserProfile> {
+  async createUserProfile(
+    userId: string,
+    name: string,
+    email: string
+  ): Promise<UserProfile> {
     const [profile] = await db
       .insert(userProfiles)
       .values({
@@ -491,7 +752,10 @@ export class DatabaseStorage implements IStorage {
     return profile;
   }
 
-  async updateUserProfileData(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | undefined> {
+  async updateUserProfileData(
+    userId: string,
+    updates: Partial<UserProfile>
+  ): Promise<UserProfile | undefined> {
     const [updatedProfile] = await db
       .update(userProfiles)
       .set({
@@ -502,13 +766,14 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedProfile || undefined;
   }
-
   // Stats methods
   async getUserStats(userId: string): Promise<UserStats | undefined> {
-    const [stats] = await db.select().from(userStats).where(eq(userStats.userId, userId));
+    const [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, userId));
     return stats || undefined;
   }
-
   async createUserStats(userId: string): Promise<UserStats> {
     const [stats] = await db
       .insert(userStats)
@@ -518,92 +783,143 @@ export class DatabaseStorage implements IStorage {
         journalEntriesCount: 0,
         currentStreak: 0,
         longestStreak: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
       .returning();
     return stats;
   }
 
-  async updateUserStats(userId: string, updates: Partial<UserStats>): Promise<UserStats | undefined> {
+  async updateUserStats(
+    userId: string,
+    updates: Partial<UserStats>
+  ): Promise<UserStats | undefined> {
     const [updatedStats] = await db
       .update(userStats)
-      .set({
-        ...updates,
-        updatedAt: new Date(),
-      })
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(userStats.userId, userId))
       .returning();
     return updatedStats || undefined;
   }
-
   async calculateUserStats(userId: string): Promise<UserStats> {
-    // Get counts
-    const [checkInsResult] = await db
-      .select({ count: count(checkIns.id) })
-      .from(checkIns)
-      .where(eq(checkIns.userId, userId));
-
-    const [entriesResult] = await db
-      .select({ count: count(diaryEntries.id) })
-      .from(diaryEntries)
-      .where(eq(diaryEntries.userId, userId));
-
-    // Calculate streaks (simplified version - daily check-ins)
-    const recentCheckIns = await db
-      .select({ createdAt: checkIns.createdAt })
-      .from(checkIns)
-      .where(eq(checkIns.userId, userId))
-      .orderBy(desc(checkIns.createdAt))
-      .limit(365); // Last year of check-ins
-
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
-    let lastDate: Date | null = null;
-
-    for (const checkIn of recentCheckIns) {
-      const checkInDate = new Date(checkIn.createdAt);
-      const daysDiff = lastDate ? Math.floor((lastDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-
-      if (lastDate === null || daysDiff === 1) {
-        tempStreak++;
-        if (lastDate === null) currentStreak = tempStreak;
-      } else if (daysDiff === 0) {
-        // Same day, continue
-        continue;
-      } else {
-        // Streak broken
-        longestStreak = Math.max(longestStreak, tempStreak);
-        tempStreak = 1;
-        if (lastDate === null) currentStreak = 0;
-      }
-
-      lastDate = checkInDate;
+    // Get existing stats or create new ones
+    let stats = await this.getUserStats(userId);
+    if (!stats) {
+      stats = await this.createUserStats(userId);
     }
 
-    longestStreak = Math.max(longestStreak, tempStreak);
+    // Calculate diary entry stats
+    const entries = await this.getDiaryEntries(userId, 1000); // Get all entries
+    const checkIns = await this.getCheckIns(userId, 1000); // Get all check-ins
 
-    const stats = {
-      checkInsCount: checkInsResult.count as number,
-      journalEntriesCount: entriesResult.count as number,
+    const journalEntriesCount = entries.length;
+    const checkInsCount = checkIns.length;
+
+    // Calculate streaks based on activity (entries or check-ins)
+    const { currentStreak, longestStreak } = this.calculateActivityStreaks(
+      entries,
+      checkIns
+    );
+
+    // Update stats
+    const updatedStats = await this.updateUserStats(userId, {
+      journalEntriesCount,
+      checkInsCount,
       currentStreak,
       longestStreak,
-    };
+    });
 
-    // Update or create stats
-    const existingStats = await this.getUserStats(userId);
-    if (existingStats) {
-      return await this.updateUserStats(userId, stats) || existingStats;
-    } else {
-      return await this.createUserStats(userId);
+    return updatedStats || stats;
+  }
+  private calculateActivityStreaks(
+    entries: DiaryEntry[],
+    checkIns: CheckIn[]
+  ): { currentStreak: number; longestStreak: number } {
+    // Combine all activities and get unique dates
+    const allActivities: Date[] = [];
+
+    // Add diary entry dates
+    entries.forEach((entry) => {
+      allActivities.push(new Date(entry.createdAt));
+    });
+
+    // Add check-in dates
+    checkIns.forEach((checkIn) => {
+      allActivities.push(new Date(checkIn.createdAt));
+    });
+
+    if (allActivities.length === 0) {
+      return { currentStreak: 0, longestStreak: 0 };
     }
+
+    // Get unique dates (YYYY-MM-DD format) and sort them in ascending order
+    const uniqueDates = Array.from(
+      new Set(allActivities.map((date) => date.toISOString().split("T")[0]))
+    ).sort();
+
+    if (uniqueDates.length === 0) {
+      return { currentStreak: 0, longestStreak: 0 };
+    }
+
+    // Calculate current streak (from today backwards)
+    let currentStreak = 0;
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+
+    // Check if user has activity today or yesterday to start streak
+    const hasActivityToday = uniqueDates.includes(today);
+    const hasActivityYesterday = uniqueDates.includes(yesterday);
+
+    if (hasActivityToday || hasActivityYesterday) {
+      // Start from the most recent activity date
+      const startDate = hasActivityToday ? today : yesterday;
+      let checkDate = new Date(startDate);
+
+      // Count backwards from start date
+      while (true) {
+        const checkDateStr = checkDate.toISOString().split("T")[0];
+        if (uniqueDates.includes(checkDateStr)) {
+          currentStreak++;
+          // Move to previous day
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    // Calculate longest streak
+    let longestStreak = 0;
+    let tempStreak = 1;
+
+    for (let i = 1; i < uniqueDates.length; i++) {
+      const currentDate = new Date(uniqueDates[i]);
+      const previousDate = new Date(uniqueDates[i - 1]);
+      const dayDifference = Math.round(
+        (currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (dayDifference === 1) {
+        tempStreak++;
+      } else {
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 1;
+      }
+    }
+    longestStreak = Math.max(longestStreak, tempStreak);
+
+    return { currentStreak, longestStreak };
   }
 
-  // Settings methods
   async getUserSettings(userId: string): Promise<UserSettings | undefined> {
-    const [settings] = await db.select().from(userSettings).where(eq(userSettings.userId, userId));
+    const [settings] = await db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId));
     return settings || undefined;
   }
-
   async createUserSettings(userId: string): Promise<UserSettings> {
     const [settings] = await db
       .insert(userSettings)
@@ -612,58 +928,56 @@ export class DatabaseStorage implements IStorage {
         notificationsEnabled: true,
         reminderEnabled: true,
         darkModeEnabled: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
       .returning();
     return settings;
   }
 
-  async updateUserSettings(userId: string, updates: UpdateUserSettings): Promise<UserSettings | undefined> {
+  async updateUserSettings(
+    userId: string,
+    updates: UpdateUserSettings
+  ): Promise<UserSettings | undefined> {
     const [updatedSettings] = await db
       .update(userSettings)
-      .set({
-        ...updates,
-        updatedAt: new Date(),
-      })
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(userSettings.userId, userId))
       .returning();
     return updatedSettings || undefined;
   }
-
-  // Account management methods
   async exportUserData(userId: string): Promise<any> {
-    const user = await this.getUser(userId);
+    const user = await this.getUserByEmail(""); // We'll need to get user differently
     const profile = await this.getUserProfile(userId);
+    const entries = await this.getDiaryEntries(userId, 1000);
+    const checkIns = await this.getCheckIns(userId, 1000);
     const stats = await this.getUserStats(userId);
     const settings = await this.getUserSettings(userId);
-    const entries = await this.getDiaryEntries(userId, 1000); // Get all entries
-    const checkIns = await this.getCheckIns(userId, 1000); // Get all check-ins
 
     return {
-      user,
+      user: { id: userId }, // Simplified user data
       profile,
+      entries,
+      checkIns,
       stats,
       settings,
-      diaryEntries: entries,
-      checkIns,
       exportedAt: new Date().toISOString(),
     };
   }
 
   async deleteUserAccount(userId: string): Promise<boolean> {
     try {
-      // Delete all related data (cascade should handle this, but being explicit)
-      await db.delete(userProfiles).where(eq(userProfiles.userId, userId));
+      // Delete in order to respect foreign key constraints
+      await db.delete(checkIns).where(eq(checkIns.userId, userId));
+      await db.delete(diaryEntries).where(eq(diaryEntries.userId, userId));
       await db.delete(userStats).where(eq(userStats.userId, userId));
       await db.delete(userSettings).where(eq(userSettings.userId, userId));
-      await db.delete(diaryEntries).where(eq(diaryEntries.userId, userId));
-      await db.delete(checkIns).where(eq(checkIns.userId, userId));
-      
-      // Finally delete the user
+      await db.delete(userProfiles).where(eq(userProfiles.userId, userId));
       await db.delete(users).where(eq(users.id, userId));
-      
+
       return true;
     } catch (error) {
-      console.error('Error deleting user account:', error);
+      console.error("Error deleting user account:", error);
       return false;
     }
   }
