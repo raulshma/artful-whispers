@@ -113,21 +113,6 @@ export function useTheme() {
   return context;
 }
 
-// Helper hook for getting theme colors (backwards compatibility)
-export function useThemeColor(
-  props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light
-) {
-  const { theme } = useTheme();
-  const colorFromProps = props[theme.isDark ? "dark" : "light"];
-
-  if (colorFromProps) {
-    return colorFromProps;
-  } else {
-    return theme.colors[colorName];
-  }
-}
-
 // Additional helper hooks
 export function useThemedStyles<T>(createStyles: (theme: Theme) => T): T {
   const { theme } = useTheme();
