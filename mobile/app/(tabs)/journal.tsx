@@ -1,24 +1,22 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   StyleSheet,
   FlatList,
-  ActivityIndicator,
   Text,
   RefreshControl,
   Alert,
-  TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInfiniteDiaryEntries } from "@/hooks/useDiary";
 import { useTheme } from "@/contexts/ThemeContext";
 import DiaryEntryCard from "@/components/DiaryEntryCard";
 import FloatingComposeButton from "@/components/FloatingComposeButton";
 import { useFocusEffect } from "@react-navigation/native";
-import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
-import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
-import { Card, SkiaLoadingAnimation } from "@/components/ui";
+import { SkiaLoadingAnimation } from "@/components/ui";
+import { Spacing } from "@/constants/Spacing";
 
 export default function JournalScreen() {
   const { user } = useAuth();
@@ -40,15 +38,6 @@ export default function JournalScreen() {
   // Flatten all pages into a single array
   const entries = data?.pages.flat() || [];
 
-  // Memoized date calculations
-  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
-
-  // Memoized today's entries
-  const todayEntries = useMemo(
-    () => entries.filter((entry) => entry.date === today),
-    [entries, today]
-  );
-
   // Refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -64,6 +53,7 @@ export default function JournalScreen() {
       setRefreshing(false);
     }
   }, [refetch]);
+
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -90,44 +80,25 @@ export default function JournalScreen() {
           color={theme.colors.primary}
           visible={true}
         />
-        <Text
-          style={[styles.loadingText, { color: theme.colors.textSecondary }]}
-        >
-          Loading more entries...
-        </Text>
       </View>
     );
   };
 
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Card style={styles.emptyStateCard}>
-        <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
-          Welcome to Your Digital Journal
-        </Text>
-        <Text
-          style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}
-        >
-          Capture your thoughts, moments, and reflections throughout the day.
-          There's no limit - write as many entries as your heart desires.
-        </Text>
-        <Text style={[styles.emptyHint, { color: theme.colors.textTertiary }]}>
-          Tap the + button below to start your first reflection
-        </Text>
-      </Card>
+    <View style={styles.emptyStateContainer}>
+      <Ionicons name="book-outline" size={48} color={theme.colors.primary} />
+      <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
+        No entries yet
+      </Text>
+      <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
+        Tap the + button to start writing
+      </Text>
     </View>
   );
+
   if (isLoading) {
     return (
-      <View
-        style={[
-          styles.container,
-          {
-            backgroundColor: theme.colors.background,
-            paddingTop: insets.top,
-          },
-        ]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.loadingContainer}>
           <SkiaLoadingAnimation
             variant="ripple"
@@ -135,11 +106,6 @@ export default function JournalScreen() {
             color={theme.colors.primary}
             visible={true}
           />
-          <Text
-            style={[styles.loadingText, { color: theme.colors.textSecondary }]}
-          >
-            Loading your entries...
-          </Text>
         </View>
       </View>
     );
@@ -147,105 +113,45 @@ export default function JournalScreen() {
 
   if (isError) {
     return (
-      <View
-        style={[
-          styles.container,
-          {
-            backgroundColor: theme.colors.background,
-            paddingTop: insets.top,
-          },
-        ]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <View style={styles.errorContainer}>
           <Text style={[styles.errorTitle, { color: theme.colors.text }]}>
             Unable to load entries
           </Text>
-          <Text
-            style={[
-              styles.errorSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}
-          >
+          <Text style={[styles.errorSubtitle, { color: theme.colors.textSecondary }]}>
             {error?.message || "Something went wrong. Please try again."}
           </Text>
-          <TouchableOpacity
-            style={[
-              styles.retryButton,
-              { backgroundColor: theme.colors.primary },
-            ]}
-            onPress={() => refetch()}
-          >
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
         </View>
       </View>
     );
   }
+
   return (
-    <AnimatedPageWrapper animationType="fadeIn">
-      <View
-        style={[
-          styles.container,
-          {
-            backgroundColor: theme.colors.background,
-            paddingTop: insets.top,
-          },
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <FlatList
+        data={entries}
+        renderItem={renderEntry}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={[
+          styles.listContainer,
+          { paddingTop: insets.top + Spacing.md }
         ]}
-      >
-        {/* Today's entry count */}
-        {todayEntries.length > 0 && (
-          <ShadowFriendlyAnimation index={0} animationType="slideUp">
-            <View style={styles.todayContainer}>
-              <Card style={styles.todayChip}>
-                <Text
-                  style={[styles.todayText, { color: theme.colors.primary }]}
-                >
-                  {todayEntries.length} reflection
-                  {todayEntries.length !== 1 ? "s" : ""} today
-                </Text>
-                {todayEntries.length > 1 && (
-                  <Text
-                    style={[
-                      styles.todaySubtext,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    • Multiple moments captured
-                  </Text>
-                )}
-              </Card>
-            </View>
-          </ShadowFriendlyAnimation>
-        )}
-
-        <ShadowFriendlyAnimation index={1} animationType="slideUp">
-          <FlatList
-            data={entries}
-            renderItem={renderEntry}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={
-              entries.length === 0
-                ? styles.emptyContainer
-                : styles.listContainer
-            }
-            showsVerticalScrollIndicator={false}
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={renderFooter}
-            ListEmptyComponent={renderEmptyState}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                tintColor={theme.colors.primary}
-              />
-            }
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.colors.primary}
           />
-        </ShadowFriendlyAnimation>
-
-        <FloatingComposeButton hasEntriesToday={todayEntries.length > 0} />
-      </View>
-    </AnimatedPageWrapper>
+        }
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter}
+        ListEmptyComponent={renderEmptyState}
+        ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
+      />
+      <FloatingComposeButton />
+    </View>
   );
 }
 
@@ -253,42 +159,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  todayContainer: {
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  todayChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  todayText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  todaySubtext: {
-    fontSize: 12,
-  },
   listContainer: {
-    paddingVertical: 8,
+    paddingHorizontal: Spacing.md,
+    paddingBottom: 100, // Space for floating button
   },
-  emptyContainer: {
+  emptyStateContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 40,
-  },
-  emptyState: {
-    alignItems: "center",
-    gap: 16,
-  },
-  emptyStateCard: {
-    padding: 32,
-    alignItems: "center",
-    gap: 16,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing["4xl"],
+    gap: Spacing.md,
   },
   emptyTitle: {
     fontSize: 20,
@@ -300,30 +181,21 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
   },
-  emptyHint: {
-    fontSize: 14,
-    textAlign: "center",
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 16,
   },
   loadingFooter: {
-    padding: 20,
+    padding: Spacing.lg,
     alignItems: "center",
-    gap: 8,
-  },
-  loadingText: {
-    fontSize: 14,
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 40,
-    gap: 16,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
   },
   errorTitle: {
     fontSize: 18,
@@ -334,15 +206,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
-  },
-  retryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
   },
 });

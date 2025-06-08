@@ -70,14 +70,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
   useEffect(() => {
-    console.log(
-      "Session effect - isPending:",
-      isPending,
-      "session:",
-      session,
-      "error:",
-      error
-    );
     console.log("Platform:", require("react-native").Platform.OS);
 
     if (!isPending) {
