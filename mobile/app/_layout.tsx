@@ -25,7 +25,8 @@ function AppWithTheme() {
       <BottomSheetModalProvider>
         <NavigationThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >          <Stack>
+        >
+          <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="checkin" options={{ headerShown: false }} />

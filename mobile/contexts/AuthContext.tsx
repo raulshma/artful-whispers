@@ -74,7 +74,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!isPending) {
       if (session?.user) {
-        console.log("Setting user:", session.user);
         setUser(session.user as User);
       } else {
         console.log("Clearing user");
@@ -86,14 +85,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session, isPending, error]); // Handle navigation based on authentication state
   useEffect(() => {
-    console.log(
-      "Navigation effect - isLoading:",
-      isLoading,
-      "user:",
-      !!user,
-      "segments:",
-      segments
-    );
     if (isLoading) return; // Don't navigate while loading
 
     const inAuthGroup = segments[0] === "(tabs)";

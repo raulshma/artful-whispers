@@ -56,7 +56,8 @@ export default function AddJournalScreen() {
     if (count > 4500) return theme.colors.semantic.error;
     if (count > 4000) return theme.colors.semantic.warning;
     return theme.colors.textTertiary;
-  };  const handleSave = async () => {
+  };
+  const handleSave = async () => {
     if (!content.trim()) {
       // Provide gentle haptic feedback for validation error
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -185,7 +186,9 @@ export default function AddJournalScreen() {
                       size={18}
                       color={theme.colors.primary}
                     />
-                    <Text style={styles.contentTitle}>What's on your mind?</Text>
+                    <Text style={styles.contentTitle}>
+                      What's on your mind?
+                    </Text>
                   </View>
                   <View style={styles.contentStats}>
                     <Text style={styles.wordCount}>{wordCount} words</Text>
@@ -275,7 +278,8 @@ Take your time... there's no rush. 💚"
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>  );
+    </View>
+  );
 }
 
 const createStyles = (theme: any) =>
@@ -451,5 +455,3 @@ const createStyles = (theme: any) =>
       lineHeight: 18,
     },
   });
-
-

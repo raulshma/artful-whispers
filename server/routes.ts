@@ -185,7 +185,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const entries = await storage.getDiaryEntriesByDate(req.user.id, date);
         res.json(entries);
       } catch (error) {
-        res.status(500).json({ message: "Failed to fetch diary entries for date" });
+        res
+          .status(500)
+          .json({ message: "Failed to fetch diary entries for date" });
       }
     }
   );
@@ -196,7 +198,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAuth,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const validatedData = insertDiaryEntrySchema.parse(req.body);        if (!req.user) {
+        const validatedData = insertDiaryEntrySchema.parse(req.body);
+        if (!req.user) {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
@@ -293,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Check-in creation error:", error);
         res.status(400).json({
           message: "Invalid check-in data",
-          error: error instanceof Error ? error.message : "Unknown error"
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
@@ -312,11 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const checkIns = await storage.getCheckIns(
-          req.user.id,
-          limit,
-          offset
-        );
+        const checkIns = await storage.getCheckIns(req.user.id, limit, offset);
         res.json(checkIns);
       } catch (error) {
         res.status(500).json({ message: "Failed to fetch check-ins" });
@@ -337,11 +336,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const stats = await storage.getJournalSummaryStats(req.user.id, period, startDate, endDate);
+        const stats = await storage.getJournalSummaryStats(
+          req.user.id,
+          period,
+          startDate,
+          endDate
+        );
         res.json(stats);
       } catch (error) {
         console.error("Journal summary stats error:", error);
-        res.status(500).json({ message: "Failed to fetch journal summary stats" });
+        res
+          .status(500)
+          .json({ message: "Failed to fetch journal summary stats" });
       }
     }
   );
@@ -359,11 +365,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const distribution = await storage.getMoodCheckinDistribution(req.user.id, period, startDate, endDate);
+        const distribution = await storage.getMoodCheckinDistribution(
+          req.user.id,
+          period,
+          startDate,
+          endDate
+        );
         res.json(distribution);
       } catch (error) {
         console.error("Mood check-in distribution error:", error);
-        res.status(500).json({ message: "Failed to fetch mood check-in distribution" });
+        res
+          .status(500)
+          .json({ message: "Failed to fetch mood check-in distribution" });
       }
     }
   );
@@ -382,7 +395,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const calendarData = await storage.getCalendarData(req.user.id, year, month, startDate, endDate);
+        const calendarData = await storage.getCalendarData(
+          req.user.id,
+          year,
+          month,
+          startDate,
+          endDate
+        );
         res.json(calendarData);
       } catch (error) {
         console.error("Calendar data error:", error);
@@ -393,163 +412,208 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Profile routes
   // Get user profile (protected route)
-  app.get("/api/profile", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+  app.get(
+    "/api/profile",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
 
-      let profile = await storage.getUserProfile(req.user.id);
-      
-      // Create profile if it doesn't exist
-      if (!profile) {
-        profile = await storage.createUserProfile(req.user.id, req.user.name, req.user.email);
-      }
+        let profile = await storage.getUserProfile(req.user.id);
 
-      res.json(profile);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user profile" });
+        // Create profile if it doesn't exist
+        if (!profile) {
+          profile = await storage.createUserProfile(
+            req.user.id,
+            req.user.name,
+            req.user.email
+          );
+        }
+
+        res.json(profile);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to fetch user profile" });
+      }
     }
-  });
+  );
 
   // Update user profile (protected route)
-  app.put("/api/profile", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      const validatedData = userProfileSchema.partial().parse(req.body);
+  app.put(
+    "/api/profile",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const validatedData = userProfileSchema.partial().parse(req.body);
 
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const updatedProfile = await storage.updateUserProfileData(
+          req.user.id,
+          validatedData
+        );
+
+        if (!updatedProfile) {
+          return res.status(404).json({ message: "Profile not found" });
+        }
+
+        res.json(updatedProfile);
+      } catch (error) {
+        res.status(400).json({ message: "Invalid profile data" });
       }
-
-      const updatedProfile = await storage.updateUserProfileData(req.user.id, validatedData);
-
-      if (!updatedProfile) {
-        return res.status(404).json({ message: "Profile not found" });
-      }
-
-      res.json(updatedProfile);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid profile data" });
     }
-  });
+  );
 
   // Get user statistics (protected route)
-  app.get("/api/profile/stats", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+  app.get(
+    "/api/profile/stats",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
 
-      let stats = await storage.getUserStats(req.user.id);
-      
-      // Create or calculate stats if they don't exist
-      if (!stats) {
-        stats = await storage.calculateUserStats(req.user.id);
-      }
+        let stats = await storage.getUserStats(req.user.id);
 
-      res.json(stats);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user statistics" });
+        // Create or calculate stats if they don't exist
+        if (!stats) {
+          stats = await storage.calculateUserStats(req.user.id);
+        }
+
+        res.json(stats);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to fetch user statistics" });
+      }
     }
-  });
+  );
 
   // Sync/recalculate user statistics (protected route)
-  app.post("/api/profile/stats/sync", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
+  app.post(
+    "/api/profile/stats/sync",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        // Force recalculation of stats
+        const stats = await storage.calculateUserStats(req.user.id);
+
+        res.json({
+          message: "Stats synced successfully",
+          stats,
+        });
+      } catch (error) {
+        console.error("Stats sync error:", error);
+        res.status(500).json({ message: "Failed to sync user statistics" });
       }
-
-      // Force recalculation of stats
-      const stats = await storage.calculateUserStats(req.user.id);
-
-      res.json({
-        message: "Stats synced successfully",
-        stats,
-      });
-    } catch (error) {
-      console.error('Stats sync error:', error);
-      res.status(500).json({ message: "Failed to sync user statistics" });
     }
-  });
+  );
 
   // Get user settings (protected route)
-  app.get("/api/settings", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+  app.get(
+    "/api/settings",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
 
-      let settings = await storage.getUserSettings(req.user.id);
-      
-      // Create settings if they don't exist
-      if (!settings) {
-        settings = await storage.createUserSettings(req.user.id);
-      }
+        let settings = await storage.getUserSettings(req.user.id);
 
-      res.json(settings);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user settings" });
+        // Create settings if they don't exist
+        if (!settings) {
+          settings = await storage.createUserSettings(req.user.id);
+        }
+
+        res.json(settings);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to fetch user settings" });
+      }
     }
-  });
+  );
 
   // Update user settings (protected route)
-  app.put("/api/settings", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      const validatedData = updateUserSettingsSchema.parse(req.body);
+  app.put(
+    "/api/settings",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const validatedData = updateUserSettingsSchema.parse(req.body);
 
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const updatedSettings = await storage.updateUserSettings(
+          req.user.id,
+          validatedData
+        );
+
+        if (!updatedSettings) {
+          return res.status(404).json({ message: "Settings not found" });
+        }
+
+        res.json(updatedSettings);
+      } catch (error) {
+        res.status(400).json({ message: "Invalid settings data" });
       }
-
-      const updatedSettings = await storage.updateUserSettings(req.user.id, validatedData);
-
-      if (!updatedSettings) {
-        return res.status(404).json({ message: "Settings not found" });
-      }
-
-      res.json(updatedSettings);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid settings data" });
     }
-  });
+  );
 
   // Export user data (protected route)
-  app.get("/api/account/export", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+  app.get(
+    "/api/account/export",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
 
-      const exportData = await storage.exportUserData(req.user.id);
-      
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="user-data-${req.user.id}-${Date.now()}.json"`);
-      res.json(exportData);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to export user data" });
+        const exportData = await storage.exportUserData(req.user.id);
+
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="user-data-${req.user.id}-${Date.now()}.json"`
+        );
+        res.json(exportData);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to export user data" });
+      }
     }
-  });
+  );
 
   // Delete user account (protected route)
-  app.delete("/api/account", requireAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
+  app.delete(
+    "/api/account",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const deleted = await storage.deleteUserAccount(req.user.id);
+
+        if (!deleted) {
+          return res.status(500).json({ message: "Failed to delete account" });
+        }
+
+        // Invalidate session - this should be handled by auth middleware
+        res.json({ message: "Account deleted successfully" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to delete account" });
       }
-
-      const deleted = await storage.deleteUserAccount(req.user.id);
-
-      if (!deleted) {
-        return res.status(500).json({ message: "Failed to delete account" });
-      }
-
-      // Invalidate session - this should be handled by auth middleware
-      res.json({ message: "Account deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete account" });
     }
-  });
+  );
 
   // Generate lofi-style image URL based on mood and emotions
   function generateLofiImageUrl(mood: string, emotions: string[]): string {
@@ -568,57 +632,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return `https://source.unsplash.com/1200x800/?${lofiKeywords}`;
   }
 
-  // Analyze sentiment, generate title and image
   async function analyzeSentimentAndGenerateImage(entry: any) {
     try {
       // Fetch user data to personalize prompts
       const user = await storage.getUser(entry.userId);
-      
+
       // Build persona from user details
-      const persona = [user?.gender, user?.nationality].filter(Boolean).join(' ');
-      const personaDescription = persona || 'person';
-      
+      const persona = [user?.gender, user?.nationality]
+        .filter(Boolean)
+        .join(" ");
+      const personaDescription = persona || "person";
+
       // Include languages in context if available
-      const languageContext = user?.languages ? ` The person speaks ${user.languages}.` : '';
+      const languageContext = user?.languages
+        ? ` The person speaks ${user.languages}.`
+        : "";
 
       // Create a new instance of GoogleGenAI for text and image generation
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-      // Generate title and sentiment analysis
+      // Enhanced analysis prompt with more personal context
       const analysisPrompt = `
-        Analyze this diary entry and respond with ONLY a valid JSON object (no markdown formatting):
-        
-        Entry: "${entry.content}"
-        Context: This entry is from a ${personaDescription}.${languageContext}
-        
-        Respond with exactly this format:
-        {
-          "title": "a short, poetic 2-4 word title that captures the essence of this entry",
-          "mood": "one word describing the primary mood",
-          "emotions": ["array", "of", "emotions", "detected"],
-          "imagePrompt": "a detailed prompt for generating a lofi-style image featuring a ${personaDescription} (lofi girl/boy style) in a setting that matches the diary's emotional essence. Include soft colors, gentle lighting, peaceful scenes, and aesthetic elements that reflect the mood and emotions"
-        }
-      `;
+      You are analyzing a deeply personal diary entry. Consider the writer's individual voice, experiences, and emotional journey.
+      
+      Entry: "${entry.content}"
+      Writer Context: This entry is from a ${personaDescription}.${languageContext}
+      
+      Instructions:
+      - Read between the lines to understand the writer's personal situation and feelings
+      - Consider cultural and linguistic nuances if applicable
+      - Identify specific emotions that resonate with this individual's experience
+      - Create a title that feels like it could have been written by the person themselves
+      - Design an image prompt that captures their unique perspective and emotional state
+      
+      Respond with ONLY a valid JSON object (no markdown formatting):
+      {
+        "title": "a personal, intimate 2-4 word title that reflects the writer's own voice and the specific situation they're describing",
+        "mood": "the dominant emotional state that best captures this person's current experience",
+        "emotions": ["specific", "nuanced", "emotions", "that", "this", "individual", "is", "experiencing"],
+        "imagePrompt": "a detailed, personalized prompt for a lofi-style scene that tells this ${personaDescription}'s story - include specific environmental details, objects, or settings that would resonate with their particular experience, mood, and cultural background. Focus on creating a scene that feels like a visual diary page of their life"
+      }
+    `;
 
       // Text analysis using the new API format
       const textResponse = await ai.models.generateContent({
-        model: DEFAULT_MODEL_LITE,
+        model: DEFAULT_MODEL,
         contents: analysisPrompt,
         config: {
-          temperature: 0.2
-        }
+          temperature: 0.3, // Slightly increased for more creative, personal responses
+        },
       });
 
       // Extract text from the response
       let analysisText = "";
-      if (textResponse.candidates && textResponse.candidates[0]?.content?.parts) {
+      if (
+        textResponse.candidates &&
+        textResponse.candidates[0]?.content?.parts
+      ) {
         for (const part of textResponse.candidates[0].content.parts) {
           if (part.text) {
             analysisText += part.text;
           }
         }
       }
-      
+
       analysisText = analysisText.trim();
 
       // Clean up any markdown formatting
@@ -639,24 +716,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
           imagePrompt: analysisData.imagePrompt,
         });
 
-        // Generate lofi-style image using Gemini image generation
+        // Generate highly personalized lofi-style image
         try {
-          const imagePrompt = `Create a lofi-style illustration: ${analysisData.imagePrompt}. Style: soft watercolor, pastel colors, dreamy atmosphere, aesthetic, minimalist, peaceful, cozy. Character: ${personaDescription} in a relaxing environment that matches the mood: ${analysisData.mood}`;
+          // Enhanced image prompt that incorporates the personal context
+          const personalizedImagePrompt = `
+          Create a deeply personal lofi-style illustration that captures this individual's story: ${
+            analysisData.imagePrompt
+          }
+          
+          Personal Context: ${personaDescription} experiencing ${
+            analysisData.mood
+          }
+          Cultural Context: ${
+            user?.nationality
+              ? `Incorporate subtle ${user.nationality} cultural elements`
+              : "Universal human experience"
+          }
+          
+          Visual Style Requirements:
+          - Lofi aesthetic: soft watercolors, muted pastels, gentle gradients
+          - Dreamy, contemplative atmosphere with warm, cozy lighting
+          - Minimalist composition that doesn't overwhelm the emotional message
+          - Include personal touches: books, tea/coffee, plants, soft textiles, personal items
+          - Setting should feel intimate and private, like a personal sanctuary
+          - Character design: ${personaDescription} in a natural, unguarded moment
+          - Mood representation: visual elements that specifically reflect ${
+            analysisData.mood
+          }
+          - Emotional resonance: the scene should feel like a visual representation of their inner world
+          
+          The image should feel like looking into someone's private, peaceful moment - authentic, relatable, and emotionally resonant.
+        `;
 
           // Image generation using the new API format with both TEXT and IMAGE modalities
           const imageResponse = await ai.models.generateContent({
             model: DEFAULT_MODEL_IMAGE,
-            contents: imagePrompt,
+            contents: personalizedImagePrompt,
             config: {
               responseModalities: [Modality.TEXT, Modality.IMAGE],
-              temperature: 0.4
+              temperature: 0.5,
             },
           });
-          
+
           // Process the image response
           let imageData = null;
-          
-          if (imageResponse.candidates && imageResponse.candidates[0]?.content?.parts) {
+
+          if (
+            imageResponse.candidates &&
+            imageResponse.candidates[0]?.content?.parts
+          ) {
             // Find the image part in the response
             for (const part of imageResponse.candidates[0].content.parts) {
               if (part.inlineData) {
@@ -665,33 +773,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
           }
-          
+
           if (imageData) {
             try {
               // Convert base64 to buffer
-              // Convert base64 to buffer
               const originalBuffer = Buffer.from(imageData, "base64");
-              
+
               // Compress image using sharp
               const compressedBuffer = await sharp(originalBuffer)
                 .png({ quality: 90, compressionLevel: 9 })
                 .toBuffer();
-              
+
               // Generate a unique filename based on entry ID and timestamp
               const filename = `diary-${entry.id}-${Date.now()}.png`;
-              
+
               // Upload compressed image to Vercel Blob
               const { url } = await put(filename, compressedBuffer, {
-                access: 'public',
-                contentType: 'image/png'
+                access: "public",
+                contentType: "image/png",
                 // Removed metadata as it's not supported by Vercel Blob
               });
-              
+
               // Store the Vercel Blob URL in the database
               await storage.updateDiaryEntry(entry.id, {
                 imageUrl: url,
               });
-              
+
               console.log(`Image stored successfully at: ${url}`);
             } catch (blobError) {
               console.error("Failed to store image in Vercel Blob:", blobError);
@@ -700,7 +807,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 analysisData.mood,
                 analysisData.emotions
               );
-              
+
               await storage.updateDiaryEntry(entry.id, {
                 imageUrl: imageUrl,
               });
@@ -715,7 +822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             analysisData.mood,
             analysisData.emotions
           );
-          
+
           await storage.updateDiaryEntry(entry.id, {
             imageUrl: imageUrl,
           });
