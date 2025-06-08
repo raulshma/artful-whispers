@@ -361,16 +361,6 @@ export default function EntryDetailsScreen() {
                 />
               </View>
               <Text
-                style={[
-                  styles.nextEntryHint,
-                  {
-                    color: theme.colors.textSecondary,
-                  },
-                ]}
-              >
-                Swipe up to continue
-              </Text>
-              <Text
                 style={[styles.nextEntryTitle, { color: theme.colors.text }]}
               >
                 {nextEntry.title || "Next Entry"}
@@ -606,14 +596,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
-  },
-  nextEntryHint: {
-    fontSize: 13,
-    textAlign: "center",
-    fontWeight: "500",
-    marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   nextEntryTitle: {
     fontSize: 18,
