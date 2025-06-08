@@ -22,6 +22,7 @@ import Animated, {
 import JournalStats from "@/components/JournalStats";
 import MoodStatsCard from "@/components/MoodStatsCard";
 import MoodCalendar from "@/components/MoodCalendar";
+import DateRangePicker, { DateRange } from "@/components/ui/DateRangePicker";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
@@ -68,15 +69,29 @@ export default function JournalStatsScreen() {
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<string>("currentMonth");
 
-  // Fetch journal summary stats
+  // Initialize date range
+  const getInitialDateRange = (): DateRange => {
+    const now = new Date();
+    return {
+      key: 'currentMonth',
+      label: 'This month',
+      startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+      endDate: now
+    };
+  };
+
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(getInitialDateRange());  // Fetch journal summary stats
   const {
     data: journalStats,
     error: journalError,
     isLoading: journalLoading,
     refetch: refetchJournalStats,
   } = useQuery({
-    queryKey: ["journalStats", selectedPeriod],
-    queryFn: () => fetchJournalSummary(selectedPeriod),
+    queryKey: ["journalStats", selectedDateRange.key, selectedDateRange.startDate, selectedDateRange.endDate],
+    queryFn: () => fetchJournalSummary(selectedDateRange.key, {
+      startDate: selectedDateRange.startDate,
+      endDate: selectedDateRange.endDate
+    }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -87,8 +102,11 @@ export default function JournalStatsScreen() {
     isLoading: moodLoading,
     refetch: refetchMoodStats,
   } = useQuery({
-    queryKey: ["moodDistribution", selectedPeriod],
-    queryFn: () => fetchMoodCheckinDistribution(selectedPeriod),
+    queryKey: ["moodDistribution", selectedDateRange.key, selectedDateRange.startDate, selectedDateRange.endDate],
+    queryFn: () => fetchMoodCheckinDistribution(selectedDateRange.key, {
+      startDate: selectedDateRange.startDate,
+      endDate: selectedDateRange.endDate
+    }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -108,6 +126,11 @@ export default function JournalStatsScreen() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  const handleDateRangeChange = (newRange: DateRange) => {
+    setSelectedDateRange(newRange);
+    setSelectedPeriod(newRange.key);
+  };
+
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -119,18 +142,17 @@ export default function JournalStatsScreen() {
     } finally {
       setRefreshing(false);
     }
-  };
-  const handleJournalStatsPress = () => {
+  };  const handleJournalStatsPress = () => {
     router.push({
       pathname: "./stats/journal-advanced",
-      params: { period: selectedPeriod }
+      params: { period: selectedDateRange.key }
     });
   };
 
   const handleMoodStatsPress = () => {
     router.push({
-      pathname: "./stats/mood-advanced",
-      params: { period: selectedPeriod }
+      pathname: "./stats/mood-advanced", 
+      params: { period: selectedDateRange.key }
     });
   };
 
@@ -222,20 +244,25 @@ export default function JournalStatsScreen() {
                   Failed to load stats. Pull to refresh.
                 </Text>
               </Animated.View>
-            )}
-
-            {/* Content */}
+            )}            {/* Content */}
             {!journalLoading && !moodLoading && !calendarLoading && (
               <Animated.View
                 entering={FadeIn.delay(150).duration(400)}
                 style={styles.contentContainer}
               >
-                {/* Main Journal Stats Card */}
-                {journalStats && (
+                {/* Date Range Picker */}
+                <View style={styles.dateRangeContainer}>
+                  <DateRangePicker
+                    selectedRange={selectedDateRange}
+                    onRangeChange={handleDateRangeChange}
+                  />
+                </View>
+
+                {/* Main Journal Stats Card */}                {journalStats && (
                   <ShadowFriendlyAnimation index={0} animationType="slideUp">
                     <JournalStats
                       title="Journal Stats"
-                      subtitle={`Your Journal Stats for ${getPeriodDisplayName(selectedPeriod)}`}
+                      subtitle={`Your Journal Stats for ${selectedDateRange.label.toLowerCase()}`}
                       data={journalStats}
                       onPress={handleJournalStatsPress}
                     />
@@ -329,9 +356,12 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 100, // Space for tab bar
-  },
-  contentContainer: {
+  },  contentContainer: {
     flex: 1,
+  },
+  dateRangeContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   refreshingContainer: {
     alignItems: 'center',

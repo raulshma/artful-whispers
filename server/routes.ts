@@ -323,7 +323,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
-
   // Get journal summary stats (protected route)
   app.get(
     "/api/stats/journal-summary",
@@ -331,12 +330,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const period = req.query.period as string | undefined;
+        const startDate = req.query.startDate as string | undefined;
+        const endDate = req.query.endDate as string | undefined;
 
         if (!req.user) {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const stats = await storage.getJournalSummaryStats(req.user.id, period);
+        const stats = await storage.getJournalSummaryStats(req.user.id, period, startDate, endDate);
         res.json(stats);
       } catch (error) {
         console.error("Journal summary stats error:", error);
@@ -344,7 +345,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
-
   // Get mood check-in distribution (protected route)
   app.get(
     "/api/stats/mood-checkin-distribution",
@@ -352,12 +352,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const period = req.query.period as string | undefined;
+        const startDate = req.query.startDate as string | undefined;
+        const endDate = req.query.endDate as string | undefined;
 
         if (!req.user) {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const distribution = await storage.getMoodCheckinDistribution(req.user.id, period);
+        const distribution = await storage.getMoodCheckinDistribution(req.user.id, period, startDate, endDate);
         res.json(distribution);
       } catch (error) {
         console.error("Mood check-in distribution error:", error);
@@ -365,21 +367,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
-
   // Get calendar data for a specific month (protected route)
   app.get(
     "/api/stats/calendar-data",
     requireAuth,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const year = parseInt(req.query.year as string) || new Date().getFullYear();
-        const month = parseInt(req.query.month as string) || new Date().getMonth() + 1;
+        const year = parseInt(req.query.year as string) || undefined;
+        const month = parseInt(req.query.month as string) || undefined;
+        const startDate = req.query.startDate as string | undefined;
+        const endDate = req.query.endDate as string | undefined;
 
         if (!req.user) {
           return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const calendarData = await storage.getCalendarData(req.user.id, year, month);
+        const calendarData = await storage.getCalendarData(req.user.id, year, month, startDate, endDate);
         res.json(calendarData);
       } catch (error) {
         console.error("Calendar data error:", error);

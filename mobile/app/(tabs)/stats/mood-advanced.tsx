@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { SkiaLoadingAnimation } from '@/components/ui/SkiaLoadingAnimation';
+import DateRangePicker, { DateRange } from '@/components/ui/DateRangePicker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,28 +33,55 @@ export default function MoodAdvancedStats() {
   const { period = 'currentMonth' } = useLocalSearchParams<{ period: string }>();
   const styles = createStyles(theme);
 
+  // Initialize date range based on period parameter
+  const getInitialDateRange = (): DateRange => {
+    const now = new Date();
+    switch (period) {
+      case 'last7days':
+        return {
+          key: 'last7days',
+          label: 'Last 7 days',
+          startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          endDate: now
+        };
+      case 'last30days':
+        return {
+          key: 'last30days',
+          label: 'Last 30 days',
+          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          endDate: now
+        };
+      case 'currentMonth':
+      default:
+        return {
+          key: 'currentMonth',
+          label: 'This month',
+          startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+          endDate: now
+        };
+    }
+  };
+
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(getInitialDateRange());
   // Fetch mood check-in distribution
   const {
     data: stats,
     error,
     isLoading,
   } = useQuery({
-    queryKey: ["moodDistribution", period],
-    queryFn: () => fetchMoodCheckinDistribution(period),
+    queryKey: ["moodDistribution", selectedDateRange.key, selectedDateRange.startDate, selectedDateRange.endDate],
+    queryFn: () => fetchMoodCheckinDistribution(selectedDateRange.key, {
+      startDate: selectedDateRange.startDate,
+      endDate: selectedDateRange.endDate
+    }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  const getPeriodDisplayName = (period: string): string => {
-    switch (period) {
-      case 'currentMonth':
-        return 'This Month';
-      case 'last30days':
-        return 'Last 30 Days';
-      case 'last7days':
-        return 'Last 7 Days';
-      default:
-        return 'All Time';
-    }
+  const handleDateRangeChange = (newRange: DateRange) => {
+    setSelectedDateRange(newRange);
+  };
+  const getPeriodDisplayName = (dateRange: DateRange): string => {
+    return dateRange.label;
   };
 
   const getTotalCheckIns = () => {
@@ -72,11 +100,11 @@ export default function MoodAdvancedStats() {
     if (!stats) return 0;
     return stats.filter(stat => stat.count > 0).length;
   };
-
   const getAverageCheckInsPerDay = () => {
-    const days = period === 'last7days' ? 7 : period === 'last30days' ? 30 : 30;
     const total = getTotalCheckIns();
-    return (total / days).toFixed(1);
+    const diffTime = Math.abs(selectedDateRange.endDate.getTime() - selectedDateRange.startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    return (total / diffDays).toFixed(1);
   };
 
   const renderMoodCard = (stat: MoodStat, index: number) => (
@@ -270,13 +298,16 @@ export default function MoodAdvancedStats() {
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
           Mood Analytics
+        </Text>        <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
+          {getPeriodDisplayName(selectedDateRange)}
         </Text>
-        <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
-          {getPeriodDisplayName(period)}
-        </Text>
-      </View>
+      </View>      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Date Range Picker */}
+        <DateRangePicker
+          selectedRange={selectedDateRange}
+          onRangeChange={handleDateRangeChange}
+        />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Summary Cards */}
         <View style={styles.summaryGrid}>
           {renderDetailCard(
@@ -343,14 +374,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     alignItems: 'center',
-  },
-  backButton: {
+  },  backButton: {
     position: 'absolute',
     top: 20,
     left: 20,
     padding: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.cardBackground,
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   headerTitle: {
     fontSize: 24,
@@ -470,9 +500,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   trendContainer: {
     marginBottom: 30,
-  },
-  trendCard: {
-    backgroundColor: theme.colors.cardBackground,
+  },  trendCard: {
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 16,
   },
@@ -504,11 +533,10 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   insightsContainer: {
     marginBottom: 30,
-  },
-  insightCard: {
+  },  insightCard: {
     flexDirection: 'row',
     padding: 16,
-    backgroundColor: theme.colors.cardBackground,
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     alignItems: 'flex-start',
   },

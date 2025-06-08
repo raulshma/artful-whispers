@@ -90,8 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isAuthenticated = !!user;
     const onAuthScreen = segments[0] === 'auth' || segments.some((segment: string) => segment === 'auth');
 
-    console.log('Navigation state - inAuthGroup:', inAuthGroup, 'isAuthenticated:', isAuthenticated, 'onAuthScreen:', onAuthScreen);
-
     // Only handle redirecting authenticated users to the main app
     // Let ProtectedRoute handle redirecting unauthenticated users to auth
     if (isAuthenticated && onAuthScreen) {

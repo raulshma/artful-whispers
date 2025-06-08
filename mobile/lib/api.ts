@@ -70,13 +70,45 @@ export interface MoodStat {
   percentage: number;
 }
 
-export async function fetchJournalSummary(period?: string): Promise<JournalStatsData> {
-  const endpoint = period ? `/api/stats/journal-summary?period=${period}` : '/api/stats/journal-summary';
+export async function fetchJournalSummary(
+  period?: string, 
+  dateRange?: { startDate: Date; endDate: Date }
+): Promise<JournalStatsData> {
+  let endpoint = '/api/stats/journal-summary';
+  const params = new URLSearchParams();
+  
+  if (dateRange) {
+    params.append('startDate', dateRange.startDate.toISOString());
+    params.append('endDate', dateRange.endDate.toISOString());
+  } else if (period) {
+    params.append('period', period);
+  }
+  
+  if (params.toString()) {
+    endpoint += `?${params.toString()}`;
+  }
+  
   return apiRequest<JournalStatsData>(endpoint);
 }
 
-export async function fetchMoodCheckinDistribution(period?: string): Promise<MoodStat[]> {
-  const endpoint = period ? `/api/stats/mood-checkin-distribution?period=${period}` : '/api/stats/mood-checkin-distribution';
+export async function fetchMoodCheckinDistribution(
+  period?: string,
+  dateRange?: { startDate: Date; endDate: Date }
+): Promise<MoodStat[]> {
+  let endpoint = '/api/stats/mood-checkin-distribution';
+  const params = new URLSearchParams();
+  
+  if (dateRange) {
+    params.append('startDate', dateRange.startDate.toISOString());
+    params.append('endDate', dateRange.endDate.toISOString());
+  } else if (period) {
+    params.append('period', period);
+  }
+  
+  if (params.toString()) {
+    endpoint += `?${params.toString()}`;
+  }
+  
   return apiRequest<MoodStat[]>(endpoint);
 }
 
@@ -86,12 +118,30 @@ export interface CalendarDay {
   hasEntry: boolean;
 }
 
-export async function fetchCalendarData(year?: number, month?: number): Promise<CalendarDay[]> {
-  const currentDate = new Date();
-  const targetYear = year || currentDate.getFullYear();
-  const targetMonth = month || currentDate.getMonth() + 1;
+export async function fetchCalendarData(
+  year?: number, 
+  month?: number,
+  dateRange?: { startDate: Date; endDate: Date }
+): Promise<CalendarDay[]> {
+  let endpoint = '/api/stats/calendar-data';
+  const params = new URLSearchParams();
   
-  return apiRequest<CalendarDay[]>(`/api/stats/calendar-data?year=${targetYear}&month=${targetMonth}`);
+  if (dateRange) {
+    params.append('startDate', dateRange.startDate.toISOString());
+    params.append('endDate', dateRange.endDate.toISOString());
+  } else {
+    const currentDate = new Date();
+    const targetYear = year || currentDate.getFullYear();
+    const targetMonth = month || currentDate.getMonth() + 1;
+    params.append('year', targetYear.toString());
+    params.append('month', targetMonth.toString());
+  }
+  
+  if (params.toString()) {
+    endpoint += `?${params.toString()}`;
+  }
+  
+  return apiRequest<CalendarDay[]>(endpoint);
 }
 
 // Profile API functions

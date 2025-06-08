@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,16 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/contexts/ThemeContext';
-import { SkiaLoadingAnimation } from '@/components/ui/SkiaLoadingAnimation';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { fetchJournalSummary } from '@/lib/api';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/contexts/ThemeContext";
+import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
+import DateRangePicker, { DateRange } from "@/components/ui/DateRangePicker";
+import { router, useLocalSearchParams } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { fetchJournalSummary } from "@/lib/api";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 interface JournalStatsData {
   positive: number;
@@ -24,36 +25,72 @@ interface JournalStatsData {
   total: number;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 export default function JournalAdvancedStats() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { period = 'currentMonth' } = useLocalSearchParams<{ period: string }>();
+  const { period = "currentMonth" } = useLocalSearchParams<{
+    period: string;
+  }>();
   const styles = createStyles(theme);
 
-  // Fetch journal summary stats
-  const {
-    data,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ["journalStats", period],
-    queryFn: () => fetchJournalSummary(period),
+  // Initialize date range based on period parameter
+  const getInitialDateRange = (): DateRange => {
+    const now = new Date();
+    switch (period) {
+      case "last7days":
+        return {
+          key: "last7days",
+          label: "Last 7 days",
+          startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          endDate: now,
+        };
+      case "last30days":
+        return {
+          key: "last30days",
+          label: "Last 30 days",
+          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          endDate: now,
+        };
+      case "currentMonth":
+      default:
+        return {
+          key: "currentMonth",
+          label: "This month",
+          startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+          endDate: now,
+        };
+    }
+  };
+
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(
+    getInitialDateRange()
+  ); // Fetch journal summary stats
+  const { data, error, isLoading } = useQuery({
+    queryKey: [
+      "journalStats",
+      selectedDateRange.key,
+      selectedDateRange.startDate,
+      selectedDateRange.endDate,
+    ],
+    queryFn: () =>
+      fetchJournalSummary(selectedDateRange.key, {
+        startDate: selectedDateRange.startDate,
+        endDate: selectedDateRange.endDate,
+      }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
-
-  const getPeriodDisplayName = (period: string): string => {
-    switch (period) {
-      case 'currentMonth':
-        return 'This Month';
-      case 'last30days':
-        return 'Last 30 Days';
-      case 'last7days':
-        return 'Last 7 Days';
-      default:
-        return 'All Time';
-    }
+  const handleDateRangeChange = (newRange: DateRange) => {
+    console.log(
+      "Journal Advanced: Date range changed to:",
+      newRange.label,
+      newRange.key
+    );
+    setSelectedDateRange(newRange);
+  };
+  const getPeriodDisplayName = (dateRange: DateRange): string => {
+    return dateRange.label;
   };
 
   const getPositivityRate = () => {
@@ -66,11 +103,14 @@ export default function JournalAdvancedStats() {
     const completed = data.total - data.skipped;
     return ((completed / data.total) * 100).toFixed(1);
   };
-
   const getAverageEntriesPerDay = () => {
     if (!data) return 0;
-    const days = period === 'last7days' ? 7 : period === 'last30days' ? 30 : 30; // Approximate
-    return (data.total / days).toFixed(1);
+    const diffTime = Math.abs(
+      selectedDateRange.endDate.getTime() -
+        selectedDateRange.startDate.getTime()
+    );
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    return (data.total / diffDays).toFixed(1);
   };
 
   const renderDetailCard = (
@@ -80,9 +120,9 @@ export default function JournalAdvancedStats() {
     color: string,
     icon: string
   ) => (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.delay(200).duration(400)}
-      style={[styles.detailCard, { backgroundColor: color + '20' }]}
+      style={[styles.detailCard, { backgroundColor: color + "20" }]}
     >
       <View style={styles.detailCardHeader}>
         <Ionicons name={icon as any} size={24} color={color} />
@@ -91,55 +131,96 @@ export default function JournalAdvancedStats() {
       <Text style={[styles.detailCardTitle, { color: theme.colors.text }]}>
         {title}
       </Text>
-      <Text style={[styles.detailCardSubtitle, { color: theme.colors.textSecondary }]}>
+      <Text
+        style={[
+          styles.detailCardSubtitle,
+          { color: theme.colors.textSecondary },
+        ]}
+      >
         {subtitle}
       </Text>
     </Animated.View>
   );
 
   const renderMoodBreakdown = () => (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.delay(400).duration(400)}
       style={styles.breakdownContainer}
     >
       <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
         Mood Distribution
       </Text>
-      
+
       <View style={styles.moodBars}>
         {[
-          { key: 'positive', count: data?.positive || 0, color: theme.colors.mood.happy, label: 'Positive', icon: 'happy-outline' },
-          { key: 'neutral', count: data?.neutral || 0, color: theme.colors.mood.neutral, label: 'Neutral', icon: 'remove-outline' },
-          { key: 'negative', count: data?.negative || 0, color: theme.colors.mood.sad, label: 'Negative', icon: 'sad-outline' },
-          { key: 'skipped', count: data?.skipped || 0, color: theme.colors.textTertiary, label: 'Skipped', icon: 'ellipsis-horizontal-outline' },
+          {
+            key: "positive",
+            count: data?.positive || 0,
+            color: theme.colors.mood.happy,
+            label: "Positive",
+            icon: "happy-outline",
+          },
+          {
+            key: "neutral",
+            count: data?.neutral || 0,
+            color: theme.colors.mood.neutral,
+            label: "Neutral",
+            icon: "remove-outline",
+          },
+          {
+            key: "negative",
+            count: data?.negative || 0,
+            color: theme.colors.mood.sad,
+            label: "Negative",
+            icon: "sad-outline",
+          },
+          {
+            key: "skipped",
+            count: data?.skipped || 0,
+            color: theme.colors.textTertiary,
+            label: "Skipped",
+            icon: "ellipsis-horizontal-outline",
+          },
         ].map((mood, index) => {
-          const percentage = data && data.total > 0 ? (mood.count / data.total) * 100 : 0;
+          const percentage =
+            data && data.total > 0 ? (mood.count / data.total) * 100 : 0;
           return (
-            <Animated.View 
+            <Animated.View
               key={mood.key}
               entering={FadeIn.delay(500 + index * 100).duration(400)}
               style={styles.moodBarContainer}
             >
               <View style={styles.moodBarHeader}>
                 <View style={styles.moodBarInfo}>
-                  <Ionicons name={mood.icon as any} size={20} color={mood.color} />
-                  <Text style={[styles.moodBarLabel, { color: theme.colors.text }]}>
+                  <Ionicons
+                    name={mood.icon as any}
+                    size={20}
+                    color={mood.color}
+                  />
+                  <Text
+                    style={[styles.moodBarLabel, { color: theme.colors.text }]}
+                  >
                     {mood.label}
                   </Text>
                 </View>
-                <Text style={[styles.moodBarCount, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.moodBarCount,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   {mood.count} ({percentage.toFixed(1)}%)
                 </Text>
               </View>
               <View style={styles.moodBarTrack}>
-                <Animated.View 
+                <Animated.View
                   entering={FadeIn.delay(600 + index * 100).duration(600)}
                   style={[
                     styles.moodBarFill,
-                    { 
+                    {
                       backgroundColor: mood.color,
-                      width: `${percentage}%`
-                    }
+                      width: `${percentage}%`,
+                    },
                   ]}
                 />
               </View>
@@ -152,9 +233,17 @@ export default function JournalAdvancedStats() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.background, paddingTop: insets.top },
+        ]}
+      >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
@@ -168,7 +257,9 @@ export default function JournalAdvancedStats() {
             variant="orbital"
             visible={true}
           />
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+          <Text
+            style={[styles.loadingText, { color: theme.colors.textSecondary }]}
+          >
             Loading analytics...
           </Text>
         </View>
@@ -178,9 +269,17 @@ export default function JournalAdvancedStats() {
 
   if (error || !data) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.background, paddingTop: insets.top },
+        ]}
+      >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
@@ -194,7 +293,9 @@ export default function JournalAdvancedStats() {
             variant="ripple"
             visible={true}
           />
-          <Text style={[styles.errorText, { color: theme.colors.semantic.error }]}>
+          <Text
+            style={[styles.errorText, { color: theme.colors.semantic.error }]}
+          >
             Failed to load analytics
           </Text>
         </View>
@@ -203,50 +304,64 @@ export default function JournalAdvancedStats() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.background, paddingTop: insets.top },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
           Journal Analytics
         </Text>
-        <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
-          {getPeriodDisplayName(period)}
+        <Text
+          style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}
+        >
+          {getPeriodDisplayName(selectedDateRange)}
         </Text>
       </View>
-
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Date Range Picker */}
+        <DateRangePicker
+          selectedRange={selectedDateRange}
+          onRangeChange={handleDateRangeChange}
+        />
         {/* Key Metrics */}
         <View style={styles.metricsGrid}>
           {renderDetailCard(
-            'Positivity Rate',
+            "Positivity Rate",
             `${getPositivityRate()}%`,
-            'Percentage of positive entries',
+            "Percentage of positive entries",
             theme.colors.mood.happy,
-            'trending-up-outline'
+            "trending-up-outline"
           )}
           {renderDetailCard(
-            'Completion Rate',
+            "Completion Rate",
             `${getCompletionRate()}%`,
-            'Entries with mood recorded',
+            "Entries with mood recorded",
             theme.colors.primary,
-            'checkmark-circle-outline'
+            "checkmark-circle-outline"
           )}
           {renderDetailCard(
-            'Daily Average',
+            "Daily Average",
             getAverageEntriesPerDay(),
-            'Entries per day',
+            "Entries per day",
             theme.colors.mood.neutral,
-            'calendar-outline'
+            "calendar-outline"
           )}
           {renderDetailCard(
-            'Total Entries',
+            "Total Entries",
             data.total.toString(),
-            'Journal entries written',
+            "Journal entries written",
             theme.colors.accent,
-            'document-text-outline'
+            "document-text-outline"
           )}
         </View>
 
@@ -254,7 +369,7 @@ export default function JournalAdvancedStats() {
         {renderMoodBreakdown()}
 
         {/* Insights */}
-        <Animated.View 
+        <Animated.View
           entering={FadeIn.delay(800).duration(400)}
           style={styles.insightsContainer}
         >
@@ -262,14 +377,22 @@ export default function JournalAdvancedStats() {
             Insights
           </Text>
           <View style={styles.insightCard}>
-            <Ionicons name="bulb-outline" size={20} color={theme.colors.primary} />
-            <Text style={[styles.insightText, { color: theme.colors.textSecondary }]}>
-              {data.positive > data.negative 
+            <Ionicons
+              name="bulb-outline"
+              size={20}
+              color={theme.colors.primary}
+            />
+            <Text
+              style={[
+                styles.insightText,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {data.positive > data.negative
                 ? `You're maintaining a positive outlook! ${data.positive} positive entries vs ${data.negative} negative ones.`
                 : data.positive === data.negative
                 ? `Your mood entries are balanced between positive and negative.`
-                : `Consider focusing on positive aspects in your journaling to improve your overall mood tracking.`
-              }
+                : `Consider focusing on positive aspects in your journaling to improve your overall mood tracking.`}
             </Text>
           </View>
         </Animated.View>
@@ -278,148 +401,149 @@ export default function JournalAdvancedStats() {
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    alignItems: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: theme.colors.cardBackground,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  errorText: {
-    marginTop: 16,
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 30,
-  },
-  detailCard: {
-    width: (width - 60) / 2,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  detailCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  detailCardValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  detailCardTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  detailCardSubtitle: {
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  breakdownContainer: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  moodBars: {
-    backgroundColor: theme.colors.cardBackground,
-    borderRadius: 12,
-    padding: 16,
-  },
-  moodBarContainer: {
-    marginBottom: 16,
-  },
-  moodBarHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  moodBarInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  moodBarLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 8,
-  },
-  moodBarCount: {
-    fontSize: 14,
-  },
-  moodBarTrack: {
-    height: 6,
-    backgroundColor: theme.colors.border,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  moodBarFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  insightsContainer: {
-    marginBottom: 30,
-  },
-  insightCard: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: theme.colors.cardBackground,
-    borderRadius: 12,
-    alignItems: 'flex-start',
-  },
-  insightText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    marginLeft: 12,
-  },
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    header: {
+      padding: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      alignItems: "center",
+    },
+    backButton: {
+      position: "absolute",
+      top: 20,
+      left: 20,
+      padding: 8,
+      borderRadius: 20,
+      backgroundColor: theme.colors.backgroundSecondary,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      marginBottom: 4,
+    },
+    headerSubtitle: {
+      fontSize: 16,
+    },
+    content: {
+      flex: 1,
+      padding: 20,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 32,
+    },
+    loadingText: {
+      marginTop: 16,
+      fontSize: 16,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 32,
+    },
+    errorText: {
+      marginTop: 16,
+      fontSize: 16,
+      textAlign: "center",
+    },
+    metricsGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      marginBottom: 30,
+    },
+    detailCard: {
+      width: (width - 60) / 2,
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      alignItems: "center",
+    },
+    detailCardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    detailCardValue: {
+      fontSize: 24,
+      fontWeight: "bold",
+      marginLeft: 8,
+    },
+    detailCardTitle: {
+      fontSize: 14,
+      fontWeight: "600",
+      textAlign: "center",
+      marginBottom: 2,
+    },
+    detailCardSubtitle: {
+      fontSize: 12,
+      textAlign: "center",
+    },
+    breakdownContainer: {
+      marginBottom: 30,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 16,
+    },
+    moodBars: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderRadius: 12,
+      padding: 16,
+    },
+    moodBarContainer: {
+      marginBottom: 16,
+    },
+    moodBarHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    moodBarInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    moodBarLabel: {
+      fontSize: 14,
+      fontWeight: "500",
+      marginLeft: 8,
+    },
+    moodBarCount: {
+      fontSize: 14,
+    },
+    moodBarTrack: {
+      height: 6,
+      backgroundColor: theme.colors.border,
+      borderRadius: 3,
+      overflow: "hidden",
+    },
+    moodBarFill: {
+      height: "100%",
+      borderRadius: 3,
+    },
+    insightsContainer: {
+      marginBottom: 30,
+    },
+    insightCard: {
+      flexDirection: "row",
+      padding: 16,
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderRadius: 12,
+      alignItems: "flex-start",
+    },
+    insightText: {
+      flex: 1,
+      fontSize: 14,
+      lineHeight: 20,
+      marginLeft: 12,
+    },
+  });

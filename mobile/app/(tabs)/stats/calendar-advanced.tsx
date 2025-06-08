@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { SkiaLoadingAnimation } from '@/components/ui/SkiaLoadingAnimation';
+import DateRangePicker, { DateRange } from '@/components/ui/DateRangePicker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -65,21 +66,40 @@ export default function CalendarAdvancedStats() {
   const { currentMonth } = useLocalSearchParams<{ currentMonth: string }>();
   const styles = createStyles(theme);
 
+  // Initialize date range - default to current month
+  const getInitialDateRange = (): DateRange => {
+    const now = new Date();
+    return {
+      key: 'currentMonth',
+      label: 'This month',
+      startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+      endDate: now
+    };
+  };
+
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(getInitialDateRange());
+
   // Get current date info for calendar data fetch
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonthIndex = currentDate.getMonth() + 1;
-
-  // Fetch calendar data for current month
+  // Fetch calendar data for selected date range
   const {
     data: calendarData,
     error,
     isLoading,
   } = useQuery({
-    queryKey: ["calendarData", currentYear, currentMonthIndex],
-    queryFn: () => fetchCalendarData(currentYear, currentMonthIndex),
+    queryKey: ["calendarData", selectedDateRange.key, selectedDateRange.startDate, selectedDateRange.endDate],
+    queryFn: () => fetchCalendarData(undefined, undefined, {
+      startDate: selectedDateRange.startDate,
+      endDate: selectedDateRange.endDate
+    }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  const handleDateRangeChange = (newRange: DateRange) => {
+    setSelectedDateRange(newRange);
+  };
 
   // Use real data if available, otherwise fallback to mock data
   const days = calendarData && calendarData.length > 0 ? calendarData : mockCalendarDays;
@@ -397,13 +417,16 @@ export default function CalendarAdvancedStats() {
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
           Calendar Analytics
+        </Text>        <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
+          {selectedDateRange.label}
         </Text>
-        <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
-          {currentMonth || new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
-        </Text>
-      </View>
+      </View>      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Date Range Picker */}
+        <DateRangePicker
+          selectedRange={selectedDateRange}
+          onRangeChange={handleDateRangeChange}
+        />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Summary Cards */}
         <View style={styles.summaryGrid}>
           {renderDetailCard(
@@ -458,14 +481,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     alignItems: 'center',
-  },
-  backButton: {
+  },  backButton: {
     position: 'absolute',
     top: 20,
     left: 20,
     padding: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.cardBackground,
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   headerTitle: {
     fontSize: 24,
@@ -529,9 +551,8 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
-  },
-  calendarCard: {
-    backgroundColor: theme.colors.cardBackground,
+  },  calendarCard: {
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 16,
   },
@@ -580,9 +601,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   distributionContainer: {
     marginBottom: 30,
-  },
-  distributionCard: {
-    backgroundColor: theme.colors.cardBackground,
+  },  distributionCard: {
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 16,
   },
@@ -619,11 +639,10 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   insightsContainer: {
     marginBottom: 30,
-  },
-  insightCard: {
+  },  insightCard: {
     flexDirection: 'row',
     padding: 16,
-    backgroundColor: theme.colors.cardBackground,
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     alignItems: 'flex-start',
   },

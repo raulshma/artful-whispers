@@ -59,11 +59,10 @@ export interface IStorage {
   createCheckIn(checkIn: InsertCheckIn & { userId: string }): Promise<CheckIn>;
   getCheckIns(userId: string, limit?: number, offset?: number): Promise<CheckIn[]>;
   getCheckIn(id: number): Promise<CheckIn | undefined>;
-  
-  // Stats methods (existing)
-  getJournalSummaryStats(userId: string, period?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }>;
-  getMoodCheckinDistribution(userId: string, period?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>>;
-  getCalendarData(userId: string, year: number, month: number): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>>;
+    // Stats methods (existing)
+  getJournalSummaryStats(userId: string, period?: string, startDate?: string, endDate?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }>;
+  getMoodCheckinDistribution(userId: string, period?: string, startDate?: string, endDate?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>>;
+  getCalendarData(userId: string, year?: number, month?: number, startDate?: string, endDate?: string): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -226,13 +225,19 @@ export class DatabaseStorage implements IStorage {
     const [checkIn] = await db.select().from(checkIns).where(eq(checkIns.id, id));
     return checkIn || undefined;
   }
-
   // Stats methods implementation
-  async getJournalSummaryStats(userId: string, period?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }> {
+  async getJournalSummaryStats(userId: string, period?: string, startDate?: string, endDate?: string): Promise<{ positive: number, neutral: number, negative: number, skipped: number, total: number }> {
     let whereCondition = eq(diaryEntries.userId, userId);
     
-    // Add period filtering if specified
-    if (period) {
+    // Add date range filtering if specified
+    if (startDate && endDate) {
+      whereCondition = and(
+        eq(diaryEntries.userId, userId),
+        sql`${diaryEntries.createdAt} >= ${startDate}`,
+        sql`${diaryEntries.createdAt} <= ${endDate}`
+      )!;
+    } else if (period) {
+      // Fallback to period-based filtering for backward compatibility
       const now = new Date();
       let dateThreshold: Date;
       
@@ -293,12 +298,18 @@ export class DatabaseStorage implements IStorage {
 
     return { positive, neutral, negative, skipped, total };
   }
-
-  async getMoodCheckinDistribution(userId: string, period?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>> {
+  async getMoodCheckinDistribution(userId: string, period?: string, startDate?: string, endDate?: string): Promise<Array<{ mood: string, count: number, color: string, icon: string, percentage: number }>> {
     let whereCondition = eq(checkIns.userId, userId);
     
-    // Add period filtering if specified
-    if (period) {
+    // Add date range filtering if specified
+    if (startDate && endDate) {
+      whereCondition = and(
+        eq(checkIns.userId, userId),
+        sql`${checkIns.createdAt} >= ${startDate}`,
+        sql`${checkIns.createdAt} <= ${endDate}`
+      )!;
+    } else if (period) {
+      // Fallback to period-based filtering for backward compatibility
       const now = new Date();
       let dateThreshold: Date;
       
@@ -366,14 +377,26 @@ export class DatabaseStorage implements IStorage {
       };
     });
   }
+  async getCalendarData(userId: string, year?: number, month?: number, startDate?: string, endDate?: string): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>> {
+    let firstDay: Date;
+    let lastDay: Date;
+    let daysInRange: number;
 
-  async getCalendarData(userId: string, year: number, month: number): Promise<Array<{ day: number, mood: 'happy' | 'neutral' | 'sad' | 'negative' | 'skipped' | null, hasEntry: boolean }>> {
-    // Get the first and last day of the month
-    const firstDay = new Date(year, month - 1, 1);
-    const lastDay = new Date(year, month, 0);
-    const daysInMonth = lastDay.getDate();
+    if (startDate && endDate) {
+      // Use provided date range
+      firstDay = new Date(startDate);
+      lastDay = new Date(endDate);
+      daysInRange = Math.ceil((lastDay.getTime() - firstDay.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    } else {
+      // Fallback to year/month for backward compatibility
+      const currentYear = year || new Date().getFullYear();
+      const currentMonth = month || new Date().getMonth() + 1;
+      firstDay = new Date(currentYear, currentMonth - 1, 1);
+      lastDay = new Date(currentYear, currentMonth, 0);
+      daysInRange = lastDay.getDate();
+    }
 
-    // Get all diary entries for the month
+    // Get all diary entries for the date range
     const entries = await db
       .select({
         date: diaryEntries.date,
@@ -412,18 +435,38 @@ export class DatabaseStorage implements IStorage {
       return 'neutral';
     };
 
-    // Build calendar data for all days in the month
+    // Build calendar data for all days in the range
     const calendarData = [];
-    for (let day = 1; day <= daysInMonth; day++) {
-      const moodText = entryMap.get(day);
-      const hasEntry = !!moodText;
-      const mood = hasEntry ? categorizeMood(moodText) : null;
+    if (startDate && endDate) {
+      // For date ranges, we need to iterate day by day
+      const currentDate = new Date(firstDay);
+      while (currentDate <= lastDay) {
+        const day = currentDate.getDate();
+        const moodText = entryMap.get(day);
+        const hasEntry = !!moodText;
+        const mood = hasEntry ? categorizeMood(moodText) : null;
 
-      calendarData.push({
-        day,
-        mood,
-        hasEntry
-      });
+        calendarData.push({
+          day,
+          mood,
+          hasEntry
+        });
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    } else {
+      // For month-based queries, use the original logic
+      for (let day = 1; day <= daysInRange; day++) {
+        const moodText = entryMap.get(day);
+        const hasEntry = !!moodText;
+        const mood = hasEntry ? categorizeMood(moodText) : null;
+
+        calendarData.push({
+          day,
+          mood,
+          hasEntry
+        });
+      }
     }
 
     return calendarData;
