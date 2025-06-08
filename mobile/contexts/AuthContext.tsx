@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Let ProtectedRoute handle redirecting unauthenticated users to auth
     if (isAuthenticated && onAuthScreen) {
       console.log('Redirecting authenticated user from auth to tabs');
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/journal');
     }
   }, [user, segments, isLoading]);
 

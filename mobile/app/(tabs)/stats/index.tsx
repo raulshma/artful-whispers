@@ -10,15 +10,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/contexts/ThemeContext";
 import { router } from "expo-router";
-import Animated, { 
-  FadeIn, 
-  FadeOut, 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
   withSequence,
-  withDelay 
-} from 'react-native-reanimated';
+  withDelay,
+} from "react-native-reanimated";
 import JournalStats from "@/components/JournalStats";
 import MoodStatsCard from "@/components/MoodStatsCard";
 import MoodCalendar from "@/components/MoodCalendar";
@@ -26,7 +26,11 @@ import DateRangePicker, { DateRange } from "@/components/ui/DateRangePicker";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
-import { fetchJournalSummary, fetchMoodCheckinDistribution, fetchCalendarData } from "@/lib/api";
+import {
+  fetchJournalSummary,
+  fetchMoodCheckinDistribution,
+  fetchCalendarData,
+} from "@/lib/api";
 
 // Mock calendar data - will be replaced when calendar integration is implemented
 
@@ -73,25 +77,33 @@ export default function JournalStatsScreen() {
   const getInitialDateRange = (): DateRange => {
     const now = new Date();
     return {
-      key: 'currentMonth',
-      label: 'This month',
+      key: "currentMonth",
+      label: "This month",
       startDate: new Date(now.getFullYear(), now.getMonth(), 1),
-      endDate: now
+      endDate: now,
     };
   };
 
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(getInitialDateRange());  // Fetch journal summary stats
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(
+    getInitialDateRange()
+  ); // Fetch journal summary stats
   const {
     data: journalStats,
     error: journalError,
     isLoading: journalLoading,
     refetch: refetchJournalStats,
   } = useQuery({
-    queryKey: ["journalStats", selectedDateRange.key, selectedDateRange.startDate, selectedDateRange.endDate],
-    queryFn: () => fetchJournalSummary(selectedDateRange.key, {
-      startDate: selectedDateRange.startDate,
-      endDate: selectedDateRange.endDate
-    }),
+    queryKey: [
+      "journalStats",
+      selectedDateRange.key,
+      selectedDateRange.startDate,
+      selectedDateRange.endDate,
+    ],
+    queryFn: () =>
+      fetchJournalSummary(selectedDateRange.key, {
+        startDate: selectedDateRange.startDate,
+        endDate: selectedDateRange.endDate,
+      }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -102,11 +114,17 @@ export default function JournalStatsScreen() {
     isLoading: moodLoading,
     refetch: refetchMoodStats,
   } = useQuery({
-    queryKey: ["moodDistribution", selectedDateRange.key, selectedDateRange.startDate, selectedDateRange.endDate],
-    queryFn: () => fetchMoodCheckinDistribution(selectedDateRange.key, {
-      startDate: selectedDateRange.startDate,
-      endDate: selectedDateRange.endDate
-    }),
+    queryKey: [
+      "moodDistribution",
+      selectedDateRange.key,
+      selectedDateRange.startDate,
+      selectedDateRange.endDate,
+    ],
+    queryFn: () =>
+      fetchMoodCheckinDistribution(selectedDateRange.key, {
+        startDate: selectedDateRange.startDate,
+        endDate: selectedDateRange.endDate,
+      }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -114,7 +132,7 @@ export default function JournalStatsScreen() {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
-  
+
   const {
     data: calendarData,
     error: calendarError,
@@ -136,30 +154,40 @@ export default function JournalStatsScreen() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchJournalStats(), refetchMoodStats(), refetchCalendarData()]);
+      await Promise.all([
+        refetchJournalStats(),
+        refetchMoodStats(),
+        refetchCalendarData(),
+      ]);
     } catch (error) {
       console.error("Error refreshing stats:", error);
     } finally {
       setRefreshing(false);
     }
-  };  const handleJournalStatsPress = () => {
+  };
+  const handleJournalStatsPress = () => {
     router.push({
       pathname: "./stats/journal-advanced",
-      params: { period: selectedDateRange.key }
+      params: { period: selectedDateRange.key },
     });
   };
 
   const handleMoodStatsPress = () => {
     router.push({
-      pathname: "./stats/mood-advanced", 
-      params: { period: selectedDateRange.key }
+      pathname: "./stats/mood-advanced",
+      params: { period: selectedDateRange.key },
     });
   };
 
   const handleCalendarPress = () => {
     router.push({
       pathname: "./stats/calendar-advanced",
-      params: { currentMonth: new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' }) }
+      params: {
+        currentMonth: new Date(currentYear, currentMonth - 1).toLocaleString(
+          "default",
+          { month: "long", year: "numeric" }
+        ),
+      },
     });
   };
 
@@ -204,10 +232,9 @@ export default function JournalStatsScreen() {
                 />
               </View>
             )}
-
             {/* Loading State */}
             {(journalLoading || moodLoading || calendarLoading) && (
-              <Animated.View 
+              <Animated.View
                 entering={FadeIn.duration(300)}
                 exiting={FadeOut.duration(300)}
                 style={styles.loadingContainer}
@@ -218,18 +245,27 @@ export default function JournalStatsScreen() {
                   variant="orbital"
                   visible={true}
                 />
-                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.loadingText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Loading your stats...
                 </Text>
-                <Text style={[styles.loadingSubtext, { color: theme.colors.textTertiary }]}>
+                <Text
+                  style={[
+                    styles.loadingSubtext,
+                    { color: theme.colors.textTertiary },
+                  ]}
+                >
                   Analyzing your journal data
                 </Text>
               </Animated.View>
             )}
-
             {/* Error State */}
             {(journalError || moodError || calendarError) && (
-              <Animated.View 
+              <Animated.View
                 entering={FadeIn.duration(300)}
                 exiting={FadeOut.duration(300)}
                 style={styles.errorContainer}
@@ -240,11 +276,17 @@ export default function JournalStatsScreen() {
                   variant="ripple"
                   visible={true}
                 />
-                <Text style={[styles.errorText, { color: theme.colors.semantic.error }]}>
+                <Text
+                  style={[
+                    styles.errorText,
+                    { color: theme.colors.semantic.error },
+                  ]}
+                >
                   Failed to load stats. Pull to refresh.
                 </Text>
               </Animated.View>
-            )}            {/* Content */}
+            )}
+            {/* Content */}
             {!journalLoading && !moodLoading && !calendarLoading && (
               <Animated.View
                 entering={FadeIn.delay(150).duration(400)}
@@ -257,8 +299,8 @@ export default function JournalStatsScreen() {
                     onRangeChange={handleDateRangeChange}
                   />
                 </View>
-
-                {/* Main Journal Stats Card */}                {journalStats && (
+                {/* Main Journal Stats Card */}
+                {journalStats && (
                   <ShadowFriendlyAnimation index={0} animationType="slideUp">
                     <JournalStats
                       title="Journal Stats"
@@ -268,7 +310,6 @@ export default function JournalStatsScreen() {
                     />
                   </ShadowFriendlyAnimation>
                 )}
-
                 {/* Most Frequent Emotion Card */}
                 {moodDistribution && moodDistribution.length > 0 && (
                   <ShadowFriendlyAnimation index={1} animationType="slideUp">
@@ -280,7 +321,6 @@ export default function JournalStatsScreen() {
                     />
                   </ShadowFriendlyAnimation>
                 )}
-
                 {/* Empty state when no mood data */}
                 {moodDistribution && moodDistribution.length === 0 && (
                   <ShadowFriendlyAnimation index={1} animationType="slideUp">
@@ -291,21 +331,34 @@ export default function JournalStatsScreen() {
                         variant="breathing"
                         visible={true}
                       />
-                      <Text style={[styles.emptyStateText, { color: theme.colors.textSecondary }]}>
-                        No mood check-ins yet. Start tracking your moods to see statistics.
+                      <Text
+                        style={[
+                          styles.emptyStateText,
+                          { color: theme.colors.textSecondary },
+                        ]}
+                      >
+                        No mood check-ins yet. Start tracking your moods to see
+                        statistics.
                       </Text>
                     </View>
                   </ShadowFriendlyAnimation>
                 )}
-
                 {/* Calendar View */}
                 {calendarData && calendarData.length > 0 ? (
                   <ShadowFriendlyAnimation index={2} animationType="slideUp">
                     <MoodCalendar
-                      title={`${calendarData.filter(day => day.hasEntry).length}/${calendarData.length}`}
+                      title={`${
+                        calendarData.filter((day) => day.hasEntry).length
+                      }/${calendarData.length}`}
                       subtitle="Journals written this month"
                       days={calendarData}
-                      currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                      currentMonth={new Date(
+                        currentYear,
+                        currentMonth - 1
+                      ).toLocaleString("default", {
+                        month: "long",
+                        year: "numeric",
+                      })}
                       onDayPress={handleCalendarDayPress}
                       onAddPress={handleAddJournalPress}
                       onPress={handleCalendarPress}
@@ -318,7 +371,13 @@ export default function JournalStatsScreen() {
                       title="0/31"
                       subtitle="Journals written this month"
                       days={mockCalendarDays}
-                      currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                      currentMonth={new Date(
+                        currentYear,
+                        currentMonth - 1
+                      ).toLocaleString("default", {
+                        month: "long",
+                        year: "numeric",
+                      })}
                       onDayPress={handleCalendarDayPress}
                       onAddPress={handleAddJournalPress}
                       onPress={handleCalendarPress}
@@ -336,14 +395,14 @@ export default function JournalStatsScreen() {
 
 function getPeriodDisplayName(period: string): string {
   switch (period) {
-    case 'currentMonth':
-      return 'this month';
-    case 'last30days':
-      return 'last 30 days';
-    case 'last7days':
-      return 'last 7 days';
+    case "currentMonth":
+      return "this month";
+    case "last30days":
+      return "last 30 days";
+    case "last7days":
+      return "last 7 days";
     default:
-      return 'all time';
+      return "all time";
   }
 }
 
@@ -356,21 +415,22 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 100, // Space for tab bar
-  },  contentContainer: {
+  },
+  contentContainer: {
     flex: 1,
   },
   dateRangeContainer: {
     paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 0,
   },
   refreshingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
     minHeight: 200,
   },
@@ -386,23 +446,23 @@ const styles = StyleSheet.create({
     padding: 20,
     marginHorizontal: 20,
     borderRadius: 12,
-    backgroundColor: 'rgba(244, 67, 54, 0.1)',
-    alignItems: 'center',
+    backgroundColor: "rgba(244, 67, 54, 0.1)",
+    alignItems: "center",
   },
   errorText: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptyStateContainer: {
     padding: 32,
     marginHorizontal: 20,
     borderRadius: 16,
-    alignItems: 'center',
-    backgroundColor: 'rgba(158, 158, 158, 0.1)',
+    alignItems: "center",
+    backgroundColor: "rgba(158, 158, 158, 0.1)",
   },
   emptyStateText: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 24,
   },
 });

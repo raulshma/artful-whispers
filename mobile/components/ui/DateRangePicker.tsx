@@ -1,22 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Modal,
-  Pressable,
-  ScrollView,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInDown,
-  SlideOutDown,
-} from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
 
 const { width, height } = Dimensions.get("window");
 
@@ -88,14 +85,24 @@ export default function DateRangePicker({
   onRangeChange,
 }: DateRangePickerProps) {
   const { theme } = useTheme();
-  const [modalVisible, setModalVisible] = useState(false);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const styles = createStyles(theme);
-  const handleRangeSelect = (range: DateRange) => {
-    console.log("DateRangePicker: Range selected:", range.label, range.key);
-    alert(`Selected: ${range.label}`); // Temporary for testing
-    onRangeChange(range);
-    setModalVisible(false);
-  };
+
+  // Bottom sheet snap points
+  const snapPoints = useMemo(() => ["50%", "70%"], []);
+
+  const handleRangeSelect = useCallback(
+    (range: DateRange) => {
+      console.log("DateRangePicker: Range selected:", range.label, range.key);
+      onRangeChange(range);
+      bottomSheetModalRef.current?.close();
+    },
+    [onRangeChange]
+  );
+
+  const handleOpenBottomSheet = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
 
   const formatDateRange = (range: DateRange) => {
     const startMonth = range.startDate.toLocaleDateString("en-US", {
@@ -123,10 +130,8 @@ export default function DateRangePicker({
 
   return (
     <>
-      <TouchableOpacity
-        style={styles.trigger}
-        onPress={() => setModalVisible(true)}
-      >
+      {/* Trigger Button */}
+      <TouchableOpacity style={styles.trigger} onPress={handleOpenBottomSheet}>
         <View style={styles.triggerContent}>
           <Ionicons
             name="calendar-outline"
@@ -143,100 +148,101 @@ export default function DateRangePicker({
           color={theme.colors.textSecondary}
         />
       </TouchableOpacity>
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="none"
-        onRequestClose={() => setModalVisible(false)}
+      {/* Bottom Sheet Modal */}
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={1}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+        backgroundStyle={{
+          backgroundColor: theme.colors.background,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: theme.colors.textSecondary,
+          width: 40,
+          height: 4,
+        }}
+        style={{
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }}
       >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setModalVisible(false)}
+        <BottomSheetView
+          style={[
+            styles.bottomSheetContent,
+            { backgroundColor: theme.colors.background },
+          ]}
         >
-          <Animated.View
-            entering={SlideInDown.duration(300)}
-            exiting={SlideOutDown.duration(200)}
-            style={[
-              styles.modalContent,
-              { backgroundColor: theme.colors.background },
-            ]}
+          <Text style={[styles.bottomSheetTitle, { color: theme.colors.text }]}>
+            Select Date Range
+          </Text>
+          <BottomSheetScrollView
+            style={styles.bottomSheetList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
           >
-            <Pressable onPress={(e) => e.stopPropagation()}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
-                  Select Date Range
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={styles.closeButton}
-                >
-                  <Ionicons
-                    name="close"
-                    size={24}
-                    color={theme.colors.textSecondary}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView
-                style={styles.rangeList}
-                showsVerticalScrollIndicator={false}
+            {predefinedRanges.map((range, index) => (
+              <Animated.View
+                key={range.key}
+                entering={FadeIn.delay(index * 50).duration(300)}
               >
-                {predefinedRanges.map((range, index) => (
-                  <Animated.View
-                    key={range.key}
-                    entering={FadeIn.delay(index * 50).duration(300)}
-                  >
-                    <TouchableOpacity
+                <TouchableOpacity
+                  style={[
+                    styles.rangeItem,
+                    { backgroundColor: theme.colors.backgroundSecondary },
+                    selectedRange.key === range.key && {
+                      backgroundColor: theme.colors.primary + "20",
+                      borderColor: theme.colors.primary,
+                      borderWidth: 1,
+                    },
+                  ]}
+                  onPress={() => handleRangeSelect(range)}
+                >
+                  <View style={styles.rangeItemContent}>
+                    <Text
                       style={[
-                        styles.rangeItem,
+                        styles.rangeLabel,
+                        { color: theme.colors.text },
                         selectedRange.key === range.key && {
-                          backgroundColor: theme.colors.primary + "20",
-                          borderColor: theme.colors.primary,
-                          borderWidth: 1,
+                          color: theme.colors.primary,
                         },
                       ]}
-                      onPress={() => handleRangeSelect(range)}
                     >
-                      <View style={styles.rangeItemContent}>
-                        <Text
-                          style={[
-                            styles.rangeLabel,
-                            { color: theme.colors.text },
-                            selectedRange.key === range.key && {
-                              color: theme.colors.primary,
-                            },
-                          ]}
-                        >
-                          {range.label}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.rangeDates,
-                            { color: theme.colors.textSecondary },
-                            selectedRange.key === range.key && {
-                              color: theme.colors.primary + "CC",
-                            },
-                          ]}
-                        >
-                          {formatDateRange(range)}
-                        </Text>
-                      </View>
-                      {selectedRange.key === range.key && (
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={20}
-                          color={theme.colors.primary}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  </Animated.View>
-                ))}
-              </ScrollView>
-            </Pressable>
-          </Animated.View>
-        </Pressable>
-      </Modal>
+                      {range.label}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.rangeDates,
+                        { color: theme.colors.textSecondary },
+                        selectedRange.key === range.key && {
+                          color: theme.colors.primary + "CC",
+                        },
+                      ]}
+                    >
+                      {formatDateRange(range)}
+                    </Text>
+                  </View>
+                  {selectedRange.key === range.key && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color={theme.colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </BottomSheetScrollView>
+        </BottomSheetView>
+      </BottomSheetModal>
     </>
   );
 }
@@ -252,8 +258,8 @@ const createStyles = (theme: any) =>
       borderRadius: 12,
       borderWidth: 1,
       borderColor: theme.colors.border,
-      marginBottom: 16,
       backgroundColor: theme.colors.backgroundSecondary,
+      marginBottom: 16,
     },
     triggerContent: {
       flexDirection: "row",
@@ -264,37 +270,21 @@ const createStyles = (theme: any) =>
       fontWeight: "500",
       marginLeft: 8,
     },
-    modalOverlay: {
+    bottomSheetContent: {
       flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.6)"
+      paddingHorizontal: 16,
+      backgroundColor: "transparent", // Let the background style handle the color
     },
-    modalContent: {
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      paddingTop: 20,
-      maxHeight: height * 0.7,
-      minHeight: 300,
+    bottomSheetTitle: {
+      fontSize: 20,
+      fontWeight: "600",
+      textAlign: "center",
+      marginBottom: 20,
+      marginTop: 8,
     },
-    modalHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 20,
-      paddingBottom: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    modalTitle: {
-      fontSize: 18,
-      fontWeight: "bold",
-    },
-    closeButton: {
-      padding: 4,
-    },
-    rangeList: {
-      paddingHorizontal: 20,
-      paddingTop: 16,
-      paddingBottom: 40,
+    bottomSheetList: {
+      flex: 1,
+      paddingHorizontal: 4,
     },
     rangeItem: {
       flexDirection: "row",
@@ -302,9 +292,16 @@ const createStyles = (theme: any) =>
       justifyContent: "space-between",
       paddingVertical: 16,
       paddingHorizontal: 16,
+      marginVertical: 4,
       borderRadius: 12,
-      marginBottom: 8,
-      backgroundColor: theme.colors.backgroundSecondary,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 1.5,
+      elevation: 2,
     },
     rangeItemContent: {
       flex: 1,
