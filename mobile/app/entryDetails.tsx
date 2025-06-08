@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Image,
   Alert,
   Share,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,7 +17,8 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DiaryEntry } from "@/hooks/useDiary";
-import { useFavoriteToggle } from "@/hooks/useDiary";
+import { useFavoriteToggle, useAdjacentDiaryEntry } from "@/hooks/useDiary";
+import { FadeMergeTransition } from "@/components/skia/FadeMergeTransition";
 
 const { width, height } = Dimensions.get("window");
 
@@ -29,9 +31,32 @@ export default function EntryDetailsScreen() {
 
   // Parse the entry data from params
   const entry: DiaryEntry = JSON.parse(params.entry as string);
+  const [currentEntry, setCurrentEntry] = useState<DiaryEntry>(entry);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const [isScrolled, setIsScrolled] = useState(false);
+  // Fetch next entry
+  const { data: nextEntry, isLoading: isLoadingNext } = useAdjacentDiaryEntry(
+    currentEntry.id,
+    "next"
+  );
 
+  // Enhanced transition function with Skia animation
+  const triggerTransition = useCallback(async () => {
+    if (!nextEntry || isTransitioning) return;
+
+    setIsTransitioning(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, [nextEntry, isTransitioning]);
+
+  const handleTransitionComplete = useCallback(() => {
+    if (nextEntry) {
+      // Update the current entry after transition completes
+      setCurrentEntry(nextEntry);
+      // Update URL params to reflect new entry
+      router.setParams({ entry: JSON.stringify(nextEntry) });
+    }
+    setIsTransitioning(false);
+  }, [nextEntry, router]);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -96,12 +121,11 @@ export default function EntryDetailsScreen() {
     const readTime = Math.max(1, Math.ceil(words / 200));
     return `${readTime} min read`;
   };
-
   const handleToggleFavorite = async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await favoriteToggle.mutateAsync(entry.id);
-      const message = !entry.isFavorite
+      await favoriteToggle.mutateAsync(currentEntry.id);
+      const message = !currentEntry.isFavorite
         ? "Added to favorites ❤️"
         : "Removed from favorites";
       Alert.alert("Success", message);
@@ -109,17 +133,20 @@ export default function EntryDetailsScreen() {
       Alert.alert("Error", "Failed to update favorite status");
     }
   };
+
   const handleShare = async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      const shareContent = `${entry.title || "My Journal Entry"}\n\n${
-        entry.content
-      }\n\n${formatDate(entry.date)} • ${formatTime(entry.createdAt)}`;
+      const shareContent = `${currentEntry.title || "My Journal Entry"}\n\n${
+        currentEntry.content
+      }\n\n${formatDate(currentEntry.date)} • ${formatTime(
+        currentEntry.createdAt
+      )}`;
 
       await Share.share({
         message: shareContent,
-        title: entry.title || "Journal Entry",
+        title: currentEntry.title || "Journal Entry",
       });
     } catch (error) {
       Alert.alert("Error", "Failed to share entry");
@@ -130,10 +157,9 @@ export default function EntryDetailsScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.back();
   };
-
-  const emotions = parseEmotions(entry.emotions);
-  const moodIcon = getMoodIcon(entry.mood);
-  const displayMood = entry.mood || "Reflective";
+  const emotions = parseEmotions(currentEntry.emotions);
+  const moodIcon = getMoodIcon(currentEntry.mood);
+  const displayMood = currentEntry.mood || "Reflective";
 
   const renderHeader = () => (
     <View style={[styles.header, { paddingTop: insets.top }]}>
@@ -166,7 +192,6 @@ export default function EntryDetailsScreen() {
               color={theme.colors.text}
             />
           </TouchableOpacity>
-
           <TouchableOpacity
             style={[
               styles.headerButton,
@@ -175,10 +200,10 @@ export default function EntryDetailsScreen() {
             onPress={handleToggleFavorite}
           >
             <Ionicons
-              name={entry.isFavorite ? "heart" : "heart-outline"}
+              name={currentEntry.isFavorite ? "heart" : "heart-outline"}
               size={20}
               color={
-                entry.isFavorite
+                currentEntry.isFavorite
                   ? theme.colors.semantic.error
                   : theme.colors.text
               }
@@ -188,14 +213,13 @@ export default function EntryDetailsScreen() {
       </View>
     </View>
   );
-
   const renderContent = () => (
     <View style={styles.contentWrapper}>
       {/* Hero Image Section */}
-      {entry.imageUrl && (
+      {currentEntry.imageUrl && (
         <View style={styles.heroImageContainer}>
           <Image
-            source={{ uri: entry.imageUrl }}
+            source={{ uri: currentEntry.imageUrl }}
             style={styles.heroImage}
             resizeMode="cover"
           />
@@ -218,7 +242,7 @@ export default function EntryDetailsScreen() {
           styles.contentContainer,
           {
             backgroundColor: theme.colors.background,
-            marginTop: entry.imageUrl ? -30 : 0,
+            marginTop: currentEntry.imageUrl ? -30 : 0,
           },
         ]}
       >
@@ -260,7 +284,7 @@ export default function EntryDetailsScreen() {
             <Text
               style={[styles.dateText, { color: theme.colors.textSecondary }]}
             >
-              {formatDate(entry.date)}
+              {formatDate(currentEntry.date)}
             </Text>
             <View
               style={[
@@ -271,25 +295,22 @@ export default function EntryDetailsScreen() {
               ]}
             >
               <Text style={[styles.timeText, { color: theme.colors.primary }]}>
-                {formatTime(entry.createdAt)}
+                {formatTime(currentEntry.createdAt)}
               </Text>
             </View>
           </View>
         </View>
-
         {/* Title */}
         <Text style={[styles.title, { color: theme.colors.text }]}>
-          {entry.title || "Untitled Entry"}
+          {currentEntry.title || "Untitled Entry"}
         </Text>
-
         {/* Read Time */}
         <Text style={[styles.readTime, { color: theme.colors.textTertiary }]}>
-          {getReadTime(entry.content)}
+          {getReadTime(currentEntry.content)}
         </Text>
-
         {/* Content */}
         <View style={styles.contentTextContainer}>
-          {entry.content.split("\n").map((paragraph, index) => {
+          {currentEntry.content.split("\n").map((paragraph, index) => {
             if (!paragraph.trim()) {
               return <View key={index} style={styles.paragraphSpacing} />;
             }
@@ -303,9 +324,8 @@ export default function EntryDetailsScreen() {
             );
           })}
         </View>
-
         {/* Image Prompt Section */}
-        {entry.imagePrompt && (
+        {currentEntry.imagePrompt && (
           <View style={styles.imagePromptSection}>
             <Text
               style={[
@@ -321,14 +341,98 @@ export default function EntryDetailsScreen() {
                 { color: theme.colors.textTertiary },
               ]}
             >
-              "{entry.imagePrompt}"
+              "{currentEntry.imagePrompt}"
             </Text>
           </View>
+        )}
+        {/* Next Entry Preview */}
+        {nextEntry && (
+          <TouchableOpacity
+            style={[
+              styles.nextEntryPreviewContainer,
+              {
+                backgroundColor: isTransitioning
+                  ? theme.colors.backgroundTertiary
+                  : theme.colors.backgroundSecondary,
+                borderColor: isTransitioning
+                  ? theme.colors.primary + "40"
+                  : theme.colors.primary + "20",
+                opacity: isTransitioning ? 0.7 : 1,
+              },
+            ]}
+            onPress={triggerTransition}
+            activeOpacity={0.8}
+            disabled={isTransitioning}
+          >
+            <View style={styles.nextEntryPreview}>
+              <View
+                style={[
+                  styles.nextEntryIconContainer,
+                  {
+                    backgroundColor: isTransitioning
+                      ? theme.colors.primary + "25"
+                      : theme.colors.primary + "15",
+                  },
+                ]}
+              >
+                {isTransitioning ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.primary}
+                  />
+                ) : (
+                  <Ionicons
+                    name="book-outline"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                )}
+              </View>
+              <Text
+                style={[
+                  styles.nextEntryHint,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                {isTransitioning ? "Loading..." : "Continue your journey"}
+              </Text>
+              <Text
+                style={[styles.nextEntryTitle, { color: theme.colors.text }]}
+              >
+                {nextEntry.title || "Next Entry"}
+              </Text>
+              <Text
+                style={[
+                  styles.nextEntryDate,
+                  { color: theme.colors.textTertiary },
+                ]}
+              >
+                {formatDate(nextEntry.date)}
+              </Text>
+              {!isTransitioning && (
+                <View style={styles.nextEntryAction}>
+                  <Text
+                    style={[
+                      styles.nextEntryActionText,
+                      { color: theme.colors.primary },
+                    ]}
+                  >
+                    Tap to continue
+                  </Text>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={16}
+                    color={theme.colors.primary}
+                    style={styles.nextEntryActionIcon}
+                  />
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
         )}
       </View>
     </View>
   );
-
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -337,14 +441,14 @@ export default function EntryDetailsScreen() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        onScroll={(event) => {
-          const scrollY = event.nativeEvent.contentOffset.y;
-          setIsScrolled(scrollY > 50);
-        }}
-        scrollEventThrottle={16}
       >
         {renderContent()}
       </ScrollView>
+      {/* Page transition overlay */}
+      <FadeMergeTransition
+        isTransitioning={isTransitioning}
+        onTransitionComplete={handleTransitionComplete}
+      />
     </View>
   );
 }
@@ -506,5 +610,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontStyle: "italic",
     lineHeight: 20,
+  },
+  nextEntryPreviewContainer: {
+    marginTop: 32,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    overflow: "hidden",
+  },
+  nextEntryPreview: {
+    padding: 24,
+    alignItems: "center",
+  },
+  nextEntryIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  nextEntryHint: {
+    fontSize: 13,
+    textAlign: "center",
+    fontWeight: "500",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  nextEntryTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  nextEntryDate: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  nextEntryAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  nextEntryActionText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  nextEntryActionIcon: {
+    marginLeft: 4,
+  },
+  nextEntryIcon: {
+    marginTop: 4,
   },
 });
