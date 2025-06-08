@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -11,79 +11,72 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Animated,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCreateDiaryEntry } from "@/hooks/useDiary";
-import { LinearGradient } from "expo-linear-gradient";
+import { Spacing } from "@/constants/Spacing";
 import * as Haptics from "expo-haptics";
 
 export default function AddJournalScreen() {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
   const router = useRouter();
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const createEntry = useCreateDiaryEntry();
-  const saveButtonScale = React.useRef(new Animated.Value(1)).current;
+  const contentInputRef = useRef<TextInput>(null);
 
   const getCurrentTime = () => {
     const now = new Date();
-    // Get a more friendly date format
-    const dateString = now.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    let dateLabel;
+    if (now.toDateString() === today.toDateString()) {
+      dateLabel = "Today";
+    } else if (now.toDateString() === yesterday.toDateString()) {
+      dateLabel = "Yesterday";
+    } else {
+      dateLabel = now.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    }
+
     const timeString = now.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
-    return { date: dateString, time: timeString };
+
+    return { date: dateLabel, time: timeString };
   };
+
   const handleContentChange = (text: string) => {
     setContent(text);
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     setWordCount(words);
   };
 
-  const getCharacterCount = () => content.length;
-  const getCharacterColor = () => {
-    const count = getCharacterCount();
-    if (count > 4500) return theme.colors.semantic.error;
-    if (count > 4000) return theme.colors.semantic.warning;
-    return theme.colors.textTertiary;
+  const getReadingTime = () => {
+    if (wordCount === 0) return "0 min read";
+    const readTime = Math.max(1, Math.ceil(wordCount / 200));
+    return `${readTime} min read`;
   };
+
   const handleSave = async () => {
     if (!content.trim()) {
-      // Provide gentle haptic feedback for validation error
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       Alert.alert(
-        "Share Your Thoughts",
-        "Please write something to create your journal entry."
+        "Empty Entry",
+        "Please write something before saving your journal entry."
       );
       return;
     }
 
-    // Provide success haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    // Animate button press
-    Animated.sequence([
-      Animated.timing(saveButtonScale, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(saveButtonScale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     try {
       const today = new Date().toISOString().split("T")[0];
@@ -92,366 +85,239 @@ export default function AddJournalScreen() {
         date: today,
       });
 
-      // Success haptic feedback
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-      Alert.alert(
-        "✨ Journal Saved",
-        "Your thoughts have been captured beautifully!",
-        [{ text: "Continue Writing", onPress: () => router.back() }]
-      );
+      router.back();
     } catch (error: any) {
-      // Error haptic feedback
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert(
-        "Oops!",
-        error.message || "Something went wrong while saving. Please try again."
+        "Save Failed",
+        error.message || "Could not save your entry. Please try again."
       );
+    }
+  };
+  const handleDiscard = () => {
+    if (content.trim()) {
+      Alert.alert(
+        "Discard Entry?",
+        "You have unsaved changes. Are you sure you want to go back?",
+        [
+          { text: "Keep Writing", style: "cancel" },
+          {
+            text: "Discard",
+            style: "destructive",
+            onPress: () => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.back();
+            },
+          },
+        ]
+      );
+    } else {
+      router.back();
     }
   };
 
   const { date, time } = getCurrentTime();
+  const hasContent = content.trim().length > 0;
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.keyboardContainer}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={0}
         >
-          {/* Enhanced Header with Gradient */}
-          <LinearGradient
-            colors={[theme.colors.primary, theme.colors.primaryDark]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.headerGradient}
+          {/* Minimal Header */}
+          <View
+            style={[styles.header, { borderBottomColor: theme.colors.border }]}
           >
-            <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.back();
-                }}
-                disabled={createEntry.isPending}
-              >
-                <Ionicons name="arrow-back" size={22} color="white" />
-              </TouchableOpacity>
-              <View style={styles.headerContent}>
-                <Text style={styles.headerTitle}>New Journal Entry</Text>
-                <Text style={styles.headerSubtitle}>Share your thoughts</Text>
-              </View>
-              <View style={styles.headerSpacer} />
-            </View>
-          </LinearGradient>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={handleDiscard}
+              disabled={createEntry.isPending}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons
+                name="close"
+                size={24}
+                color={theme.colors.textSecondary}
+              />
+            </TouchableOpacity>
 
+            <View style={styles.headerCenter}>
+              <Text style={[styles.headerDate, { color: theme.colors.text }]}>
+                {date}
+              </Text>
+              <Text
+                style={[
+                  styles.headerTime,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                {time}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.saveButton,
+                {
+                  backgroundColor: hasContent
+                    ? theme.colors.primary
+                    : theme.colors.backgroundSecondary,
+                },
+              ]}
+              onPress={handleSave}
+              disabled={createEntry.isPending || !hasContent}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              {createEntry.isPending ? (
+                <ActivityIndicator
+                  size="small"
+                  color={theme.colors.background}
+                />
+              ) : (
+                <Text
+                  style={[
+                    styles.saveButtonText,
+                    {
+                      color: hasContent
+                        ? theme.colors.background
+                        : theme.colors.textTertiary,
+                    },
+                  ]}
+                >
+                  Save
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
           <ScrollView
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContent}
           >
-            {/* Enhanced Time Display */}
-            <View style={styles.timeSection}>
-              <View style={styles.timeContainer}>
-                <View style={styles.timeContent}>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={18}
-                    color={theme.colors.primary}
-                  />
-                  <View style={styles.timeTextContainer}>
-                    <Text style={styles.dateText}>{date}</Text>
-                    <Text style={styles.timeText}>{time}</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
+            {/* Content Input */}
+            <TextInput
+              ref={contentInputRef}
+              style={[styles.contentInput, { color: theme.colors.text }]}
+              value={content}
+              onChangeText={handleContentChange}
+              placeholder="What's on your mind today?
 
-            {/* Enhanced Content Input */}
-            <View style={styles.contentSection}>
-              <View
-                style={[
-                  styles.contentContainer,
-                  {
-                    borderColor: content.trim()
-                      ? theme.colors.primary
-                      : theme.colors.border,
-                  },
-                ]}
+Share your thoughts, experiences, or feelings. This is your space to reflect and express yourself freely."
+              placeholderTextColor={theme.colors.textTertiary}
+              multiline
+              textAlignVertical="top"
+              maxLength={5000}
+              scrollEnabled={false}
+              autoFocus
+            />
+
+            {/* Bottom Spacing for Keyboard */}
+            <View style={styles.bottomSpacing} />
+          </ScrollView>
+          {/* Stats Footer */}
+          {hasContent && (
+            <View
+              style={[
+                styles.statsFooter,
+                {
+                  backgroundColor: theme.colors.background,
+                  borderTopColor: theme.colors.border,
+                },
+              ]}
+            >
+              <Text
+                style={[styles.statsText, { color: theme.colors.textTertiary }]}
               >
-                <View style={styles.contentHeader}>
-                  <View style={styles.contentTitleContainer}>
-                    <Ionicons
-                      name="create-outline"
-                      size={18}
-                      color={theme.colors.primary}
-                    />
-                    <Text style={styles.contentTitle}>
-                      What's on your mind?
-                    </Text>
-                  </View>
-                  <View style={styles.contentStats}>
-                    <Text style={styles.wordCount}>{wordCount} words</Text>
-                    <Text
-                      style={[styles.charCount, { color: getCharacterColor() }]}
-                    >
-                      {getCharacterCount()}/5000
-                    </Text>
-                  </View>
-                </View>
-                <TextInput
-                  style={styles.contentInput}
-                  value={content}
-                  onChangeText={handleContentChange}
-                  placeholder="How are you feeling today? What's been on your mind?
-
-Share your thoughts, experiences, or reflections. This is your personal space to express yourself freely and without judgment.
-
-• What made you smile today?
-• Any challenges you faced?
-• Something you're grateful for?
-• Goals or hopes for tomorrow?
-
-Take your time... there's no rush. 💚"
-                  placeholderTextColor={theme.colors.textTertiary}
-                  multiline
-                  textAlignVertical="top"
-                  maxLength={5000}
-                  scrollEnabled={false}
-                  autoFocus
-                />
-              </View>
-            </View>
-
-            {/* Enhanced Save Button */}
-            <View style={styles.saveSection}>
-              <Animated.View
-                style={{ transform: [{ scale: saveButtonScale }] }}
-              >
-                <TouchableOpacity
-                  style={[
-                    styles.saveButton,
-                    {
-                      opacity:
-                        !content.trim() || createEntry.isPending ? 0.6 : 1,
-                    },
-                  ]}
-                  onPress={handleSave}
-                  disabled={createEntry.isPending || !content.trim()}
-                  activeOpacity={0.9}
-                >
-                  <LinearGradient
-                    colors={[theme.colors.primary, theme.colors.primaryDark]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.saveButtonGradient}
-                  >
-                    {createEntry.isPending ? (
-                      <View style={styles.loadingContainer}>
-                        <ActivityIndicator color="white" size="small" />
-                        <Text style={styles.saveButtonText}>
-                          Saving your thoughts...
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={styles.saveButtonContent}>
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={20}
-                          color="white"
-                        />
-                        <Text style={styles.saveButtonText}>
-                          Save Journal Entry
-                        </Text>
-                      </View>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animated.View>
-
-              {/* Helpful tip */}
-              <Text style={styles.tipText}>
-                💡 Your entries are private and secure. Take your time to
-                express yourself.
+                {wordCount} words • {getReadingTime()}
               </Text>
             </View>
-          </ScrollView>
+          )}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );
 }
 
-const createStyles = (theme: any) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    safeArea: {
-      flex: 1,
-    },
-    keyboardContainer: {
-      flex: 1,
-    },
-    // Header
-    headerGradient: {
-      paddingBottom: theme.spacing.lg,
-      borderBottomLeftRadius: theme.borderRadius["2xl"],
-      borderBottomRightRadius: theme.borderRadius["2xl"],
-    },
-    header: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing.md,
-      paddingBottom: theme.spacing.xs,
-    },
-    backButton: {
-      width: 40,
-      height: 40,
-      borderRadius: theme.borderRadius.xl,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "rgba(255,255,255,0.2)",
-    },
-    headerContent: {
-      flex: 1,
-      alignItems: "center",
-    },
-    headerTitle: {
-      ...theme.typography.h4,
-      color: "white",
-      marginBottom: 2,
-    },
-    headerSubtitle: {
-      ...theme.typography.caption,
-      color: "rgba(255,255,255,0.8)",
-    },
-    headerSpacer: {
-      width: 40,
-    },
-    // Content
-    scrollView: {
-      flex: 1,
-    },
-    timeSection: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing["2xl"],
-      paddingBottom: theme.spacing.md,
-    },
-    timeContainer: {
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      borderRadius: theme.borderRadius.lg,
-      alignSelf: "flex-start",
-      backgroundColor: theme.colors.backgroundGreen,
-      ...theme.shadows.sm,
-    },
-    timeContent: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    timeTextContainer: {
-      marginLeft: theme.spacing.sm,
-    },
-    dateText: {
-      ...theme.typography.bodyMedium,
-      color: theme.colors.text,
-      marginBottom: 2,
-    },
-    timeText: {
-      ...theme.typography.caption,
-      color: theme.colors.textSecondary,
-    },
-    // Content Section
-    contentSection: {
-      paddingHorizontal: theme.spacing.lg,
-      flex: 1,
-    },
-    contentContainer: {
-      borderRadius: theme.borderRadius.xl,
-      borderWidth: 2,
-      borderColor: theme.colors.border,
-      minHeight: 360,
-      flex: 1,
-      backgroundColor: theme.colors.surface,
-      ...theme.shadows.md,
-    },
-    contentHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing.md,
-    },
-    contentTitleContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    contentTitle: {
-      ...theme.typography.bodyMedium,
-      color: theme.colors.text,
-      marginLeft: theme.spacing.sm,
-    },
-    contentStats: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.md,
-    },
-    wordCount: {
-      ...theme.typography.caption,
-      color: theme.colors.textTertiary,
-    },
-    charCount: {
-      ...theme.typography.caption,
-    },
-    contentInput: {
-      ...theme.typography.body,
-      color: theme.colors.text,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.lg,
-      textAlignVertical: "top",
-      minHeight: 300,
-    },
-    // Save Section
-    saveSection: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing["2xl"],
-      paddingBottom: theme.spacing.xl,
-    },
-    saveButton: {
-      borderRadius: theme.borderRadius.lg,
-      marginBottom: theme.spacing.md,
-      ...theme.shadows.md,
-    },
-    saveButtonGradient: {
-      paddingVertical: theme.spacing.lg,
-      borderRadius: theme.borderRadius.lg,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    saveButtonContent: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.sm,
-    },
-    saveButtonText: {
-      ...theme.typography.bodyMedium,
-      fontWeight: "700",
-      color: "white",
-    },
-    loadingContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.sm,
-    },
-    tipText: {
-      ...theme.typography.caption,
-      color: theme.colors.textTertiary,
-      textAlign: "center",
-      lineHeight: 18,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  keyboardContainer: {
+    flex: 1,
+  },
+  // Header
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  headerButton: {
+    padding: Spacing.xs,
+  },
+  headerCenter: {
+    alignItems: "center",
+  },
+  headerDate: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  headerTime: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  saveButton: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: 16,
+    minWidth: 60,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  saveButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  // Content
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: Spacing.lg,
+    paddingBottom: Spacing.xl * 2,
+  },
+  contentInput: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "400",
+    minHeight: 400,
+    textAlignVertical: "top",
+  },
+  bottomSpacing: {
+    height: 100,
+  },
+  // Stats Footer
+  statsFooter: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  statsText: {
+    fontSize: 12,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+});

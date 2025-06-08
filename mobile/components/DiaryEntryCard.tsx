@@ -4,16 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
-  Image,
-  ImageBackground,
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DiaryEntry } from "@/hooks/useDiary";
+import { Spacing } from "@/constants/Spacing";
 
 interface DiaryEntryCardProps {
   entry: DiaryEntry;
@@ -22,28 +19,45 @@ interface DiaryEntryCardProps {
   onToggleFavorite?: (id: number) => Promise<void>;
 }
 
-const { width } = Dimensions.get("window");
-const cardWidth = width - 40; // 20px margin on each side
-
 export default function DiaryEntryCard({
   entry,
   onPress,
   onLongPress,
   onToggleFavorite,
 }: DiaryEntryCardProps) {
+  const { theme } = useTheme();
+
   const handleLongPress = () => {
-    // Provide haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onLongPress?.(entry.id);
   };
+
+  const handleFavoritePress = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await onToggleFavorite?.(entry.id);
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    const diffTime = Math.abs(today.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    } else if (diffDays < 7) {
+      return date.toLocaleDateString("en-US", { weekday: "long" });
+    } else {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    }
   };
 
   const formatTime = (dateString: string) => {
@@ -54,309 +68,240 @@ export default function DiaryEntryCard({
       hour12: true,
     });
   };
-
-  const getMoodIcon = (mood: string | null) => {
-    if (!mood) return "heart-outline";
-
-    switch (mood.toLowerCase()) {
-      case "peaceful":
-      case "calm":
-        return "leaf-outline";
-      case "contemplative":
-      case "reflective":
-        return "water-outline";
-      case "cozy":
-      case "comfortable":
-        return "book-outline";
-      case "happy":
-      case "joyful":
-        return "happy-outline";
-      case "excited":
-        return "flash-outline";
-      case "grateful":
-        return "heart-outline";
-      case "energetic":
-        return "flash-outline";
-      case "hopeful":
-        return "sunny-outline";
-      case "inspired":
-        return "bulb-outline";
-      default:
-        return "heart-outline";
+  const getContentPreview = (content: string) => {
+    // Clean the content and create a more elegant preview
+    const plainText = content
+      .replace(/\n\s*\n/g, '\n') // Normalize line breaks
+      .replace(/\n/g, " ") // Convert to single line
+      .replace(/\s+/g, " ") // Normalize spaces
+      .trim();
+    
+    if (plainText.length <= 160) return plainText;
+    
+    // Smart truncation that respects sentence boundaries
+    const truncated = plainText.substring(0, 160);
+    const lastSpace = truncated.lastIndexOf(' ');
+    const lastPunctuation = Math.max(
+      truncated.lastIndexOf('.'),
+      truncated.lastIndexOf('!'),
+      truncated.lastIndexOf('?'),
+      truncated.lastIndexOf(';')
+    );
+    
+    // Prefer sentence endings, then word boundaries
+    if (lastPunctuation > 140) {
+      return truncated.substring(0, lastPunctuation + 1);
+    } else if (lastSpace > 140) {
+      return truncated.substring(0, lastSpace) + "…";
+    } else {
+      return truncated + "…";
     }
   };
 
   const getReadTime = (content: string) => {
     const words = content.split(" ").length;
-    const readTime = Math.max(1, Math.ceil(words / 200)); // Average reading speed
-    return `${readTime} min read`;
+    const readTime = Math.max(1, Math.ceil(words / 200));
+    return `${readTime} min`;
   };
 
-  const parseEmotions = (emotions: string | null): string[] => {
-    if (!emotions) return [];
-    try {
-      return JSON.parse(emotions);
-    } catch {
-      return [];
-    }
-  };
-  const emotions = parseEmotions(entry.emotions);
-  const moodIcon = getMoodIcon(entry.mood);
-  const displayMood = entry.mood || "Reflective";
-  const { theme } = useTheme();
-  const renderCardContent = () => (
-    <>
-      {/* Header with mood icon and date */}
+  return (
+    <Pressable      style={({ pressed }) => [
+        styles.card,
+        {
+          backgroundColor: pressed 
+            ? theme.colors.backgroundSecondary 
+            : 'transparent',
+          borderColor: pressed 
+            ? theme.colors.border 
+            : 'transparent',
+          shadowColor: pressed ? theme.colors.text : 'transparent',
+          shadowOffset: pressed ? { width: 0, height: 1 } : { width: 0, height: 0 },
+          shadowOpacity: pressed ? 0.05 : 0,
+          shadowRadius: pressed ? 2 : 0,
+          elevation: pressed ? 1 : 0,
+        },
+      ]}
+      onPress={onPress}
+      onLongPress={handleLongPress}
+      delayLongPress={600}
+      android_ripple={{
+        color: theme.colors.backgroundSecondary,
+        borderless: false,
+        radius: 200,
+      }}
+    >
+      {/* Header with date and favorite */}
       <View style={styles.header}>
-        <View style={styles.moodContainer}>
-          <View
-            style={[
-              styles.moodIconContainer,
-              {
-                backgroundColor: theme.colors.cardSecondary,
-              },
-            ]}
-          >
-            <Ionicons
-              name={moodIcon as any}
-              size={16}
-              color={theme.colors.primary}
-            />
-          </View>
-          <View style={styles.dateTimeContainer}>
-            <View style={styles.dateTimeRow}>
-              <Text
-                style={[styles.date, { color: theme.colors.textSecondary }]}
-              >
-                {formatDate(entry.date)}
-              </Text>
-              <View
-                style={[
-                  styles.timeChip,
-                  {
-                    backgroundColor: theme.colors.backgroundGreen,
-                  },
-                ]}
-              >
-                <Text style={[styles.time, { color: theme.colors.primary }]}>
-                  {formatTime(entry.createdAt)}
-                </Text>
-              </View>
-            </View>
-            <Text style={[styles.mood, { color: theme.colors.textTertiary }]}>
-              {displayMood}
-              {emotions.length > 0 && ` • ${emotions.slice(0, 2).join(", ")}`}
-            </Text>
-          </View>
+        <View style={styles.dateContainer}>
+          <Text style={[styles.date, { color: theme.colors.textSecondary }]}>
+            {formatDate(entry.date)}
+          </Text>
+          <View style={styles.timeDivider} />
+          <Text style={[styles.time, { color: theme.colors.textTertiary }]}>
+            {formatTime(entry.createdAt)}
+          </Text>
         </View>
-      </View>
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={handleFavoritePress}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <Ionicons
+            name={entry.isFavorite ? "heart" : "heart-outline"}
+            size={20}
+            color={
+              entry.isFavorite
+                ? theme.colors.semantic.error
+                : theme.colors.textTertiary
+            }
+          />
+        </TouchableOpacity>
+      </View>      {/* Title */}
+      {entry.title && entry.title.trim() && (
+        <Text
+          style={[styles.title, { color: theme.colors.text }]}
+          numberOfLines={2}
+        >
+          {entry.title.trim()}
+        </Text>
+      )}
 
-      {/* Title */}
-      <Text style={[styles.title, { color: theme.colors.text }]}>
-        {entry.title || "Untitled Entry"}
+      {/* Content Preview */}
+      <Text
+        style={[
+          entry.title && entry.title.trim() ? styles.content : styles.contentNoTitle, 
+          { color: theme.colors.textSecondary }
+        ]}
+        numberOfLines={entry.title && entry.title.trim() ? 3 : 4}
+      >
+        {getContentPreview(entry.content)}
       </Text>
 
-      {/* Complete content */}
-      <View style={styles.contentContainer}>
-        {entry.content.split("\n").map((paragraph, index) => {
-          if (!paragraph.trim()) return null;
-          return (
-            <Text
-              key={index}
-              style={[styles.content, { color: theme.colors.text }]}
-            >
-              {paragraph}
-            </Text>
-          );
-        })}
-      </View>
-
-      {/* Footer with read time and actions */}
+      {/* Footer */}
       <View style={styles.footer}>
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => onToggleFavorite?.(entry.id)}
-          >
-            <Ionicons
-              name={entry.isFavorite ? "heart" : "heart-outline"}
-              size={16}
-              color={
-                entry.isFavorite
-                  ? theme.colors.semantic.error
-                  : theme.colors.textSecondary
-              }
+        {entry.mood && (
+          <View style={styles.moodContainer}>
+            <View
+              style={[
+                styles.moodIndicator,
+                { backgroundColor: theme.colors.primary },
+              ]}
             />
-          </TouchableOpacity>
-        </View>
+            <Text
+              style={[styles.moodText, { color: theme.colors.textTertiary }]}
+            >
+              {entry.mood}
+            </Text>
+          </View>
+        )}
         <Text style={[styles.readTime, { color: theme.colors.textTertiary }]}>
           {getReadTime(entry.content)}
         </Text>
       </View>
-    </>
-  );
-  return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.colors.card,
-          borderColor: theme.colors.border,
-        },
-      ]}
-    >
-      <Pressable
-        onPress={onPress}
-        onLongPress={handleLongPress}
-        delayLongPress={500}
-        style={({ pressed }) => [styles.touchable, pressed && styles.pressed]}
-      >
-        {entry.imageUrl ? (
-          <ImageBackground
-            source={{ uri: entry.imageUrl }}
-            style={styles.backgroundImage}
-            resizeMode="cover"
-          >
-            <BlurView
-              intensity={theme.isDark ? 60 : 70}
-              style={styles.imageBlurOverlay}
-              tint={theme.isDark ? "dark" : "light"}
-            />
-            <View
-              style={[
-                styles.contentOverlay,
-                {
-                  backgroundColor: theme.isDark
-                    ? "rgba(0, 0, 0, 0.8)"
-                    : "rgba(255, 255, 255, 0.75)",
-                },
-              ]}
-            >
-              {renderCardContent()}
-            </View>
-          </ImageBackground>
-        ) : (
-          <View
-            style={[
-              styles.plainContent,
-              {
-                backgroundColor: theme.colors.card,
-              },
-            ]}
-          >
-            {renderCardContent()}
-          </View>
-        )}
-      </Pressable>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 25,
-    marginHorizontal: 0, // Removed horizontal margin to work with parent padding
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     marginVertical: 0,
-    overflow: "hidden",
+    borderRadius: 20,
     borderWidth: 1,
+    borderColor: 'transparent',
   },
-  touchable: {
-    flex: 1,
-  },
-  pressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.99 }],
-  },
-  backgroundImage: {
-    flex: 1,
-  },
-  imageBlurOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  contentOverlay: {
-    padding: 16,
-    flex: 1,
-  },
-  plainContent: {
-    padding: 16,
-    flex: 1,
-  },
+  
+  // Header Styles
   header: {
-    marginBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
-  moodContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  moodIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  dateTimeContainer: {
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
-    gap: 6,
-  },
-  dateTimeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 8,
   },
   date: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
-  timeChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+  timeDivider: {
+    width: 2,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: '#CBD5E0',
+    marginHorizontal: Spacing.sm,
+    opacity: 0.5,
   },
   time: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 13,
+    fontWeight: '400',
+    opacity: 0.7,
   },
-  mood: {
-    fontSize: 12,
-    textTransform: "capitalize",
+  favoriteButton: {
+    padding: Spacing.sm,
+    borderRadius: 24,
+    marginLeft: Spacing.sm,
   },
+  // Content Styles
   title: {
     fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 12,
+    fontWeight: '700',
     lineHeight: 28,
-  },
-  contentContainer: {
-    marginBottom: 0,
+    marginBottom: Spacing.sm,
+    letterSpacing: -0.4,
   },
   content: {
-    fontSize: 15,
-    lineHeight: 24,
-    textAlign: "left",
-    marginBottom: 0,
+    fontSize: 16,
+    lineHeight: 25,
+    fontWeight: '400',
+    marginBottom: Spacing.lg,
+    letterSpacing: -0.2,
+    opacity: 0.85,
   },
+  contentNoTitle: {
+    fontSize: 17,
+    lineHeight: 26,
+    fontWeight: '400',
+    marginBottom: Spacing.lg,
+    letterSpacing: -0.2,
+    opacity: 0.9,
+  },
+
+  // Footer Styles
   footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: Spacing.xs,
   },
-  actions: {
-    flexDirection: "row",
-    gap: 16,
+  moodContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  actionButton: {
-    padding: 8,
-    borderRadius: 20,
+  moodIndicator: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginRight: Spacing.sm,
+    opacity: 0.6,
+  },
+  moodText: {
+    fontSize: 13,
+    fontWeight: '500',
+    textTransform: 'capitalize',
+    letterSpacing: 0.2,
+    opacity: 0.7,
   },
   readTime: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: '500',
+    opacity: 0.6,
+    letterSpacing: 0.3,
   },
 });
