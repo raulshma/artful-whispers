@@ -7,15 +7,18 @@ import {
   Dimensions,
   Image,
   ImageBackground,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DiaryEntry } from "@/hooks/useDiary";
 
 interface DiaryEntryCardProps {
   entry: DiaryEntry;
   onPress?: () => void;
+  onLongPress?: (id: number) => void;
   onToggleFavorite?: (id: number) => Promise<void>;
 }
 
@@ -25,8 +28,13 @@ const cardWidth = width - 40; // 20px margin on each side
 export default function DiaryEntryCard({
   entry,
   onPress,
+  onLongPress,
   onToggleFavorite,
-}: DiaryEntryCardProps) {
+}: DiaryEntryCardProps) {  const handleLongPress = () => {
+    // Provide haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onLongPress?.(entry.id);
+  };
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -183,8 +191,7 @@ export default function DiaryEntryCard({
         </Text>
       </View>
     </>
-  );
-  return (
+  );  return (
     <View
       style={[
         styles.card,
@@ -194,10 +201,14 @@ export default function DiaryEntryCard({
         },
       ]}
     >
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
-        activeOpacity={0.7}
-        style={styles.touchable}
+        onLongPress={handleLongPress}
+        delayLongPress={500}
+        style={({ pressed }) => [
+          styles.touchable,
+          pressed && styles.pressed,
+        ]}
       >
         {entry.imageUrl ? (
           <ImageBackground
@@ -233,9 +244,8 @@ export default function DiaryEntryCard({
             ]}
           >
             {renderCardContent()}
-          </View>
-        )}
-      </TouchableOpacity>
+          </View>        )}
+      </Pressable>
     </View>
   );
 }
@@ -247,9 +257,11 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     overflow: "hidden",
     borderWidth: 1,
-  },
-  touchable: {
+  },  touchable: {
     flex: 1,
+  },  pressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
   },
   backgroundImage: {
     flex: 1,
