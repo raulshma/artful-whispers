@@ -1,29 +1,16 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { useTheme } from "@/contexts/ThemeContext";
-import { TabProvider, useTabContext } from "@/contexts/TabContext";
-import { FloatingTabBarComponent } from "@/components/ui/FloatingTabBarComponent";
-import { DynamicTabBackground } from "@/components/ui/DynamicTabBackground";
+import { TabProvider } from "@/contexts/TabContext";
+import { UltraMinimalistTabBar } from "@/components/ui/UltraMinimalistTabBar";
 
 function TabLayoutContent() {
-  const { theme } = useTheme();
-  const { activeTabIndex, totalTabs } = useTabContext();
 
   return (
     <>
-      {/* Dynamic background that responds to tab changes */}
-      <DynamicTabBackground
-        activeIndex={activeTabIndex}
-        totalTabs={totalTabs}
-      />
-
       <Tabs
-        tabBar={(props) => <FloatingTabBarComponent {...props} />}
+        tabBar={(props) => <UltraMinimalistTabBar {...props} />}
         screenOptions={{
           headerShown: false,
           // Hide the default tab bar since we're using a custom floating one
