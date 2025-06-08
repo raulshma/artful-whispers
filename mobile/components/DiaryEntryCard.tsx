@@ -30,7 +30,8 @@ export default function DiaryEntryCard({
   onPress,
   onLongPress,
   onToggleFavorite,
-}: DiaryEntryCardProps) {  const handleLongPress = () => {
+}: DiaryEntryCardProps) {
+  const handleLongPress = () => {
     // Provide haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onLongPress?.(entry.id);
@@ -123,10 +124,12 @@ export default function DiaryEntryCard({
             />
           </View>
           <View style={styles.dateTimeContainer}>
-            <Text style={[styles.date, { color: theme.colors.textSecondary }]}>
-              {formatDate(entry.date)}
-            </Text>
-            <View style={styles.timeRow}>
+            <View style={styles.dateTimeRow}>
+              <Text
+                style={[styles.date, { color: theme.colors.textSecondary }]}
+              >
+                {formatDate(entry.date)}
+              </Text>
               <View
                 style={[
                   styles.timeChip,
@@ -191,7 +194,8 @@ export default function DiaryEntryCard({
         </Text>
       </View>
     </>
-  );  return (
+  );
+  return (
     <View
       style={[
         styles.card,
@@ -205,10 +209,7 @@ export default function DiaryEntryCard({
         onPress={onPress}
         onLongPress={handleLongPress}
         delayLongPress={500}
-        style={({ pressed }) => [
-          styles.touchable,
-          pressed && styles.pressed,
-        ]}
+        style={({ pressed }) => [styles.touchable, pressed && styles.pressed]}
       >
         {entry.imageUrl ? (
           <ImageBackground
@@ -244,7 +245,8 @@ export default function DiaryEntryCard({
             ]}
           >
             {renderCardContent()}
-          </View>        )}
+          </View>
+        )}
       </Pressable>
     </View>
   );
@@ -252,16 +254,18 @@ export default function DiaryEntryCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
+    borderRadius: 0,
     marginHorizontal: 0, // Removed horizontal margin to work with parent padding
-    marginVertical: 12,
+    marginVertical: 0,
     overflow: "hidden",
     borderWidth: 1,
-  },  touchable: {
+  },
+  touchable: {
     flex: 1,
-  },  pressed: {
+  },
+  pressed: {
     opacity: 0.8,
-    transform: [{ scale: 0.98 }],
+    transform: [{ scale: 0.99 }],
   },
   backgroundImage: {
     flex: 1,
@@ -298,16 +302,17 @@ const styles = StyleSheet.create({
   },
   dateTimeContainer: {
     flex: 1,
-    gap: 4,
+    gap: 6,
+  },
+  dateTimeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 8,
   },
   date: {
     fontSize: 14,
     fontWeight: "500",
-  },
-  timeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
   },
   timeChip: {
     paddingHorizontal: 8,
@@ -329,13 +334,13 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   contentContainer: {
-    marginBottom: 16,
+    marginBottom: 0,
   },
   content: {
     fontSize: 15,
     lineHeight: 24,
     textAlign: "left",
-    marginBottom: 8,
+    marginBottom: 0,
   },
   footer: {
     flexDirection: "row",
