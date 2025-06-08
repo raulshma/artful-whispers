@@ -26,10 +26,10 @@ export default function EntryDetailsScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const favoriteToggle = useFavoriteToggle();
-  
+
   // Parse the entry data from params
   const entry: DiaryEntry = JSON.parse(params.entry as string);
-  
+
   const [isScrolled, setIsScrolled] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -101,8 +101,8 @@ export default function EntryDetailsScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await favoriteToggle.mutateAsync(entry.id);
-      const message = !entry.isFavorite 
-        ? "Added to favorites ❤️" 
+      const message = !entry.isFavorite
+        ? "Added to favorites ❤️"
         : "Removed from favorites";
       Alert.alert("Success", message);
     } catch (error) {
@@ -112,9 +112,11 @@ export default function EntryDetailsScreen() {
   const handleShare = async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      
-      const shareContent = `${entry.title || "My Journal Entry"}\n\n${entry.content}\n\n${formatDate(entry.date)} • ${formatTime(entry.createdAt)}`;
-      
+
+      const shareContent = `${entry.title || "My Journal Entry"}\n\n${
+        entry.content
+      }\n\n${formatDate(entry.date)} • ${formatTime(entry.createdAt)}`;
+
       await Share.share({
         message: shareContent,
         title: entry.title || "Journal Entry",
@@ -139,37 +141,37 @@ export default function EntryDetailsScreen() {
         style={[
           styles.headerContent,
           {
-            backgroundColor: isScrolled
-              ? theme.colors.card + "F0"
-              : "transparent",
+            backgroundColor: "transparent",
           },
         ]}
       >
-        <TouchableOpacity 
-          style={[styles.headerButton, { backgroundColor: theme.colors.card }]} 
+        <TouchableOpacity
+          style={[styles.headerButton, { backgroundColor: theme.colors.card }]}
           onPress={handleBack}
         >
-          <Ionicons 
-            name="chevron-back" 
-            size={24} 
-            color={theme.colors.text} 
-          />
+          <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerActions}>
           <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: theme.colors.card }]}
+            style={[
+              styles.headerButton,
+              { backgroundColor: theme.colors.card },
+            ]}
             onPress={handleShare}
           >
-            <Ionicons 
-              name="share-outline" 
-              size={20} 
-              color={theme.colors.text} 
+            <Ionicons
+              name="share-outline"
+              size={20}
+              color={theme.colors.text}
             />
           </TouchableOpacity>
-          
+
           <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: theme.colors.card }]}
+            style={[
+              styles.headerButton,
+              { backgroundColor: theme.colors.card },
+            ]}
             onPress={handleToggleFavorite}
           >
             <Ionicons
@@ -238,14 +240,15 @@ export default function EntryDetailsScreen() {
               />
             </View>
             <View style={styles.moodTextContainer}>
-              <Text
-                style={[styles.moodText, { color: theme.colors.text }]}
-              >
+              <Text style={[styles.moodText, { color: theme.colors.text }]}>
                 {displayMood}
               </Text>
               {emotions.length > 0 && (
                 <Text
-                  style={[styles.emotionsText, { color: theme.colors.textSecondary }]}
+                  style={[
+                    styles.emotionsText,
+                    { color: theme.colors.textSecondary },
+                  ]}
                 >
                   {emotions.join(" • ")}
                 </Text>
@@ -305,12 +308,18 @@ export default function EntryDetailsScreen() {
         {entry.imagePrompt && (
           <View style={styles.imagePromptSection}>
             <Text
-              style={[styles.imagePromptLabel, { color: theme.colors.textSecondary }]}
+              style={[
+                styles.imagePromptLabel,
+                { color: theme.colors.textSecondary },
+              ]}
             >
               Image Inspiration
             </Text>
             <Text
-              style={[styles.imagePromptText, { color: theme.colors.textTertiary }]}
+              style={[
+                styles.imagePromptText,
+                { color: theme.colors.textTertiary },
+              ]}
             >
               "{entry.imagePrompt}"
             </Text>
@@ -321,7 +330,9 @@ export default function EntryDetailsScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {renderHeader()}
       <ScrollView
         style={styles.scrollView}
