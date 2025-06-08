@@ -10,7 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
-import { useInfiniteDiaryEntries } from "@/hooks/useDiary";
+import { useInfiniteDiaryEntries, useFavoriteToggle } from "@/hooks/useDiary";
 import { useTheme } from "@/contexts/ThemeContext";
 import DiaryEntryCard from "@/components/DiaryEntryCard";
 import FloatingComposeButton from "@/components/FloatingComposeButton";
@@ -23,6 +23,8 @@ export default function JournalScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
+
+  const favoriteToggle = useFavoriteToggle();
 
   const {
     data,
@@ -57,9 +59,23 @@ export default function JournalScreen() {
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
+    }    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const handleToggleFavorite = useCallback(async (entryId: number) => {
+    try {
+      const updatedEntry = await favoriteToggle.mutateAsync(entryId);
+      // Show feedback based on the new favorite status
+      const message = updatedEntry.isFavorite 
+        ? "Added to favorites ❤️" 
+        : "Removed from favorites";
+      Alert.alert("Success", message);
+    } catch (error) {
+      Alert.alert("Error", "Failed to update favorite status");
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [favoriteToggle]);
 
+  const handleLongPress = useCallback((entryId: number) => {
+    handleToggleFavorite(entryId);
+  }, [handleToggleFavorite]);
   const renderEntry = ({ item }: { item: any }) => (
     <DiaryEntryCard
       entry={item}
@@ -67,6 +83,8 @@ export default function JournalScreen() {
         // TODO: Navigate to entry detail
         Alert.alert("Entry", "Entry detail view coming soon!");
       }}
+      onLongPress={handleLongPress}
+      onToggleFavorite={handleToggleFavorite}
     />
   );
 

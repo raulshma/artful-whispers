@@ -94,7 +94,7 @@ export function FloatingTabBar({
   const shadowColor = theme.colors.text + "15";
 
   return (
-    <View style={[styles.container, { bottom: insets.bottom + 20 }]}>
+    <View style={[styles.container, { bottom: insets.bottom + 8 }]}>
       <Animated.View style={[styles.tabBarContainer, containerStyle]}>
         {/* Skia Canvas for visual effects */}
         <Canvas style={StyleSheet.absoluteFill}>
