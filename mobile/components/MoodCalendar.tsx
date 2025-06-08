@@ -22,6 +22,7 @@ interface MoodCalendarProps {
   currentMonth: string;
   onDayPress?: (day: number) => void;
   onAddPress?: () => void;
+  onPress?: () => void;
 }
 
 const { width } = Dimensions.get('window');
@@ -35,7 +36,8 @@ export default function MoodCalendar({
   days, 
   currentMonth, 
   onDayPress, 
-  onAddPress 
+  onAddPress,
+  onPress
 }: MoodCalendarProps) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
@@ -104,9 +106,12 @@ export default function MoodCalendar({
       </TouchableOpacity>
     );
   };
-
   return (
-    <View style={styles.container}>
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>{title}</Text>
@@ -159,7 +164,7 @@ export default function MoodCalendar({
           <Ionicons name="close" size={16} color={theme.colors.mood.skipped} />
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

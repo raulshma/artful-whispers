@@ -21,6 +21,9 @@ import Animated, {
 import JournalStats from "@/components/JournalStats";
 import MoodStatsCard from "@/components/MoodStatsCard";
 import MoodCalendar from "@/components/MoodCalendar";
+import JournalAdvancedStats from "@/components/JournalAdvancedStats";
+import MoodAdvancedStats from "@/components/MoodAdvancedStats";
+import CalendarAdvancedStats from "@/components/CalendarAdvancedStats";
 import { AnimatedPageWrapper } from "@/components/ui/AnimatedPageWrapper";
 import { ShadowFriendlyAnimation } from "@/components/ui/ShadowFriendlyAnimation";
 import { SkiaLoadingAnimation } from "@/components/ui/SkiaLoadingAnimation";
@@ -66,6 +69,11 @@ export default function JournalStatsScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<string>("currentMonth");
+  
+  // Modal visibility states
+  const [journalStatsVisible, setJournalStatsVisible] = useState(false);
+  const [moodStatsVisible, setMoodStatsVisible] = useState(false);
+  const [calendarStatsVisible, setCalendarStatsVisible] = useState(false);
 
   // Fetch journal summary stats
   const {
@@ -119,15 +127,16 @@ export default function JournalStatsScreen() {
       setRefreshing(false);
     }
   };
-
   const handleJournalStatsPress = () => {
-    // Navigate to detailed stats view
-    console.log("Journal stats pressed");
+    setJournalStatsVisible(true);
   };
 
   const handleMoodStatsPress = () => {
-    // Navigate to mood analytics view
-    console.log("Mood stats pressed");
+    setMoodStatsVisible(true);
+  };
+
+  const handleCalendarPress = () => {
+    setCalendarStatsVisible(true);
   };
 
   const handleCalendarDayPress = (day: number) => {
@@ -251,9 +260,7 @@ export default function JournalStatsScreen() {
                       </Text>
                     </View>
                   </ShadowFriendlyAnimation>
-                )}
-
-                {/* Calendar View */}
+                )}                {/* Calendar View */}
                 {calendarData && calendarData.length > 0 ? (
                   <ShadowFriendlyAnimation index={2} animationType="slideUp">
                     <MoodCalendar
@@ -263,6 +270,7 @@ export default function JournalStatsScreen() {
                       currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
                       onDayPress={handleCalendarDayPress}
                       onAddPress={handleAddJournalPress}
+                      onPress={handleCalendarPress}
                     />
                   </ShadowFriendlyAnimation>
                 ) : (
@@ -275,13 +283,40 @@ export default function JournalStatsScreen() {
                       currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
                       onDayPress={handleCalendarDayPress}
                       onAddPress={handleAddJournalPress}
+                      onPress={handleCalendarPress}
                     />
                   </ShadowFriendlyAnimation>
                 )}
               </Animated.View>
-            )}
-          </View>
+            )}          </View>
         </ScrollView>
+        
+        {/* Advanced Stats Modals */}
+        {journalStats && (
+          <JournalAdvancedStats
+            visible={journalStatsVisible}
+            onClose={() => setJournalStatsVisible(false)}
+            data={journalStats}
+            period={selectedPeriod}
+          />
+        )}
+        
+        {moodDistribution && (
+          <MoodAdvancedStats
+            visible={moodStatsVisible}
+            onClose={() => setMoodStatsVisible(false)}
+            stats={moodDistribution}
+            period={selectedPeriod}
+          />
+        )}
+        
+        <CalendarAdvancedStats
+          visible={calendarStatsVisible}
+          onClose={() => setCalendarStatsVisible(false)}
+          days={calendarData || mockCalendarDays}
+          currentMonth={new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
+          onDayPress={handleCalendarDayPress}
+        />
       </View>
     </AnimatedPageWrapper>
   );
