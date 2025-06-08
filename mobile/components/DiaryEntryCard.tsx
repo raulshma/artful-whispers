@@ -227,8 +227,8 @@ export default function DiaryEntryCard({
                 styles.contentOverlay,
                 {
                   backgroundColor: theme.isDark
-                    ? "rgba(0, 0, 0, 0.6)"
-                    : "rgba(255, 255, 255, 0.65)",
+                    ? "rgba(0, 0, 0, 0.8)"
+                    : "rgba(255, 255, 255, 0.75)",
                 },
               ]}
             >
@@ -254,7 +254,7 @@ export default function DiaryEntryCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 0,
+    borderRadius: 25,
     marginHorizontal: 0, // Removed horizontal margin to work with parent padding
     marginVertical: 0,
     overflow: "hidden",
