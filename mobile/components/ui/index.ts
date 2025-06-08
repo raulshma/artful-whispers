@@ -36,13 +36,6 @@ export {
   ListSeparator,
 } from "./ListItem";
 
-// Floating Navigation Components
-export { FloatingTabBar } from "./FloatingTabBar";
-export { FloatingTabButton } from "./FloatingTabButton";
-export { FloatingTabBarComponent } from "./FloatingTabBarComponent";
-export { DynamicTabBackground } from "./DynamicTabBackground";
-export { TabParticleSystem } from "./TabParticleSystem";
-
 // Skia components
 export { BarChart, HorizontalBarChart } from "../skia/BarChart";
 export {
@@ -60,4 +53,3 @@ export { AudioWaveform, RecordingIndicator } from "../audio/AudioWaveform";
 
 // Re-export existing components that might be used
 export { IconSymbol } from "./IconSymbol";
-export { useBottomTabOverflow } from "./TabBarBackground";
